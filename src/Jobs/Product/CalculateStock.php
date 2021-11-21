@@ -1,0 +1,85 @@
+<?php
+
+namespace Decotatoo\WoocommerceIntegration\Jobs\Product;
+
+use App\Models\ProductInCatalog;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+
+class CalculateStock implements ShouldQueue
+{
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    /**
+     * The product instance.
+     *
+     * @var \App\Models\ProductInCatalog
+     */
+    protected $product;
+
+    /**
+     * The stock type [false|in|out] for overriding the stock lookup. If not defined, the stock will be re-calculated from database.
+     * 
+     * @var bool|string
+     */
+    protected $op;
+
+    /**
+     * The value to be increment or decrement.
+     * 
+     * @var int
+     */
+    protected $value;
+
+    /**
+     * Create a new job instance.
+     *
+     * @return void
+     */
+    public function __construct(ProductInCatalog $product, $op = false, $value = 1)
+    {
+        $this->product = $product;
+        $this->op = $op;
+        $this->value = $value;
+    }
+
+    /**
+     * Execute the job.
+     *
+     * @return void
+     */
+    public function handle()
+    {
+        if (!$this->product->wiProduct) {
+            return;
+        }
+
+        $wi_product = $this->product->wiProduct;
+
+        if ($this->op !== false) {
+            switch ($this->op) {
+                case 'in':
+                    $wi_product->stock_in_quantity += $this->value;
+                    break;
+
+                case 'out':
+                    $wi_product->stock_out_quantity += $this->value;
+                    break;
+
+                default:
+                    break;
+            }
+        } else {
+            $wi_product->stock_in_quantity = $this->product->productStockIn->count('id');
+            $wi_product->stock_out_quantity = $this->product->productStockOut->count('id');
+        }
+
+        $wi_product->save();
+        $wi_product->refresh();
+
+        UpdateStock::dispatch($wi_product)->onQueue('high');
+    }
+}
