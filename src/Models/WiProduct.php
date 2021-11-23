@@ -15,8 +15,15 @@ class WiProduct extends Model
 
     protected $table = 'wi_products';
 
+    protected $timestamp = false;
+
     public function product()
     {
         return $this->belongsTo(ProductInCatalog::class, 'product_id', 'id');
+    }
+
+    public function wiOrderItems()
+    {
+        return $this->hasMany(WiOrderItem::class);
     }
 }

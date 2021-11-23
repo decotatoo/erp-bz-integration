@@ -27,10 +27,14 @@ class WoocommerceIntegrationServiceProvider extends PackageServiceProvider
             ->hasViews()
             ->hasMigrations([
                 'alter_many_table',
-                'create_wi_bins_table',
-                'create_wi_categories_table',
-                'create_wi_products_table',
                 'create_commerce_categories_table',
+                'create_wi_categories_table',
+                'create_wi_bins_table',
+                'create_wi_products_table',
+                'create_wi_customers_table',
+                'create_wi_orders_table',
+                'create_wi_order_items_table',
+                'create_wi_packing_simlulations_table',
             ])
             ->hasCommands([
                 UpdateExchangeRateCommand::class,

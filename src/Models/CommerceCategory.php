@@ -14,6 +14,8 @@ class CommerceCategory extends Model
     use HasFactory;
 
     protected $table = 'commerce_categories';
+    
+    protected $timestamp = false;
 
     public function wiCategory()
     {

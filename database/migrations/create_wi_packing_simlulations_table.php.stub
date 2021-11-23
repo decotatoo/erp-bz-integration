@@ -8,10 +8,11 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('wi_order_packing_simulations', function (Blueprint $table) {
+        Schema::create('wi_packing_simulations', function (Blueprint $table) {
             $table->id();
             
             $table->unsignedBigInteger('wp_order_id')->nullable(); // WooCommerce Order ID
+            $table->foreign('wp_order_id')->references('wp_order_id')->on('wi_orders');
 
             $table->json('items')->nullable();
             $table->json('bins')->nullable();
@@ -23,6 +24,6 @@ return new class extends Migration
 
     public function down()
     {
-        Schema::dropIfExists('wi_order_packing_simulations');
+        Schema::dropIfExists('wi_packing_simulations');
     }
 };

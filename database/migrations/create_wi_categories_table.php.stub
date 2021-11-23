@@ -12,8 +12,6 @@ return new class extends Migration
             $table->id();
             $table->morphs('categoryable');
             $table->unsignedBigInteger('wp_product_category_id'); // WooCommerce Product Category ID
-
-            $table->timestamps();
         });
     }
 

@@ -13,4 +13,10 @@ class WiCustomer extends Model
     use HasFactory;
 
     protected $table = 'wi_customers';
+
+    public function wiOrders()
+    {
+        return $this->hasMany(WiOrder::class);
+    }
+
 }

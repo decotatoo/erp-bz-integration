@@ -8,16 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * TODO:PLACEHOLDER
  */
-class WiCategory extends Model
+class WiPackingSimulation extends Model
 {
     use HasFactory;
 
-    protected $table = 'wi_categories';
+    protected $table = 'wi_packing_simulations';
 
-    protected $timestamps = false;
-
-    public function categoryable()
+    public function wiOrder()
     {
-        return $this->morphTo();
+        return $this->belongsTo(WiOrder::class, 'wp_order_id', 'wp_order_id');
     }
 }
