@@ -64,9 +64,9 @@ class UpdateStock implements ShouldQueue, ShouldBeUnique
     public function handle()
     {
         // if product doesn't meet condition for public visibility, skip
-        if ($this->wi_product->wp_post_status !== 'publish') {
-            return;
-        }
+        // if ($this->wi_product->wp_post_status !== 'publish') {
+        //     return;
+        // }
 
         $stockQuantity = $this->wi_product->stock_in_quantity - $this->wi_product->stock_out_quantity;
 

@@ -2,7 +2,6 @@
 
 namespace Decotatoo\WoocommerceIntegration\Jobs\WiCategory;
 
-use App\Models\Festivity;
 use Decotatoo\WoocommerceIntegration\Models\WiCategory;
 use Exception;
 use Illuminate\Bus\Queueable;
@@ -12,7 +11,6 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Str;
 
 class Delete implements ShouldQueue
 {

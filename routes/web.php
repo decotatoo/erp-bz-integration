@@ -1,6 +1,8 @@
 <?php
 
+use Decotatoo\WoocommerceIntegration\Http\Controllers\BinPackerController;
 use Decotatoo\WoocommerceIntegration\Http\Controllers\CommerceCategoryController;
+use Decotatoo\WoocommerceIntegration\Http\Controllers\WebhookController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,12 +16,11 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::prefix('woocommerce')->name('woocommerce.')->group(function () {
+    // Route::post('webhook', WebhookController::class)->name('webhook');
 
-// Route::prefix('woocommerce')->name('woocommerce.')->group(function () {
-//     Route::post('webhook', WebhookController::class)->name('webhook');
-
-//     Route::post('shipping-weight', [WooCommerceShippingWeightController::class, 'shippingWeight'])->name('shipping-weight');
-// });
+    Route::post('bin-packer', [BinPackerController::class, 'simulate'])->name('bin-packer.simulate');
+});
 
 
 Route::middleware(['web', 'auth'])->group(function () {

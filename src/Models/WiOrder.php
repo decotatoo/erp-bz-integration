@@ -7,14 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * TODO:PLACEHOLDER
- * 
- * 
- * Dimensions is in integer milimeter.
- * Max weight is in integer gram.
  */
-class WiBin extends Model
+class WiOrder extends Model
 {
     use HasFactory;
 
-    protected $table = 'wi_bins';
+    protected $table = 'wi_orders';
 }

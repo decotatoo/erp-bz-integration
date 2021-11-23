@@ -8,7 +8,7 @@ use Decotatoo\WoocommerceIntegration\Models\WiProduct;
 use Illuminate\Console\Command;
 
 /**
- * TODO:PLACEHOLDER
+ * TODO:TEST
  */
 class UpdateProductCommand extends Command
 {
