@@ -21,7 +21,7 @@ return new class extends Migration
 
             $table->integer('variation_id')->nullable();
 
-            $table->string('sku')->nullable();
+            $table->string('sku');
             $table->string('name');
             $table->integer('quantity')->default(1);
             $table->float('price');
@@ -33,6 +33,9 @@ return new class extends Migration
             $table->json('taxes')->nullable();
             $table->json('meta_data')->nullable();
             $table->timestamps();
+
+            $table->index('wp_order_line_item_id');
+            $table->index('sku');
         });
     }
 

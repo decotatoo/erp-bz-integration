@@ -3,9 +3,11 @@
 namespace Decotatoo\WoocommerceIntegration\Http\Controllers;
 
 use Decotatoo\WoocommerceIntegration\Http\Middleware\VerifyWebhookSignature;
+use Decotatoo\WoocommerceIntegration\Models\WiCustomer;
 use Decotatoo\WoocommerceIntegration\Models\WiProduct;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -63,104 +65,152 @@ class WebhookController extends Controller
         return $this->missingMethod($request);
     }
 
-    protected function handleProductDeleted(Request $request)
+    protected function handleCustomerUpdated(Request $request)
     {
-        $request->validate([
-            'id' => ['required', 'integer', 'exists:'.WiProduct::class.',wp_product_id'],
-        ]);
-
-        $wcProduct = WiProduct::query()->where('wc_product_id', $request->input('id'))->first();
-
-        $wcProduct->delete();
-
-        return $this->successMethod();
+        return $this->handleCustomerCreated($request);
     }
 
     protected function handleCustomerCreated(Request $request)
     {
         $request->validate([
-            'id' => ['required', 'integer', 'unique:App\Modiles\WooCommerce\WcCustomer,wc_customer_id',]
+            'id' => 'required|integer',
+            'email' => 'required|email',
+            'first_name' => 'nullable|string',
+            'last_name' => 'nullable|string',
+            'billing.first_name' => 'nullable|string',
+            'billing.last_name' => 'nullable|string',
+            'billing.company' => 'nullable|string',
+            'billing.address_1' => 'nullable|string',
+            'billing.address_2' => 'nullable|string',
+            'billing.city' => 'nullable|string',
+            'billing.state' => 'nullable|string',
+            'billing.postcode' => 'nullable|string',
+            'billing.country' => 'nullable|string',
+            'billing.email' => 'nullable|email',
+            'billing.phone' => 'nullable|string',
+            'shipping.first_name' => 'nullable|string',
+            'shipping.last_name' => 'nullable|string',
+            'shipping.company' => 'nullable|string',
+            'shipping.address_1' => 'nullable|string',
+            'shipping.address_2' => 'nullable|string',
+            'shipping.city' => 'nullable|string',
+            'shipping.state' => 'nullable|string',
+            'shipping.postcode' => 'nullable|string',
+            'shipping.country' => 'nullable|string',
+            'shipping.phone' => 'nullable|string',
+            'date_created_gmt' => 'nullable|date',
+            'date_modified_gmt' => 'nullable|date',
         ]);
 
-        $wcCustomer = new WcCustomer();
-        $wcCustomer->wc_customer_id = $request->id;
-        # code...
+        /** @var WiCustomer $wiCustomer */
+        $wiCustomer = WiCustomer::where('wp_customer_id', $request->id)->first();
 
-        // if customer email exist in erp_customer, then associate, else create new erp_customer instance
+        if (!$wiCustomer) {
+            $wiCustomer = new WiCustomer();
+            $wiCustomer->wp_customer_id = $request->id;
+        } else {
+            $this->validate($request, [
+                'email' => ['required', 'email', 'unique:' . WiCustomer::class . ',email,' . $wiCustomer->id],
+            ]);
+        }
 
-        $wcCustomer->save();
+        $wiCustomer->email = $request->email;
+
+        $wiCustomer->first_name = $request->first_name;
+        $wiCustomer->last_name = $request->last_name;
+
+        $wiCustomer->billing_first_name = $request->billing['first_name'];
+        $wiCustomer->billing_last_name = $request->billing['last_name'];
+        $wiCustomer->billing_company = $request->billing['company'];
+        $wiCustomer->billing_address_1 = $request->billing['address_1'];
+        $wiCustomer->billing_address_2 = $request->billing['address_2'];
+        $wiCustomer->billing_city = $request->billing['city'];
+        $wiCustomer->billing_state = $request->billing['state'];
+        $wiCustomer->billing_postcode = $request->billing['postcode'];
+        $wiCustomer->billing_country = $request->billing['country'];
+        $wiCustomer->billing_email = $request->billing['email'];
+        $wiCustomer->billing_phone = $request->billing['phone'];
+
+        $wiCustomer->shipping_first_name = $request->shipping['first_name'];
+        $wiCustomer->shipping_last_name = $request->shipping['last_name'];
+        $wiCustomer->shipping_company = $request->shipping['company'];
+        $wiCustomer->shipping_address_1 = $request->shipping['address_1'];
+        $wiCustomer->shipping_address_2 = $request->shipping['address_2'];
+        $wiCustomer->shipping_city = $request->shipping['city'];
+        $wiCustomer->shipping_state = $request->shipping['state'];
+        $wiCustomer->shipping_postcode = $request->shipping['postcode'];
+        $wiCustomer->shipping_country = $request->shipping['country'];
+        $wiCustomer->shipping_phone = $request->shipping['phone'];
+
+        $wiCustomer->date_created_gmt = Carbon::parse($request->date_created_gmt);
+        $wiCustomer->date_modified_gmt = Carbon::parse($request->date_modified_gmt);
+
+        // save without triggering events
+        $wiCustomer->saveQuietly(['timestamps' => false]);
 
         return $this->successMethod();
     }
 
-    protected function handleCustomerUpdated(Request $request)
+    protected function handleProductDeleted(Request $request)
     {
         $request->validate([
-            'id' => ['required', 'integer', 'exists:App\Models\WooCommerce\WcCustomer,wc_customer_id'],
+            'id' => ['required', 'integer', 'exists:' . WiProduct::class . ',wp_product_id'],
         ]);
 
-        $wcCustomer = WcCustomer::query()->where('wc_customer_id', $request->input('id'))->first();
+        $wiProduct = WiProduct::where('wp_product_id', $request->input('id'))->first();
 
-        # code...
-
-        $wcCustomer->save();
+        $wiProduct->delete();
 
         return $this->successMethod();
     }
 
-    protected function handleCustomerDeleted(Request $request)
-    {
-        $request->validate([
-            'id' => ['required', 'integer', 'exists:App\Models\WooCommerce\WcCustomer,wc_customer_id'],
-        ]);
 
-        $wcCustomer = WcCustomer::query()->where('wc_customer_id', $request->input('id'))->first();
 
-        $wcCustomer->delete();
 
-        return $this->successMethod();
-    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // https://stackoverflow.com/questions/68533252/prevent-woocommerce-from-firing-product-update-webhook-on-rest-api-update-only
+
 
     protected function handleOrderCreated(Request $request)
     {
-        $request->validate([
-            'id' => ['required', 'integer', 'exists:App\Models\WooCommerce\WcOrder,wc_order_id'],
-        ]);
-
-        $wcOrder = new WcOrder();
-
-        # code...
-
-        $wcOrder->save();
-
         return $this->successMethod();
     }
 
     protected function handleOrderUpdated(Request $request)
     {
-        $request->validate([
-            'id' => ['required', 'integer', 'exists:App\Models\WooCommerce\WcOrder,wc_order_id'],
-        ]);
 
-        $wcOrder = WcOrder::query()->where('wc_order_id', $request->input('id'))->first();
-
-        # code...
-
-        $wcOrder->save();
-
-        return $this->successMethod();
-    }
-
-    protected function handleOrderDeleted(Request $request)
-    {
-        $request->validate([
-            'id' => ['required', 'integer', 'exists:App\Models\WooCommerce\WcOrder,wc_order_id'],
-        ]);
-
-        $wcOrder = WcOrder::query()->where('wc_order_id', $request->input('id'))->first();
-
-        $wcOrder->delete();
-
-        return $this->successMethod();
+        // $wiOrder->saveSilently();
+        // return $this->successMethod();
     }
 }

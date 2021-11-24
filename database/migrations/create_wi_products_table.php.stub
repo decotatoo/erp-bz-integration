@@ -18,6 +18,8 @@ return new class extends Migration
             $table->string('wp_post_status')->default('pending');
             $table->integer('stock_in_quantity')->default(0);
             $table->integer('stock_out_quantity')->default(0);
+
+            $table->index('wp_product_id');
         });
     }
 

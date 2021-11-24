@@ -16,6 +16,8 @@ use Illuminate\Queue\SerializesModels;
 
 /**
  * TODO:TEST
+ * 
+ * @task add weight attribute to product
  */
 class Update implements ShouldQueue
 {
@@ -74,19 +76,17 @@ class Update implements ShouldQueue
 
         try {
             $payload = [
-                'type' => 'simple',
-                'sku' => $this->product->prod_id,
-                'slug' => $this->product->prod_id,
                 'name' => "{$this->product->prod_name}",
                 'regular_price' => "{$this->product->price_cus_idr}",
-                'description' => '',
-                'short_description' => '',
                 'categories' => $categories,
                 'tags' => [],
-                'images' => $this->getImages(),
                 'meta_data' => $this->getMetadata(),
                 'status' => $publish_status,
             ];
+
+            if ($this->product->wasChanged('pic')) {
+                $payload['images'] = $this->getImages();
+            }
 
             $result = \Codexshaper\WooCommerce\Facades\Product::update($this->product->wiProduct->wp_product_id, $payload);
 
@@ -146,29 +146,15 @@ class Update implements ShouldQueue
     {
         $images = [];
 
-        $productName = "{$this->product->prod_name}";
+        $_online_product = \Codexshaper\WooCommerce\Facades\Product::find($this->product->wiProduct->wp_product_id);
 
-        if ($this->product->pic) {
-            $images[] = [
-                'name' => $productName,
-                'alt' => $productName,
+        if ($_online_product) {
+            $images = $_online_product->images;
+        }
+
+        if ($this->product->wasChanged('pic') && $this->product->pic) {
+            $images[0] = [
                 'src' => asset('images/product/' . $this->product->pic) // absolute url of image
-            ];
-        }
-
-        if ($this->product->pic_butik) {
-            $images[] = [
-                'name' => $productName,
-                'alt' => $productName,
-                'src' => asset('images/product/' . $this->product->pic_butik) // absolute url of image
-            ];
-        }
-
-        if ($this->product->pic_butik2) {
-            $images[] = [
-                'name' => $productName,
-                'alt' => $productName,
-                'src' => asset('images/product/' . $this->product->pic_butik2) // absolute url of image
             ];
         }
 

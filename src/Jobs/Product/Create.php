@@ -17,6 +17,8 @@ use Illuminate\Support\Carbon;
 
 /**
  * TODO:TEST
+ * 
+ * @task add weight attribute to product
  */
 class Create implements ShouldQueue
 {
@@ -82,7 +84,7 @@ class Create implements ShouldQueue
                 'short_description' => '',
                 'categories' => $categories,
                 'tags' => [],
-                'images' => $this->getImages(),
+                'images' => $this->product->pic ? ['src' => asset('images/product/' . $this->product->pic)] : [],
                 'meta_data' => $this->getMetadata(),
                 'manage_stock' => true,
                 'stock_quantity' => 0,
@@ -162,41 +164,5 @@ class Create implements ShouldQueue
         }
 
         return $categories;
-    }
-
-    /**
-     * Get the images for the product.
-     */
-    private function getImages()
-    {
-        $images = [];
-
-        $productName = "{$this->product->prod_name}";
-
-        if ($this->product->pic) {
-            $images[] = [
-                'name' => $productName,
-                'alt' => $productName,
-                'src' => asset('images/product/' . $this->product->pic) // absolute url of image
-            ];
-        }
-
-        if ($this->product->pic_butik) {
-            $images[] = [
-                'name' => $productName,
-                'alt' => $productName,
-                'src' => asset('images/product/' . $this->product->pic_butik) // absolute url of image
-            ];
-        }
-
-        if ($this->product->pic_butik2) {
-            $images[] = [
-                'name' => $productName,
-                'alt' => $productName,
-                'src' => asset('images/product/' . $this->product->pic_butik2) // absolute url of image
-            ];
-        }
-
-        return $images;
     }
 }
