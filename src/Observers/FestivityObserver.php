@@ -56,26 +56,4 @@ class FestivityObserver
             Delete::dispatch($festivity->wiCategory)->afterCommit()->onQueue('high');
         }
     }
-
-    /**
-     * Handle the Festivity "restored" event.
-     *
-     * @param  Festivity  $festivity
-     * @return void
-     */
-    public function restored(Festivity $festivity)
-    {
-        //
-    }
-
-    /**
-     * Handle the Festivity "force deleted" event.
-     *
-     * @param  Festivity  $festivity
-     * @return void
-     */
-    public function forceDeleted(Festivity $festivity)
-    {
-        //
-    }
 }

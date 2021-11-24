@@ -77,15 +77,4 @@ class ProductObserver
     {
         //
     }
-
-    /**
-     * Handle the ProductInCatalog "force deleted" event.
-     *
-     * @param  ProductInCatalog  $productInCatalog
-     * @return void
-     */
-    public function forceDeleted(ProductInCatalog $productInCatalog)
-    {
-        //
-    }
 }

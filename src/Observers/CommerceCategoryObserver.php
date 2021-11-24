@@ -56,26 +56,4 @@ class CommerceCategoryObserver
             Delete::dispatch($commerceCategory->wiCategory)->afterCommit()->onQueue('high');
         }
     }
-
-    /**
-     * Handle the CommerceCategory "restored" event.
-     *
-     * @param  CommerceCategory  $commerceCategory
-     * @return void
-     */
-    public function restored(CommerceCategory $commerceCategory)
-    {
-        //
-    }
-
-    /**
-     * Handle the CommerceCategory "force deleted" event.
-     *
-     * @param  CommerceCategory  $commerceCategory
-     * @return void
-     */
-    public function forceDeleted(CommerceCategory $commerceCategory)
-    {
-        //
-    }
 }
