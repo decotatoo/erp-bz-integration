@@ -4,6 +4,7 @@ namespace Decotatoo\WoocommerceIntegration\Http\Controllers;
 
 use Decotatoo\WoocommerceIntegration\Http\Middleware\VerifyWebhookSignature;
 use Decotatoo\WoocommerceIntegration\Models\WiCustomer;
+use Decotatoo\WoocommerceIntegration\Models\WiOrder;
 use Decotatoo\WoocommerceIntegration\Models\WiProduct;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\Request;
@@ -199,17 +200,63 @@ class WebhookController extends Controller
 
 
 
-    // https://stackoverflow.com/questions/68533252/prevent-woocommerce-from-firing-product-update-webhook-on-rest-api-update-only
 
 
     protected function handleOrderCreated(Request $request)
     {
+        $request->validate([
+            'id' => 'required|integer',
+            'cart_hash' => 'required|string',
+            'order_key' => 'required|string',
+            'status' => 'required',
+        ]);
+
+        $wiOrder = new WiOrder();
+
+        $wiOrder->wp_order_id = $request->id;
+        $wiOrder->cart_hash = $request->cart_hash;
+        $wiOrder->order_key = $request->order_key;
+
+        $wiOrder->status = $request->status;
+        $wiOrder->currency = $request->currency;
+
+        $wiCustomer = WiCustomer::where('wp_customer_id', $request->customer_id)->first();
+
+        if ($wiCustomer) {
+            $wiOrder->wi_customer_id = $wiCustomer->id;
+        }
+        
+
+        $wiOrder->date_created = Carbon::parse($request->date_created_gmt);
+        $wiOrder->date_modified = Carbon::parse($request->date_modified_gmt);
+
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        // placeholder template
+
+        /** @var WiCustomer $wiCustomer */
+
+        // save without triggering events
+        $wiCustomer->saveQuietly(['timestamps' => false]);
+
+
         return $this->successMethod();
     }
 
     protected function handleOrderUpdated(Request $request)
     {
-
         // $wiOrder->saveSilently();
         // return $this->successMethod();
     }

@@ -13,14 +13,14 @@ return new class extends Migration
 
             $table->unsignedBigInteger('wp_order_id')->nullable(); // WooCommerce Order ID
 
-            $table->string('uid')->unique();
+            $table->string('uid')->unique(); // column UID is a Sales order number with format "SOOLYY-MMXXXX" where "SOOL" is the stand for "Sales Order Online", "YY" is the year of the order and "XXXX" is the order line number. Example: "SOOL19-020001" 
             
             $table->unsignedBigInteger('wi_customer_id')->nullable();
             $table->foreign('wi_customer_id')->references('id')->on('wi_customers')->onDelete('set null');
 
+            $table->string('status')->default('pending');
             $table->string('order_key')->nullable();
             $table->string('currency')->default('IDR');
-            $table->string('status')->default('pending');
             $table->float('discount_total')->default(0);
             $table->float('discount_tax')->default(0);
             $table->float('shipping_total')->default(0);

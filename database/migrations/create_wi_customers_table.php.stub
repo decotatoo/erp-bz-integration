@@ -39,7 +39,6 @@ return new class extends Migration
             $table->string('shipping_country')->nullable();
             $table->string('shipping_phone')->nullable();
 
-
             $table->timestamp('date_created_gmt');
             $table->timestamp('date_modified_gmt')->nullable();
 

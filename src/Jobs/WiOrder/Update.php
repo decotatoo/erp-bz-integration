@@ -53,12 +53,19 @@ class Update implements ShouldQueue
      */
     public function handle()
     {
-        
+
         try {
-            
+            $payload = [
+                'status' => $this->wiOrder->status,
+            ];
+
+            $result = \Codexshaper\WooCommerce\Facades\Order::update($this->wiOrder->wp_order_id, $payload);
+
+            if (!$result) {
+                return $this->fail(new Exception('Failed to update Order in WooCommerce.'));
+            }
         } catch (\Throwable $th) {
             throw $th;
         }
     }
-
 }

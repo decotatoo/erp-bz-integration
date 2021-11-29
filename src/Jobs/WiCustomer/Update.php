@@ -53,7 +53,6 @@ class Update implements ShouldQueue
      */
     public function handle()
     {
-        
         try {
             
         } catch (\Throwable $th) {
