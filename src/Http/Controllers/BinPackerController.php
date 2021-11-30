@@ -4,6 +4,7 @@ namespace Decotatoo\WoocommerceIntegration\Http\Controllers;
 
 use Decotatoo\WoocommerceIntegration\Http\Middleware\VerifyDwiSignature;
 use Decotatoo\WoocommerceIntegration\Models\WiBin;
+use Decotatoo\WoocommerceIntegration\Models\WiPackingSimulation;
 use Decotatoo\WoocommerceIntegration\Models\WiProduct;
 use Decotatoo\WoocommerceIntegration\Services\BinPacker\Packer;
 use Illuminate\Http\Request;
@@ -38,9 +39,19 @@ class BinPackerController extends Controller
             }
         }
 
-        $result = Packer::pack(WiBin::all(), $items);
+        $bins = WiBin::all();
 
-        // response
-        return response()->json($result->jsonSerialize());
+        $result = Packer::pack($bins, $items);
+
+        $wiPackingSimulation = new WiPackingSimulation();
+        $wiPackingSimulation->items = $items;
+        $wiPackingSimulation->bins = $bins;
+        $wiPackingSimulation->result = $result;
+        $wiPackingSimulation->save();
+
+        return response()->json([
+            'simulation_id' => $wiPackingSimulation->id,
+            'result' => $result,
+        ]);
     }
 }

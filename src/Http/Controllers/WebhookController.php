@@ -3,6 +3,7 @@
 namespace Decotatoo\WoocommerceIntegration\Http\Controllers;
 
 use Decotatoo\WoocommerceIntegration\Http\Middleware\VerifyWebhookSignature;
+use Decotatoo\WoocommerceIntegration\Jobs\Webhook\CustomerCreated;
 use Decotatoo\WoocommerceIntegration\Models\WiCustomer;
 use Decotatoo\WoocommerceIntegration\Models\WiOrder;
 use Decotatoo\WoocommerceIntegration\Models\WiProduct;
@@ -115,39 +116,8 @@ class WebhookController extends Controller
             ]);
         }
 
-        $wiCustomer->email = $request->email;
-
-        $wiCustomer->first_name = $request->first_name;
-        $wiCustomer->last_name = $request->last_name;
-
-        $wiCustomer->billing_first_name = $request->billing['first_name'];
-        $wiCustomer->billing_last_name = $request->billing['last_name'];
-        $wiCustomer->billing_company = $request->billing['company'];
-        $wiCustomer->billing_address_1 = $request->billing['address_1'];
-        $wiCustomer->billing_address_2 = $request->billing['address_2'];
-        $wiCustomer->billing_city = $request->billing['city'];
-        $wiCustomer->billing_state = $request->billing['state'];
-        $wiCustomer->billing_postcode = $request->billing['postcode'];
-        $wiCustomer->billing_country = $request->billing['country'];
-        $wiCustomer->billing_email = $request->billing['email'];
-        $wiCustomer->billing_phone = $request->billing['phone'];
-
-        $wiCustomer->shipping_first_name = $request->shipping['first_name'];
-        $wiCustomer->shipping_last_name = $request->shipping['last_name'];
-        $wiCustomer->shipping_company = $request->shipping['company'];
-        $wiCustomer->shipping_address_1 = $request->shipping['address_1'];
-        $wiCustomer->shipping_address_2 = $request->shipping['address_2'];
-        $wiCustomer->shipping_city = $request->shipping['city'];
-        $wiCustomer->shipping_state = $request->shipping['state'];
-        $wiCustomer->shipping_postcode = $request->shipping['postcode'];
-        $wiCustomer->shipping_country = $request->shipping['country'];
-        $wiCustomer->shipping_phone = $request->shipping['phone'];
-
-        $wiCustomer->date_created_gmt = Carbon::parse($request->date_created_gmt);
-        $wiCustomer->date_modified_gmt = Carbon::parse($request->date_modified_gmt);
-
-        // save without triggering events
-        $wiCustomer->saveQuietly(['timestamps' => false]);
+        // Passing the request object or the request's  input?
+        CustomerCreated::dispatch($wiCustomer, $request)->afterCommit()->onQueue('webhook');
 
         return $this->successMethod();
     }
@@ -211,46 +181,8 @@ class WebhookController extends Controller
             'status' => 'required',
         ]);
 
-        $wiOrder = new WiOrder();
-
-        $wiOrder->wp_order_id = $request->id;
-        $wiOrder->cart_hash = $request->cart_hash;
-        $wiOrder->order_key = $request->order_key;
-
-        $wiOrder->status = $request->status;
-        $wiOrder->currency = $request->currency;
-
-        $wiCustomer = WiCustomer::where('wp_customer_id', $request->customer_id)->first();
-
-        if ($wiCustomer) {
-            $wiOrder->wi_customer_id = $wiCustomer->id;
-        }
-        
-
-        $wiOrder->date_created = Carbon::parse($request->date_created_gmt);
-        $wiOrder->date_modified = Carbon::parse($request->date_modified_gmt);
-
-
-        
-
-
-
-
-
-
-
-
-
-
-
-
-        // placeholder template
-
-        /** @var WiCustomer $wiCustomer */
-
-        // save without triggering events
-        $wiCustomer->saveQuietly(['timestamps' => false]);
-
+        // Passing the request object or the request's  input?
+        CustomerCreated::dispatch($request)->afterCommit()->onQueue('webhook');
 
         return $this->successMethod();
     }

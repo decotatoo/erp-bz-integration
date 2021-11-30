@@ -74,6 +74,18 @@ class Box implements BoxPackerBox
             'inner_length' => $this->getInnerLength(),
             'inner_depth' => $this->getInnerDepth(),
             'max_weight' => $this->getMaxWeight(),
+            'inner_volume' => $this->getInnerVolume(),
+            'outer_volume' => $this->getOuterVolume(),
         ];
+    }
+
+    public function getInnerVolume(): int
+    {
+        return $this->getInnerWidth() * $this->getInnerLength() * $this->getInnerDepth();
+    }
+
+    public function getOuterVolume(): int
+    {
+        return $this->getOuterWidth() * $this->getOuterLength() * $this->getOuterDepth();
     }
 }

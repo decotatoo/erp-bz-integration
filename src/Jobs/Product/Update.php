@@ -59,22 +59,22 @@ class Update implements ShouldQueue
      */
     public function handle()
     {
-        if (!$this->product->wiProduct) {
-            return $this->fail(new Exception('Product not exists in WooCommerce'));
-        }
-
-        $categories = $this->getCategories();
-
-        /**
-         * If the category have not been created in WooCommerce, create it and reschedule the job.
-         */
-        if ($categories === null) {
-            return $this->release(20);
-        }
-
-        $publish_status = $this->getPublishStatus();
-
         try {
+            if (!$this->product->wiProduct) {
+                throw new Exception("Product not exists in WooCommerce. product_id:{$this->product->id}");
+            }
+
+            $categories = $this->getCategories();
+
+            /**
+             * If the category have not been created in WooCommerce, create it and reschedule the job.
+             */
+            if ($categories === null) {
+                return $this->release(20);
+            }
+
+            $publish_status = $this->getPublishStatus();
+
             $payload = [
                 'name' => "{$this->product->prod_name}",
                 'regular_price' => "{$this->product->price_cus_idr}",
@@ -91,7 +91,7 @@ class Update implements ShouldQueue
             $result = \Codexshaper\WooCommerce\Facades\Product::update($this->product->wiProduct->wp_product_id, $payload);
 
             if (!$result) {
-                return $this->fail(new Exception('Failed to update Product in WooCommerce.'));
+                throw new Exception("Failed to update Product in WooCommerce. product_id:{$this->product->id} -> wp_product_id:{$this->product->wiProduct->wp_product_id}");
             }
 
             $wiProduct = $this->product->wiProduct;
@@ -101,7 +101,7 @@ class Update implements ShouldQueue
                 $wiProduct->touch();
             }
         } catch (\Throwable $th) {
-            throw $th;
+            $this->fail($th->getMessage());
         }
     }
 

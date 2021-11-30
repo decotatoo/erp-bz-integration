@@ -54,11 +54,11 @@ class Create implements ShouldQueue
      */
     public function handle()
     {
-        if ($this->morphCategory->wiCategory) {
-            return $this->fail(new Exception('Commerce Category already exists in WooCommerce'));
-        }
-
         try {
+            if ($this->morphCategory->wiCategory) {
+                throw new Exception("Commerce Category already exists in WooCommerce");
+            }
+
             $result = \Codexshaper\WooCommerce\Facades\Category::create([
                 'name' => $this->morphCategory->name,
                 'slug' => Str::slug(!empty(Str::slug($this->morphCategory->slug)) ? $this->morphCategory->slug : $this->morphCategory->name),
@@ -69,7 +69,7 @@ class Create implements ShouldQueue
             $wiCategory->wp_product_category_id = $result['id'];
             $wiCategory->save();
         } catch (\Throwable $th) {
-            throw $th;
+            $this->fail($th->getMessage());
         }
     }
 }

@@ -54,11 +54,11 @@ class Update implements ShouldQueue
      */
     public function handle()
     {
-        if (!$this->morphCategory->wiCategory) {
-            return $this->fail(new Exception('Commerce Category not exist'));
-        }
-
         try {
+            if (!$this->morphCategory->wiCategory) {
+                throw new Exception('Commerce Category not exist');
+            }
+
             $result = \Codexshaper\WooCommerce\Facades\Category::update(
                 $this->morphCategory->wiCategory->wp_product_category_id,
                 [
@@ -67,7 +67,7 @@ class Update implements ShouldQueue
                 ]
             );
         } catch (\Throwable $th) {
-            throw $th;
+            $this->fail($th->getMessage());
         }
     }
 }

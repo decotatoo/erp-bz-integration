@@ -56,7 +56,7 @@ class Update implements ShouldQueue
         try {
             
         } catch (\Throwable $th) {
-            throw $th;
+            $this->fail($th->getMessage());
         }
     }
 

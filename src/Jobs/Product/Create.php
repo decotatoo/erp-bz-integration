@@ -60,20 +60,20 @@ class Create implements ShouldQueue
      */
     public function handle()
     {
-        if ($this->product->wiProduct) {
-            return $this->fail(new Exception('Product already exists in WooCommerce'));
-        }
-
-        $categories = $this->getCategories();
-
-        /**
-         * If the category have not been created in WooCommerce, create it and reschedule the job.
-         */
-        if ($categories === null) {
-            return $this->release(20);
-        }
-
         try {
+            if ($this->product->wiProduct) {
+                throw new Exception("Product already exists in WooCommerce. product_id:{$this->product->id} -> wp_product_id:{$this->product->wiProduct->wp_product_id}");
+            }
+
+            $categories = $this->getCategories();
+
+            /**
+             * If the category have not been created in WooCommerce, create it and reschedule the job.
+             */
+            if ($categories === null) {
+                return $this->release(20);
+            }
+
             $payload = [
                 'type' => 'simple',
                 'sku' => $this->product->prod_id,
@@ -103,10 +103,10 @@ class Create implements ShouldQueue
             if ($result && $saved) {
                 CalculateStock::dispatch($this->product)->onQueue('low');
             } else {
-                return $this->fail(new Exception('Failed to create Product in WooCommerce.'));
+                throw new Exception("Failed to create Product in WooCommerce. product_id:{$this->product->id}");
             }
         } catch (\Throwable $th) {
-            throw $th;
+            $this->fail($th->getMessage());
         }
     }
 

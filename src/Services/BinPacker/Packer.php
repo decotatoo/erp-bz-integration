@@ -3,6 +3,7 @@
 namespace Decotatoo\WoocommerceIntegration\Services\BinPacker;
 
 use Decotatoo\WoocommerceIntegration\Models\WiBin;
+use DVDoug\BoxPacker\PackedBox;
 use DVDoug\BoxPacker\Packer as BoxPackerPacker;
 use Exception;
 
@@ -28,6 +29,15 @@ class Packer
             $packer->addItem(new Item($item['product']), $item['quantity']);
         }
 
-        return $packer->pack();
+        return array_map(function ($packedBox) {
+            /** @var PackedBox $packedBox */
+            return [
+                'bin' => $packedBox->getBox()->getReference(),
+                'items' => $packedBox->getItems()->asItemArray(),
+                'weight' => $packedBox->getWeight(),
+                'volume' => $packedBox->getBox()->getOuterDepth() * $packedBox->getBox()->getOuterWidth() * $packedBox->getBox()->getOuterLength(),
+            ];
+
+        }, $packer->pack()->jsonSerialize());
     }
 }

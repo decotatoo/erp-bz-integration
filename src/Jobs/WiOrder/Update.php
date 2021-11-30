@@ -62,10 +62,10 @@ class Update implements ShouldQueue
             $result = \Codexshaper\WooCommerce\Facades\Order::update($this->wiOrder->wp_order_id, $payload);
 
             if (!$result) {
-                return $this->fail(new Exception('Failed to update Order in WooCommerce.'));
+                throw new Exception("Failed to update Order in WooCommerce. wp_order_id:{$this->wiOrder->wp_order_id}");
             }
         } catch (\Throwable $th) {
-            throw $th;
+            $this->fail($th->getMessage());
         }
     }
 }

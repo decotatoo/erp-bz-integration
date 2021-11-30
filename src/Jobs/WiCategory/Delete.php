@@ -51,17 +51,17 @@ class Delete implements ShouldQueue
      */
     public function handle()
     {
-        if (!$this->wiCategory) {
-            return $this->fail(new Exception('Commerce Category doesn\'t exists in WooCommerce'));
-        }
-
         try {
+            if (!$this->wiCategory) {
+                throw new Exception("Commerce Category doesn't exists in WooCommerce");
+            }
+
             $result = \Codexshaper\WooCommerce\Facades\Category::delete($this->wiCategory->wp_product_category_id, ['force' => true]);
 
             $this->wiCategory->categoryable()->disassociate();
             $this->wiCategory->delete();
         } catch (\Throwable $th) {
-            throw $th;
+            $this->fail($th->getMessage());
         }
     }
 }

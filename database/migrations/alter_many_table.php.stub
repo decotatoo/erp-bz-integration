@@ -20,6 +20,10 @@ return new class extends Migration
         Schema::table('festivities', function (Blueprint $table) {
             $table->string('slug')->nullable();
         });
+
+        Schema::table('product_stock_outs', function (Blueprint $table) {
+            $table->nullableMorphs('ownable');
+        });
     }
 
     public function down()
@@ -36,6 +40,10 @@ return new class extends Migration
         
         Schema::table('festivities', function (Blueprint $table) {
             $table->dropColumn('slug');
+        });
+        
+        Schema::table('festivities', function (Blueprint $table) {
+            $table->dropMorphs('ownable');
         });
     }
 };

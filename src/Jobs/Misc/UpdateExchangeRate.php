@@ -42,7 +42,7 @@ class UpdateExchangeRate implements ShouldQueue
                 throw new Exception('Exchange rate update failed');
             }
         } catch (\Throwable $th) {
-            throw $th;
+            $this->fail($th->getMessage());
         }
     }
 }

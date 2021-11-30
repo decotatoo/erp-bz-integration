@@ -79,13 +79,13 @@ class UpdateStock implements ShouldQueue, ShouldBeUnique
             $result = \Codexshaper\WooCommerce\Facades\Product::update($this->wi_product->wp_product_id, $payload);
 
             if (!$result) {
-                return $this->fail(new Exception('Failed to update Product in WooCommerce.'));
+                throw new Exception("Failed to update Product wp_product_id:{$this->wi_product->wp_product_id} in WooCommerce.");
             }
 
             $this->wi_product->stock_updated_at = Carbon::now();
             $this->wi_product->save();
         } catch (\Throwable $th) {
-            throw $th;
+            $this->fail($th->getMessage());
         }
     }
 }
