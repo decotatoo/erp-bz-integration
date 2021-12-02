@@ -19,7 +19,7 @@ class VerifyDwiSignature
     {
         if (
             ! $request->hasHeader('x-dwi-signature') 
-            || $request->header('x-dwi-signature') !== config('woocommerce-integration.secret')
+            || $request->header('x-dwi-signature') !== base64_encode(hash_hmac('sha256', config('woocommerce-integration.credential.username'), config('woocommerce-integration.credential.password'), true))
         ) {
             throw new AccessDeniedHttpException('Invalid Dwi signature.');
         }
