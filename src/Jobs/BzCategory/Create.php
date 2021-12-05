@@ -5,6 +5,7 @@ namespace Decotatoo\Bz\Jobs\BzCategory;
 use App\Models\Festivity;
 use Decotatoo\Bz\Models\CommerceCategory;
 use Decotatoo\Bz\Models\BzCategory;
+use Decotatoo\Bz\Services\WooCommerceApi\Models\Category;
 use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -13,6 +14,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Str;
 
 class Create implements ShouldQueue
@@ -59,7 +61,7 @@ class Create implements ShouldQueue
                 throw new Exception("Commerce Category already exists in WooCommerce");
             }
 
-            $result = \Codexshaper\WooCommerce\Facades\Category::create([
+            $result = (new Category(App::make('bz.woocommerce')))->create([
                 'name' => $this->morphCategory->name,
                 'slug' => Str::slug(!empty(Str::slug($this->morphCategory->slug)) ? $this->morphCategory->slug : $this->morphCategory->name),
             ]);

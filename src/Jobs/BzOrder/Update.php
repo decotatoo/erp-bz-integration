@@ -3,6 +3,7 @@
 namespace Decotatoo\Bz\Jobs\BzOrder;
 
 use Decotatoo\Bz\Models\BzOrder;
+use Decotatoo\Bz\Services\WooCommerceApi\Models\Order;
 use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -11,6 +12,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Str;
 
 class Update implements ShouldQueue
@@ -58,8 +60,8 @@ class Update implements ShouldQueue
             $payload = [
                 'status' => $this->bzOrder->status,
             ];
-
-            $result = \Codexshaper\WooCommerce\Facades\Order::update($this->bzOrder->wp_order_id, $payload);
+            
+            $result = (new Order(App::make('bz.woocommerce')))->update($this->bzOrder->wp_order_id, $payload);
 
             if (!$result) {
                 throw new Exception("Failed to update Order in WooCommerce. wp_order_id:{$this->bzOrder->wp_order_id}");

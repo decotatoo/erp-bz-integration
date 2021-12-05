@@ -8,7 +8,7 @@ use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 use Decotatoo\Bz\Commands\BzCommand;
 use Decotatoo\Bz\Providers\EventServiceProvider;
-use Decotatoo\Bz\Services\WooCommerceApi;
+use Decotatoo\Bz\Services\WooCommerceApi\WooCommerceApi;
 use Decotatoo\Bz\Services\WordPressRestApi;
 use Illuminate\Console\Scheduling\Schedule;
 
@@ -51,7 +51,7 @@ class BzServiceProvider extends PackageServiceProvider
     {
         $this->app->register(EventServiceProvider::class);
 
-        $this->app->singleton('bz.wordpressrestapi', function () {
+        $this->app->singleton('bz.wordpress', function () {
             $base_url = config('bz.base_url');
             $base_path = config('bz.rest_api.base_path');
             $auth = [
@@ -62,7 +62,7 @@ class BzServiceProvider extends PackageServiceProvider
             return new WordPressRestApi($base_url . $base_path, $auth);
         });
 
-        $this->app->singleton('bz.woocommerceapi', function () {
+        $this->app->singleton('bz.woocommerce', function () {
             $base_url = config('bz.base_url');
             $consumer_key = config('bz.woocommerce.consumer_key');
             $consumer_secret = config('bz.woocommerce.consumer_secret');

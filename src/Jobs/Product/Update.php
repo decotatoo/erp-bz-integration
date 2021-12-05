@@ -4,6 +4,7 @@ namespace Decotatoo\Bz\Jobs\Product;
 
 use App\Models\ProductInCatalog;
 use Decotatoo\Bz\Jobs\BzCategory\Create as BzCategoryCreate;
+use Decotatoo\Bz\Services\WooCommerceApi\Models\Product;
 use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -12,7 +13,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
-
+use Illuminate\Support\Facades\App;
 
 /**
  * TODO:TEST
@@ -88,7 +89,7 @@ class Update implements ShouldQueue
                 $payload['images'] = $this->getImages();
             }
 
-            $result = \Codexshaper\WooCommerce\Facades\Product::update($this->product->bzProduct->wp_product_id, $payload);
+            $result = (new Product(App::make('bz.woocommerce')))->update($this->product->bzProduct->wp_product_id, $payload);
 
             if (!$result) {
                 throw new Exception("Failed to update Product in WooCommerce. product_id:{$this->product->id} -> wp_product_id:{$this->product->bzProduct->wp_product_id}");
@@ -146,7 +147,7 @@ class Update implements ShouldQueue
     {
         $images = [];
 
-        $_online_product = \Codexshaper\WooCommerce\Facades\Product::find($this->product->bzProduct->wp_product_id);
+        $_online_product = (new Product(App::make('bz.woocommerce')))->find($this->product->bzProduct->wp_product_id);
 
         if ($_online_product) {
             $images = $_online_product->images;

@@ -3,6 +3,7 @@
 namespace Decotatoo\Bz\Jobs\BzCategory;
 
 use Decotatoo\Bz\Models\BzCategory;
+use Decotatoo\Bz\Services\WooCommerceApi\Models\Category;
 use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -11,6 +12,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\App;
 
 class Delete implements ShouldQueue
 {
@@ -56,7 +58,7 @@ class Delete implements ShouldQueue
                 throw new Exception("Commerce Category doesn't exists in WooCommerce");
             }
 
-            $result = \Codexshaper\WooCommerce\Facades\Category::delete($this->bzCategory->wp_product_category_id, ['force' => true]);
+            $result = (new Category(App::make('bz.woocommerce')))->delete($this->bzCategory->wp_product_category_id, ['force' => true]);
 
             $this->bzCategory->categoryable()->disassociate();
             $this->bzCategory->delete();

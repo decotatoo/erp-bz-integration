@@ -1,9 +1,9 @@
 <?php
 
-namespace Decotatoo\Bz\Services;
+namespace Decotatoo\Bz\Services\WooCommerceApi;
 
 use Automattic\WooCommerce\Client;
-use Codexshaper\WooCommerce\Traits\WooCommerceTrait;
+use Decotatoo\Bz\Services\WooCommerceApi\Traits\WooCommerceTrait;
 
 class WooCommerceApi
 {

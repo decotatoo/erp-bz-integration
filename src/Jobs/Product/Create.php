@@ -5,6 +5,7 @@ namespace Decotatoo\Bz\Jobs\Product;
 use App\Models\ProductInCatalog;
 use Decotatoo\Bz\Models\BzProduct;
 use Decotatoo\Bz\Jobs\BzCategory\Create as BzCategoryCreate;
+use Decotatoo\Bz\Services\WooCommerceApi\Models\Product;
 use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -14,6 +15,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\App;
 
 /**
  * TODO:TEST
@@ -91,7 +93,7 @@ class Create implements ShouldQueue
                 'status' => 'publish'
             ];
 
-            $result = \Codexshaper\WooCommerce\Facades\Product::create($payload);
+            $result = (new Product(App::make('bz.woocommerce')))->create($payload);
 
             $bzProduct = new BzProduct();
             $bzProduct->product()->associate($this->product);

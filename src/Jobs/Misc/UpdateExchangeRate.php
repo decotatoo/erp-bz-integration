@@ -26,7 +26,6 @@ class UpdateExchangeRate implements ShouldQueue
      */
     public function __construct()
     {
-        $this->bz_wp_api = App::make('bz.wordpressrestapi');
     }
 
     /**
@@ -39,7 +38,7 @@ class UpdateExchangeRate implements ShouldQueue
         $exchange_rates = ExchangeRate::all(['from_currency', 'to_currency', 'rate']);
 
         try {
-            $response = $this->bz_wp_api->post('/exchange-rate', $exchange_rates->toArray());
+            $response = App::make('bz.wordpress')->post('/exchange-rate', $exchange_rates->toArray());
 
             if ($response->getStatusCode() !== 200) {
                 throw new Exception('[bz] Exchange rate update failed');

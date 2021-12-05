@@ -5,6 +5,7 @@ namespace Decotatoo\Bz\Jobs\BzCategory;
 use App\Models\Festivity;
 use Decotatoo\Bz\Models\CommerceCategory;
 use Decotatoo\Bz\Models\BzCategory;
+use Decotatoo\Bz\Services\WooCommerceApi\Models\Category;
 use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -13,6 +14,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Str;
 
 class Update implements ShouldQueue
@@ -59,7 +61,7 @@ class Update implements ShouldQueue
                 throw new Exception('Commerce Category not exist');
             }
 
-            $result = \Codexshaper\WooCommerce\Facades\Category::update(
+            $result = (new Category(App::make('bz.woocommerce')))->update(
                 $this->morphCategory->bzCategory->wp_product_category_id,
                 [
                     'name' => $this->morphCategory->name,
