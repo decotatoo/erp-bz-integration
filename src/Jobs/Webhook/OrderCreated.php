@@ -72,7 +72,7 @@ class OrderCreated implements ShouldQueue
             $wiOrder->cart_hash = $this->request->cart_hash;
             $wiOrder->order_key = $this->request->order_key;
 
-            $wiOrder->status = $this->request->status;
+            $wiOrder->status = 'processing';
             $wiOrder->currency = $this->request->currency;
             $wiOrder->discount_total = $this->request->discount_total;
             $wiOrder->discount_tax = $this->request->discount_tax;
@@ -141,9 +141,8 @@ class OrderCreated implements ShouldQueue
 
             $wiOrder->wiOrderItems()->saveMany($items);
 
-            if ($this->request->status === 'completed') {
-                // TODO: add the order to production and shipment
-            }
+            // TODO: add the order to production and shipment
+            
         } catch (\Throwable $th) {
             $this->fail($th->getMessage());
         }

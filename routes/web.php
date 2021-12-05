@@ -2,6 +2,7 @@
 
 use Decotatoo\WoocommerceIntegration\Http\Controllers\BinPackerController;
 use Decotatoo\WoocommerceIntegration\Http\Controllers\CommerceCategoryController;
+use Decotatoo\WoocommerceIntegration\Http\Controllers\SalesOrderController;
 use Decotatoo\WoocommerceIntegration\Http\Controllers\WebhookController;
 use Illuminate\Support\Facades\Route;
 
@@ -29,5 +30,9 @@ Route::middleware(['web', 'auth'])->group(function () {
 
         // commerce-category
         Route::resource('commerce-category', CommerceCategoryController::class);
+    });
+
+    Route::prefix('sales-order')->name('sales-order.')->group(function () {
+        Route::get('/online', [SalesOrderController::class, 'index'])->name('online');
     });
 });

@@ -182,11 +182,11 @@ class OrderUpdated implements ShouldQueue
 
             $wiOrder->refresh();
 
-            if ($wiOrder->status !== $this->request->status) {
-                if ($this->request->status === 'completed') {
-                    // TODO: add the order to production and shipment
-                }
-            }
+            // if ($wiOrder->status !== $this->request->status) {
+            //     if ($this->request->status === 'completed') {
+            //         // TODO: add the order to production and shipment
+            //     }
+            // }
         } catch (\Throwable $th) {
             $this->fail($th->getMessage());
         }

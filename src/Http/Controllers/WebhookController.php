@@ -4,6 +4,7 @@ namespace Decotatoo\WoocommerceIntegration\Http\Controllers;
 
 use Decotatoo\WoocommerceIntegration\Http\Middleware\VerifyWebhookSignature;
 use Decotatoo\WoocommerceIntegration\Jobs\Webhook\CustomerCreated;
+use Decotatoo\WoocommerceIntegration\Jobs\Webhook\OrderCreated;
 use Decotatoo\WoocommerceIntegration\Models\WiCustomer;
 use Decotatoo\WoocommerceIntegration\Models\WiOrder;
 use Decotatoo\WoocommerceIntegration\Models\WiProduct;
@@ -182,7 +183,7 @@ class WebhookController extends Controller
         ]);
 
         // Passing the request object or the request's  input?
-        CustomerCreated::dispatch($request)->afterCommit()->onQueue('webhook');
+        OrderCreated::dispatch($request)->afterCommit()->onQueue('webhook');
 
         return $this->successMethod();
     }

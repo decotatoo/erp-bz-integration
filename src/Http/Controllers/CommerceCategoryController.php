@@ -15,10 +15,10 @@ class CommerceCategoryController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('permission:commerce-category-list', ['only' => 'index']);
-        $this->middleware('permission:commerce-category-create', ['only' => ['create', 'store']]);
-        $this->middleware('permission:commerce-category-edit', ['only' => ['edit', 'update']]);
-        $this->middleware('permission:commerce-category-delete', ['only' => ['destroy']]);
+        $this->middleware('permission:TODO-PERMISSION-WI', ['only' => 'index']);
+        $this->middleware('permission:TODO-PERMISSION-WI', ['only' => ['create', 'store']]);
+        $this->middleware('permission:TODO-PERMISSION-WI', ['only' => ['edit', 'update']]);
+        $this->middleware('permission:TODO-PERMISSION-WI', ['only' => ['destroy']]);
     }
 
     /**

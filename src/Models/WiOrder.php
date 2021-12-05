@@ -16,7 +16,7 @@ class WiOrder extends Model
 
     protected $table = 'wi_orders';
 
-    protected $timestamps = false;
+    public $timestamps = false;
 
     public function wiCustomer()
     {

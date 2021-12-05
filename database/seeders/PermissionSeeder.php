@@ -15,37 +15,15 @@ class PermissionSeeder extends Seeder
     public function run()
     {
         $permissions = [
-            // Permission Commerce Categories
-
             [
-                'name' => 'commerce-category-list',
-                'modul_name' => 'Website Management',
-                'submodul_name' => 'Commerce Categories',
-                'menu_description' => 'View a Commerce Categories',
+                'name' => 'TODO-PERMISSION-WI',
+                'modul_name' => 'TODO-PERMISSION-WI',
+                'submodul_name' => 'TODO-PERMISSION-WI',
+                'menu_description' => 'TODO-PERMISSION-WI',
             ],
 
-            [
-                'name' => 'commerce-category-create',
-                'modul_name' => 'Website Management',
-                'submodul_name' => 'Commerce Categories',
-                'menu_description' => 'Create a New Commerce Categories',
-            ],
-
-            [
-                'name' => 'commerce-category-edit',
-                'modul_name' => 'Website Management',
-                'submodul_name' => 'Commerce Categories',
-                'menu_description' => 'Update a Commerce Categories',
-            ],
-
-            [
-                'name' => 'commerce-category-delete',
-                'modul_name' => 'Website Management',
-                'submodul_name' => 'Commerce Categories',
-                'menu_description' => 'Delete a Commerce Categories',
-            ],
         ];
-        
+
 
         foreach ($permissions as $permission) {
             Permission::updateOrCreate(
