@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('wi_customers', function (Blueprint $table) {
+        Schema::create('bz_customers', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('wp_customer_id')->nullable(); // WooCommerce Customer ID
 
@@ -48,6 +48,6 @@ return new class extends Migration
 
     public function down()
     {
-        Schema::dropIfExists('wi_customers');
+        Schema::dropIfExists('bz_customers');
     }
 };

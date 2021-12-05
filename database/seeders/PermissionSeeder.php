@@ -1,6 +1,6 @@
 <?php
 
-namespace Decotatoo\WoocommerceIntegration\Database\Seeders;
+namespace Decotatoo\Bz\Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;

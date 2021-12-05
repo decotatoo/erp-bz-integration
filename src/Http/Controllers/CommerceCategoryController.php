@@ -1,9 +1,9 @@
 <?php
 
-namespace Decotatoo\WoocommerceIntegration\Http\Controllers;
+namespace Decotatoo\Bz\Http\Controllers;
 
 use App\Rules\Slug;
-use Decotatoo\WoocommerceIntegration\Models\CommerceCategory;
+use Decotatoo\Bz\Models\CommerceCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
@@ -30,7 +30,7 @@ class CommerceCategoryController extends Controller
     {
         $data['page_title'] = 'Commerce Categories';
         $data['categories'] = CommerceCategory::get();
-        return view('woocommerce-integration::website-management.commerce-category.index', $data);
+        return view('bz::website-management.commerce-category.index', $data);
     }
 
     /**
@@ -41,7 +41,7 @@ class CommerceCategoryController extends Controller
     public function create()
     {
         $data['page_title'] = 'Add Data';
-        return view('woocommerce-integration::website-management.commerce-category.create', $data);
+        return view('bz::website-management.commerce-category.create', $data);
     }
 
     /**
@@ -94,7 +94,7 @@ class CommerceCategoryController extends Controller
     {
         $data['page_title'] = 'Edit Data';
         $data['category'] = $commerceCategory;
-        return view('woocommerce-integration::website-management.ecommerce-category.edit', $data);
+        return view('bz::website-management.ecommerce-category.edit', $data);
     }
 
     /**

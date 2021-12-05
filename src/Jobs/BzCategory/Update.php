@@ -1,10 +1,10 @@
 <?php
 
-namespace Decotatoo\WoocommerceIntegration\Jobs\WiCategory;
+namespace Decotatoo\Bz\Jobs\BzCategory;
 
 use App\Models\Festivity;
-use Decotatoo\WoocommerceIntegration\Models\CommerceCategory;
-use Decotatoo\WoocommerceIntegration\Models\WiCategory;
+use Decotatoo\Bz\Models\CommerceCategory;
+use Decotatoo\Bz\Models\BzCategory;
 use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -15,7 +15,7 @@ use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Str;
 
-class Create implements ShouldQueue
+class Update implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -55,19 +55,17 @@ class Create implements ShouldQueue
     public function handle()
     {
         try {
-            if ($this->morphCategory->wiCategory) {
-                throw new Exception("Commerce Category already exists in WooCommerce");
+            if (!$this->morphCategory->bzCategory) {
+                throw new Exception('Commerce Category not exist');
             }
 
-            $result = \Codexshaper\WooCommerce\Facades\Category::create([
-                'name' => $this->morphCategory->name,
-                'slug' => Str::slug(!empty(Str::slug($this->morphCategory->slug)) ? $this->morphCategory->slug : $this->morphCategory->name),
-            ]);
-
-            $wiCategory = new WiCategory();
-            $wiCategory->categoryable()->associate($this->morphCategory);
-            $wiCategory->wp_product_category_id = $result['id'];
-            $wiCategory->save();
+            $result = \Codexshaper\WooCommerce\Facades\Category::update(
+                $this->morphCategory->bzCategory->wp_product_category_id,
+                [
+                    'name' => $this->morphCategory->name,
+                    'slug' => Str::slug(!empty(Str::slug($this->morphCategory->slug)) ? $this->morphCategory->slug : $this->morphCategory->name),
+                ]
+            );
         } catch (\Throwable $th) {
             $this->fail($th->getMessage());
         }

@@ -1,8 +1,8 @@
 <?php
 
-namespace Decotatoo\WoocommerceIntegration\Services\BinPacker;
+namespace Decotatoo\Bz\Services\BinPacker;
 
-use Decotatoo\WoocommerceIntegration\Models\WiBin;
+use Decotatoo\Bz\Models\Bin;
 use DVDoug\BoxPacker\PackedBox;
 use DVDoug\BoxPacker\Packer as BoxPackerPacker;
 use Exception;
@@ -12,7 +12,7 @@ class Packer
     public static function pack($bins = [], $items = [])
     {
         if (empty($bins)) {
-            $bins = WiBin::all();
+            $bins = Bin::all();
         }
 
         if (empty($items) || empty($bins)) {

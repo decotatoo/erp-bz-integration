@@ -1,10 +1,10 @@
 <?php
 
-namespace Decotatoo\WoocommerceIntegration\Observers;
+namespace Decotatoo\Bz\Observers;
 
 use App\Models\ProductInCatalog;
-use Decotatoo\WoocommerceIntegration\Jobs\Product\Create;
-use Decotatoo\WoocommerceIntegration\Jobs\Product\Update;
+use Decotatoo\Bz\Jobs\Product\Create;
+use Decotatoo\Bz\Jobs\Product\Update;
 
 /**
  * TODO:PLACEHOLDER
@@ -27,7 +27,7 @@ class ProductObserver
     public function created(ProductInCatalog $productInCatalog)
     {
         if (
-            !$productInCatalog->wiProduct
+            !$productInCatalog->bzProduct
             && $productInCatalog->category === 'catalog'
             && $productInCatalog->customer_id === null
             && $productInCatalog->season !== null
@@ -49,7 +49,7 @@ class ProductObserver
      */
     public function updated(ProductInCatalog $productInCatalog)
     {
-        if ($productInCatalog->wiProduct) {
+        if ($productInCatalog->bzProduct) {
             Update::dispatch($productInCatalog)->afterCommit()->onQueue('default');
         } else {
             $this->created($productInCatalog);

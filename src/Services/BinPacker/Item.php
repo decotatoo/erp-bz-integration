@@ -1,6 +1,6 @@
 <?php
 
-namespace Decotatoo\WoocommerceIntegration\Services\BinPacker;
+namespace Decotatoo\Bz\Services\BinPacker;
 
 use App\Models\ProductInCatalog;
 use DVDoug\BoxPacker\Item as BoxPackerItem;

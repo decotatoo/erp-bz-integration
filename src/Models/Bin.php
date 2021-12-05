@@ -1,6 +1,6 @@
 <?php
 
-namespace Decotatoo\WoocommerceIntegration\Models;
+namespace Decotatoo\Bz\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,9 +12,9 @@ use Illuminate\Database\Eloquent\Model;
  * Dimensions is in integer milimeter.
  * Max weight is in integer gram.
  */
-class WiBin extends Model
+class Bin extends Model
 {
     use HasFactory;
 
-    protected $table = 'wi_bins';
+    protected $table = 'bins';
 }

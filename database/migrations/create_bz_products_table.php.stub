@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('wi_products', function (Blueprint $table) {
+        Schema::create('bz_products', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('product_id')->nullable();
             $table->foreign('product_id')->references('id')->on('products');
@@ -19,12 +19,13 @@ return new class extends Migration
             $table->integer('stock_in_quantity')->default(0);
             $table->integer('stock_out_quantity')->default(0);
 
+            $table->string('instance_type')->default('bz');
             $table->index('wp_product_id');
         });
     }
 
     public function down()
     {
-        Schema::dropIfExists('wi_products');
+        Schema::dropIfExists('bz_products');
     }
 };

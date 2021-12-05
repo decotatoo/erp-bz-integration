@@ -1,12 +1,12 @@
 <?php
 
-namespace Decotatoo\WoocommerceIntegration\Http\Controllers;
+namespace Decotatoo\Bz\Http\Controllers;
 
-use Decotatoo\WoocommerceIntegration\Http\Middleware\VerifyDwiSignature;
-use Decotatoo\WoocommerceIntegration\Models\WiBin;
-use Decotatoo\WoocommerceIntegration\Models\WiPackingSimulation;
-use Decotatoo\WoocommerceIntegration\Models\WiProduct;
-use Decotatoo\WoocommerceIntegration\Services\BinPacker\Packer;
+use Decotatoo\Bz\Http\Middleware\VerifyDwiSignature;
+use Decotatoo\Bz\Models\Bin;
+use Decotatoo\Bz\Models\PackingSimulation;
+use Decotatoo\Bz\Models\BzProduct;
+use Decotatoo\Bz\Services\BinPacker\Packer;
 use Illuminate\Http\Request;
 
 /**
@@ -30,27 +30,27 @@ class BinPackerController extends Controller
         $items = [];
 
         foreach ($request->items as $item) {
-            $wiProduct = WiProduct::where('wp_product_id', $item['id'])->first();
-            if ($wiProduct) {
+            $bzProduct = BzProduct::where('wp_product_id', $item['id'])->first();
+            if ($bzProduct) {
                 $items[] = [
-                    'product' => $wiProduct,
+                    'product' => $bzProduct,
                     'quantity' => $item['quantity'],
                 ];
             }
         }
 
-        $bins = WiBin::all();
+        $bins = Bin::all();
 
         $result = Packer::pack($bins, $items);
 
-        $wiPackingSimulation = new WiPackingSimulation();
-        $wiPackingSimulation->items = $items;
-        $wiPackingSimulation->bins = $bins;
-        $wiPackingSimulation->result = $result;
-        $wiPackingSimulation->save();
+        $packingSimulation = new PackingSimulation();
+        $packingSimulation->items = $items;
+        $packingSimulation->bins = $bins;
+        $packingSimulation->result = $result;
+        $packingSimulation->save();
 
         return response()->json([
-            'simulation_id' => $wiPackingSimulation->id,
+            'simulation_id' => $packingSimulation->id,
             'result' => $result,
         ]);
     }

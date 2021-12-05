@@ -1,6 +1,6 @@
 <?php
 
-namespace Decotatoo\WoocommerceIntegration\Http\Controllers;
+namespace Decotatoo\Bz\Http\Controllers;
 
 use Illuminate\Http\Request;
 
@@ -14,6 +14,6 @@ class SalesOrderController extends Controller
     public function index()
     {
         $data['page_title'] = 'Sales Order [ONLINE]';
-        return view('woocommerce-integration::sales-order.online.index', $data);
+        return view('bz::sales-order.online.index', $data);
     }
 }

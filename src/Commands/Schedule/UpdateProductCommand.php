@@ -1,10 +1,10 @@
 <?php
 
-namespace Decotatoo\WoocommerceIntegration\Commands\Schedule;
+namespace Decotatoo\Bz\Commands\Schedule;
 
-use Decotatoo\WoocommerceIntegration\Jobs\Product\CalculateStock;
-use Decotatoo\WoocommerceIntegration\Jobs\Product\Update;
-use Decotatoo\WoocommerceIntegration\Models\WiProduct;
+use Decotatoo\Bz\Jobs\Product\CalculateStock;
+use Decotatoo\Bz\Jobs\Product\Update;
+use Decotatoo\Bz\Models\BzProduct;
 use Illuminate\Console\Command;
 
 /**
@@ -17,7 +17,7 @@ class UpdateProductCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'wi:schedule:update-product';
+    protected $signature = 'bz:schedule:update-product';
 
     /**
      * The console command description.
@@ -43,18 +43,18 @@ class UpdateProductCommand extends Command
      */
     public function handle()
     {
-        $wi_products = WiProduct::where('wp_post_status', 'publish')->get();
+        $bz_products = BzProduct::where('wp_post_status', 'publish')->get();
 
-        $this->alert('Start update product. Total: '. $wi_products->count());
+        $this->alert('Start update product. Total: '. $bz_products->count());
 
-        foreach ($wi_products as $wi_product) {
-            $this->info('Start update product with id: ' . $wi_product->id);
+        foreach ($bz_products as $bz_product) {
+            $this->info('Start update product with id: ' . $bz_product->id);
 
-            $this->line('[background] Updating product info');
-            Update::dispatch($wi_product->product)->onQueue('high');
+            $this->line('[bz] Updating product info');
+            Update::dispatch($bz_product->product)->onQueue('high');
 
-            $this->line('[background] Updating product stock');
-            CalculateStock::dispatch($wi_product->product)->onQueue('low');
+            $this->line('[bz] Updating product stock');
+            CalculateStock::dispatch($bz_product->product)->onQueue('low');
 
             $this->newLine();
         }

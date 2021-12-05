@@ -1,9 +1,9 @@
 <?php
 
-use Decotatoo\WoocommerceIntegration\Http\Controllers\BinPackerController;
-use Decotatoo\WoocommerceIntegration\Http\Controllers\CommerceCategoryController;
-use Decotatoo\WoocommerceIntegration\Http\Controllers\SalesOrderController;
-use Decotatoo\WoocommerceIntegration\Http\Controllers\WebhookController;
+use Decotatoo\Bz\Http\Controllers\BinPackerController;
+use Decotatoo\Bz\Http\Controllers\CommerceCategoryController;
+use Decotatoo\Bz\Http\Controllers\SalesOrderController;
+use Decotatoo\Bz\Http\Controllers\WebhookController;
 use Illuminate\Support\Facades\Route;
 
 /*

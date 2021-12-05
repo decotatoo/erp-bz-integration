@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('wi_orders', function (Blueprint $table) {
+        Schema::create('bz_orders', function (Blueprint $table) {
             $table->id();
 
             $table->unsignedBigInteger('wp_order_id')->nullable(); // WooCommerce Order ID
@@ -17,8 +17,8 @@ return new class extends Migration
             $table->string('cart_hash')->nullable();
             $table->string('order_key')->nullable();
             
-            $table->unsignedBigInteger('wi_customer_id')->nullable();
-            $table->foreign('wi_customer_id')->references('id')->on('wi_customers')->onDelete('set null');
+            $table->unsignedBigInteger('bz_customer_id')->nullable();
+            $table->foreign('bz_customer_id')->references('id')->on('bz_customers')->onDelete('set null');
 
             $table->string('status')->default('pending');
             $table->string('currency')->default('IDR');
@@ -60,6 +60,6 @@ return new class extends Migration
 
     public function down()
     {
-        Schema::dropIfExists('wi_orders');
+        Schema::dropIfExists('bz_orders');
     }
 };

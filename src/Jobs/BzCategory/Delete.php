@@ -1,8 +1,8 @@
 <?php
 
-namespace Decotatoo\WoocommerceIntegration\Jobs\WiOrder;
+namespace Decotatoo\Bz\Jobs\BzCategory;
 
-use Decotatoo\WoocommerceIntegration\Models\WiOrder;
+use Decotatoo\Bz\Models\BzCategory;
 use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -11,27 +11,25 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Str;
 
-class Update implements ShouldQueue
+class Delete implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
-     * The WiOrder instance.
-     *
-     * @var WiOrder
+     * @var BzCategory
      */
-    protected $wiOrder;
+    protected $bzCategory;
 
     /**
      * Create a new job instance.
      *
+     * @param BzCategory $bzCategory
      * @return void
      */
-    public function __construct(WiOrder $wiOrder)
+    public function __construct($bzCategory)
     {
-        $this->wiOrder = $wiOrder;
+        $this->bzCategory = $bzCategory;
     }
 
     /**
@@ -42,7 +40,7 @@ class Update implements ShouldQueue
     public function middleware()
     {
         return [
-            (new WithoutOverlapping($this->wiOrder->id))->dontRelease()
+            (new WithoutOverlapping($this->bzCategory->id))->dontRelease()
         ];
     }
 
@@ -53,17 +51,15 @@ class Update implements ShouldQueue
      */
     public function handle()
     {
-
         try {
-            $payload = [
-                'status' => $this->wiOrder->status,
-            ];
-
-            $result = \Codexshaper\WooCommerce\Facades\Order::update($this->wiOrder->wp_order_id, $payload);
-
-            if (!$result) {
-                throw new Exception("Failed to update Order in WooCommerce. wp_order_id:{$this->wiOrder->wp_order_id}");
+            if (!$this->bzCategory) {
+                throw new Exception("Commerce Category doesn't exists in WooCommerce");
             }
+
+            $result = \Codexshaper\WooCommerce\Facades\Category::delete($this->bzCategory->wp_product_category_id, ['force' => true]);
+
+            $this->bzCategory->categoryable()->disassociate();
+            $this->bzCategory->delete();
         } catch (\Throwable $th) {
             $this->fail($th->getMessage());
         }

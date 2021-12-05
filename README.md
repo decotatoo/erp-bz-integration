@@ -15,13 +15,13 @@ Install package menggunakan Composer.
 Kemudian jalankan perintah berikut untuk mempublikasikan aset dan sumber daya dari package.
 
 ```bash
-php artisan vendor:publish --tag=woocommerce-integration-config
+php artisan vendor:publish --tag=bz-config
 ```
 ```bash
-php artisan vendor:publish --tag=woocommerce-integration-views
+php artisan vendor:publish --tag=bz-views
 ```
 ```bash
-php artisan vendor:publish --tag=woocommerce-integration-migrations
+php artisan vendor:publish --tag=bz-migrations
 ```
 
 Pada file .env di root folder, silahkan sesuaikan config nya

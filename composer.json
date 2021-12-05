@@ -1,6 +1,6 @@
 {
-  "name": "decotatoo/woocommerce-integration",
-  "description": "WooCommerce integration for ERP",
+  "name": "decotatoo/bz-integration",
+  "description": "B2B WooCommerce integration for ERP",
   "type": "library",
   "require": {
     "php": "^8.0",
@@ -24,14 +24,14 @@
   "license": "MIT",
   "autoload": {
       "psr-4": {
-          "Decotatoo\\WoocommerceIntegration\\": "src/",
-          "Decotatoo\\WoocommerceIntegration\\Database\\Factories\\": "database/factories",
-          "Decotatoo\\WoocommerceIntegration\\Database\\Seeders\\": "database/seeders/"
+          "Decotatoo\\Bz\\": "src/",
+          "Decotatoo\\Bz\\Database\\Factories\\": "database/factories",
+          "Decotatoo\\Bz\\Database\\Seeders\\": "database/seeders/"
       }
   },
   "autoload-dev": {
       "psr-4": {
-          "Decotatoo\\WoocommerceIntegration\\Tests\\": "tests"
+          "Decotatoo\\Bz\\Tests\\": "tests"
       }
   },
   "scripts": {
@@ -51,10 +51,10 @@
   "extra": {
       "laravel": {
           "providers": [
-              "Decotatoo\\WoocommerceIntegration\\WoocommerceIntegrationServiceProvider"
+              "Decotatoo\\Bz\\BzServiceProvider"
           ],
           "aliases": {
-              "WoocommerceIntegration": "Decotatoo\\WoocommerceIntegration\\WoocommerceIntegrationFacade"
+              "Bz": "Decotatoo\\Bz\\BzFacade"
           }
       }
   },

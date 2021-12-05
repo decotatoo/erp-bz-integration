@@ -1,12 +1,12 @@
 <?php
 
-namespace Decotatoo\WoocommerceIntegration\Commands;
+namespace Decotatoo\Bz\Commands;
 
 use Illuminate\Console\Command;
 
-class WoocommerceIntegrationCommand extends Command
+class BzCommand extends Command
 {
-    public $signature = 'wi';
+    public $signature = 'bz';
 
     public $description = 'WooCommerce Integration command';
 

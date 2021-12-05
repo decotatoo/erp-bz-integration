@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('wi_bins', function (Blueprint $table) {
+        Schema::create('bins', function (Blueprint $table) {
             $table->id();
             $table->string('ref');
             $table->string('name')->nullable();
@@ -33,6 +33,6 @@ return new class extends Migration
 
     public function down()
     {
-        Schema::dropIfExists('wi_bins');
+        Schema::dropIfExists('bins');
     }
 };

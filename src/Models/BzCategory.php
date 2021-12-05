@@ -1,6 +1,6 @@
 <?php
 
-namespace Decotatoo\WoocommerceIntegration\Models;
+namespace Decotatoo\Bz\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -8,11 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * TODO:PLACEHOLDER
  */
-class WiCategory extends Model
+class BzCategory extends Model
 {
     use HasFactory;
 
-    protected $table = 'wi_categories';
+    protected $table = 'bz_categories';
 
     protected $timestamps = false;
 

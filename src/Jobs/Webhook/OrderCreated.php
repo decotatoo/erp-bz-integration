@@ -1,11 +1,11 @@
 <?php
 
-namespace Decotatoo\WoocommerceIntegration\Jobs\Webhook;
+namespace Decotatoo\Bz\Jobs\Webhook;
 
-use Decotatoo\WoocommerceIntegration\Models\WiCustomer;
-use Decotatoo\WoocommerceIntegration\Models\WiOrder;
-use Decotatoo\WoocommerceIntegration\Models\WiOrderItem;
-use Decotatoo\WoocommerceIntegration\Models\WiProduct;
+use Decotatoo\Bz\Models\BzCustomer;
+use Decotatoo\Bz\Models\BzOrder;
+use Decotatoo\Bz\Models\BzOrderItem;
+use Decotatoo\Bz\Models\BzProduct;
 use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -59,69 +59,69 @@ class OrderCreated implements ShouldQueue
     public function handle()
     {
         try {
-            /** @var WiCustomer $wiCustomer */
-            $wiCustomer = WiCustomer::where('wp_customer_id', $this->request->customer_id)->first();
+            /** @var BzCustomer $bzCustomer */
+            $bzCustomer = BzCustomer::where('wp_customer_id', $this->request->customer_id)->first();
 
-            $wiOrder = new WiOrder();
+            $bzOrder = new BzOrder();
 
-            if ($wiCustomer) {
-                $wiOrder->wi_customer_id = $wiCustomer->id;
+            if ($bzCustomer) {
+                $bzOrder->bz_customer_id = $bzCustomer->id;
             }
 
-            $wiOrder->wp_order_id = $this->request->id;
-            $wiOrder->cart_hash = $this->request->cart_hash;
-            $wiOrder->order_key = $this->request->order_key;
+            $bzOrder->wp_order_id = $this->request->id;
+            $bzOrder->cart_hash = $this->request->cart_hash;
+            $bzOrder->order_key = $this->request->order_key;
 
-            $wiOrder->status = 'processing';
-            $wiOrder->currency = $this->request->currency;
-            $wiOrder->discount_total = $this->request->discount_total;
-            $wiOrder->discount_tax = $this->request->discount_tax;
-            $wiOrder->shipping_total = $this->request->shipping_total;
-            $wiOrder->shipping_tax = $this->request->shipping_tax;
-            $wiOrder->total = $this->request->total;
-            $wiOrder->total_tax = $this->request->total_tax;
+            $bzOrder->status = 'processing';
+            $bzOrder->currency = $this->request->currency;
+            $bzOrder->discount_total = $this->request->discount_total;
+            $bzOrder->discount_tax = $this->request->discount_tax;
+            $bzOrder->shipping_total = $this->request->shipping_total;
+            $bzOrder->shipping_tax = $this->request->shipping_tax;
+            $bzOrder->total = $this->request->total;
+            $bzOrder->total_tax = $this->request->total_tax;
 
-            $wiOrder->payment_method = $this->request->payment_method;
-            $wiOrder->payment_method_title = $this->request->payment_method_title;
+            $bzOrder->payment_method = $this->request->payment_method;
+            $bzOrder->payment_method_title = $this->request->payment_method_title;
 
             if ($this->request->transaction_id) {
-                $wiOrder->transaction_id = $this->request->transaction_id;
+                $bzOrder->transaction_id = $this->request->transaction_id;
             }
 
             if ($this->request->date_paid) {
-                $wiOrder->date_paid = Carbon::parse($this->request->date_paid);
+                $bzOrder->date_paid = Carbon::parse($this->request->date_paid);
             }
 
             if ($this->request->date_completed) {
-                $wiOrder->date_completed = Carbon::parse($this->request->date_completed);
+                $bzOrder->date_completed = Carbon::parse($this->request->date_completed);
             }
 
-            $wiOrder->date_created = Carbon::parse($this->request->date_created_gmt);
-            $wiOrder->date_modified = Carbon::parse($this->request->date_modified_gmt);
+            $bzOrder->date_created = Carbon::parse($this->request->date_created_gmt);
+            $bzOrder->date_modified = Carbon::parse($this->request->date_modified_gmt);
 
 
-            $wiOrder->billing = $this->request->billing;
-            $wiOrder->shipping = $this->request->shipping;
-            $wiOrder->shipping_lines = $this->request->shipping_lines;
-            $wiOrder->line_items = $this->request->line_items;
-            $wiOrder->tax_lines = $this->request->tax_lines;
-            $wiOrder->fee_lines = $this->request->fee_lines;
-            $wiOrder->coupon_lines = $this->request->coupon_lines;
-            $wiOrder->meta_data = $this->request->meta_data;
+            $bzOrder->billing = $this->request->billing;
+            $bzOrder->shipping = $this->request->shipping;
+            $bzOrder->shipping_lines = $this->request->shipping_lines;
+            $bzOrder->line_items = $this->request->line_items;
+            $bzOrder->tax_lines = $this->request->tax_lines;
+            $bzOrder->fee_lines = $this->request->fee_lines;
+            $bzOrder->coupon_lines = $this->request->coupon_lines;
+            $bzOrder->meta_data = $this->request->meta_data;
 
             // save without triggering events
-            $wiOrder->saveQuietly(['timestamps' => false]);
+            $bzOrder->saveQuietly(['timestamps' => false]);
 
-            $wiOrder->refresh();
+            $bzOrder->refresh();
 
             $items = [];
 
-            // adding the order item to wi_order_items table
+            // adding the order item to bz_order_items table
             foreach ($this->request->line_items as $line_item) {
-                $item = new WiOrderItem();
+                $item = new BzOrderItem();
 
                 $item->wp_order_line_item_id = $line_item->id;
-                $item->wi_product_id = WiProduct::where('wp_product_id', $line_item->product_id)->first()->id;
+                $item->bz_product_id = BzProduct::where('wp_product_id', $line_item->product_id)->first()->id;
 
                 $item->sku = $line_item->sku;
                 $item->name = $line_item->name;
@@ -139,7 +139,7 @@ class OrderCreated implements ShouldQueue
                 $items[] = $item;
             }
 
-            $wiOrder->wiOrderItems()->saveMany($items);
+            $bzOrder->bzOrderItems()->saveMany($items);
 
             // TODO: add the order to production and shipment
             

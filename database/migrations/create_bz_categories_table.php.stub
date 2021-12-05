@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('wi_categories', function (Blueprint $table) {
+        Schema::create('bz_categories', function (Blueprint $table) {
             $table->id();
             $table->morphs('categoryable');
             $table->unsignedBigInteger('wp_product_category_id'); // WooCommerce Product Category ID
@@ -17,6 +17,6 @@ return new class extends Migration
 
     public function down()
     {
-        Schema::dropIfExists('wi_categories');
+        Schema::dropIfExists('bz_categories');
     }
 };

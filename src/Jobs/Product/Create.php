@@ -1,10 +1,10 @@
 <?php
 
-namespace Decotatoo\WoocommerceIntegration\Jobs\Product;
+namespace Decotatoo\Bz\Jobs\Product;
 
 use App\Models\ProductInCatalog;
-use Decotatoo\WoocommerceIntegration\Models\WiProduct;
-use Decotatoo\WoocommerceIntegration\Jobs\WiCategory\Create as WiCategoryCreate;
+use Decotatoo\Bz\Models\BzProduct;
+use Decotatoo\Bz\Jobs\BzCategory\Create as BzCategoryCreate;
 use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -61,8 +61,8 @@ class Create implements ShouldQueue
     public function handle()
     {
         try {
-            if ($this->product->wiProduct) {
-                throw new Exception("Product already exists in WooCommerce. product_id:{$this->product->id} -> wp_product_id:{$this->product->wiProduct->wp_product_id}");
+            if ($this->product->bzProduct) {
+                throw new Exception("Product already exists in WooCommerce. product_id:{$this->product->id} -> wp_product_id:{$this->product->bzProduct->wp_product_id}");
             }
 
             $categories = $this->getCategories();
@@ -93,12 +93,12 @@ class Create implements ShouldQueue
 
             $result = \Codexshaper\WooCommerce\Facades\Product::create($payload);
 
-            $wiProduct = new WiProduct();
-            $wiProduct->product()->associate($this->product);
-            $wiProduct->wp_product_id = $result['id'];
-            $wiProduct->wp_post_status = $result['status'];
-            $wiProduct->stock_updated_at = Carbon::now();
-            $saved = $wiProduct->save();
+            $bzProduct = new BzProduct();
+            $bzProduct->product()->associate($this->product);
+            $bzProduct->wp_product_id = $result['id'];
+            $bzProduct->wp_post_status = $result['status'];
+            $bzProduct->stock_updated_at = Carbon::now();
+            $saved = $bzProduct->save();
 
             if ($result && $saved) {
                 CalculateStock::dispatch($this->product)->onQueue('low');
@@ -120,12 +120,12 @@ class Create implements ShouldQueue
         $metadata = [];
 
         // $metadata[] = [
-        //     'key' => '_wi_product_size',
+        //     'key' => '_erp_product_size',
         //     'value' => '30cm x 30cm',
         // ];
 
         $metadata[] = [
-            'key' => '_wi_erp_season',
+            'key' => '_erp_season',
             'value' => $this->product->season,
         ];
 
@@ -142,24 +142,24 @@ class Create implements ShouldQueue
         $categories = [];
 
         // Category
-        if (!$this->product->commerceCategory->wiCategory) {
-            WiCategoryCreate::dispatch($this->product->commerceCategory)->afterCommit()->onQueue('high');
+        if (!$this->product->commerceCategory->bzCategory) {
+            BzCategoryCreate::dispatch($this->product->commerceCategory)->afterCommit()->onQueue('high');
             return null;
         }
 
         $categories[] = [
-            'id' => $this->product->commerceCategory->wiCategory->wp_product_category_id
+            'id' => $this->product->commerceCategory->bzCategory->wp_product_category_id
         ];
 
         // Festivity
         if ($this->product->festivity) {
-            if (!$this->product->festivity->wiCategory) {
-                WiCategoryCreate::dispatch($this->product->festivity)->afterCommit()->onQueue('high');
+            if (!$this->product->festivity->bzCategory) {
+                BzCategoryCreate::dispatch($this->product->festivity)->afterCommit()->onQueue('high');
                 return null;
             }
 
             $categories[] = [
-                'id' => $this->product->festivity->wiCategory->wp_product_category_id
+                'id' => $this->product->festivity->bzCategory->wp_product_category_id
             ];
         }
 

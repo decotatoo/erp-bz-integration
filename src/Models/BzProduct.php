@@ -1,6 +1,6 @@
 <?php
 
-namespace Decotatoo\WoocommerceIntegration\Models;
+namespace Decotatoo\Bz\Models;
 
 use App\Models\ProductInCatalog;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -9,11 +9,11 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * TODO:PLACEHOLDER
  */
-class WiProduct extends Model
+class BzProduct extends Model
 {
     use HasFactory;
 
-    protected $table = 'wi_products';
+    protected $table = 'bz_products';
 
     protected $timestamp = false;
 
@@ -24,6 +24,6 @@ class WiProduct extends Model
 
     public function wiOrderItems()
     {
-        return $this->hasMany(WiOrderItem::class);
+        return $this->hasMany(BzOrderItem::class);
     }
 }

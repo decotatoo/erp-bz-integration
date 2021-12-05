@@ -1,6 +1,6 @@
 <?php
 
-namespace Decotatoo\WoocommerceIntegration\Models;
+namespace Decotatoo\Bz\Models;
 
 use App\Models\ProductInCatalog;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

@@ -1,8 +1,8 @@
 <?php
 
-namespace Decotatoo\WoocommerceIntegration\Jobs\WiCategory;
+namespace Decotatoo\Bz\Jobs\BzCustomer;
 
-use Decotatoo\WoocommerceIntegration\Models\WiCategory;
+use Decotatoo\Bz\Models\BzCustomer;
 use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -11,25 +11,27 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Str;
 
-class Delete implements ShouldQueue
+class Update implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
-     * @var WiCategory
+     * The BzCustomer instance.
+     *
+     * @var BzCustomer
      */
-    protected $wiCategory;
+    protected $bzCustomer;
 
     /**
      * Create a new job instance.
      *
-     * @param WiCategory $wiCategory
      * @return void
      */
-    public function __construct($wiCategory)
+    public function __construct(BzCustomer $bzCustomer)
     {
-        $this->wiCategory = $wiCategory;
+        $this->bzCustomer = $bzCustomer;
     }
 
     /**
@@ -40,7 +42,7 @@ class Delete implements ShouldQueue
     public function middleware()
     {
         return [
-            (new WithoutOverlapping($this->wiCategory->id))->dontRelease()
+            (new WithoutOverlapping($this->bzCustomer->id))->dontRelease()
         ];
     }
 
@@ -52,16 +54,10 @@ class Delete implements ShouldQueue
     public function handle()
     {
         try {
-            if (!$this->wiCategory) {
-                throw new Exception("Commerce Category doesn't exists in WooCommerce");
-            }
-
-            $result = \Codexshaper\WooCommerce\Facades\Category::delete($this->wiCategory->wp_product_category_id, ['force' => true]);
-
-            $this->wiCategory->categoryable()->disassociate();
-            $this->wiCategory->delete();
+            
         } catch (\Throwable $th) {
             $this->fail($th->getMessage());
         }
     }
+
 }

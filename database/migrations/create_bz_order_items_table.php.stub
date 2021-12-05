@@ -8,16 +8,16 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('wi_order_items', function (Blueprint $table) {
+        Schema::create('bz_order_items', function (Blueprint $table) {
             $table->id();
 
             $table->unsignedBigInteger('wp_order_line_item_id')->nullable(); // WooCommerce Order's line item ID
 
-            $table->unsignedBigInteger('wi_order_id');
-            $table->foreign('wi_order_id')->references('id')->on('wi_orders')->onDelete('cascade');
+            $table->unsignedBigInteger('bz_order_id');
+            $table->foreign('bz_order_id')->references('id')->on('bz_orders')->onDelete('cascade');
 
-            $table->unsignedBigInteger('wi_product_id')->nullable();
-            $table->foreign('wi_product_id')->references('id')->on('wi_products')->onDelete('set null');
+            $table->unsignedBigInteger('bz_product_id')->nullable();
+            $table->foreign('bz_product_id')->references('id')->on('bz_products')->onDelete('set null');
 
             $table->integer('variation_id')->nullable();
 
@@ -41,6 +41,6 @@ return new class extends Migration
 
     public function down()
     {
-        Schema::dropIfExists('wi_order_items');
+        Schema::dropIfExists('bz_order_items');
     }
 };

@@ -1,9 +1,9 @@
 <?php
 
-namespace Decotatoo\WoocommerceIntegration\Jobs\Product;
+namespace Decotatoo\Bz\Jobs\Product;
 
 use App\Models\ProductInCatalog;
-use Decotatoo\WoocommerceIntegration\Jobs\WiCategory\Create as WiCategoryCreate;
+use Decotatoo\Bz\Jobs\BzCategory\Create as BzCategoryCreate;
 use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -60,7 +60,7 @@ class Update implements ShouldQueue
     public function handle()
     {
         try {
-            if (!$this->product->wiProduct) {
+            if (!$this->product->bzProduct) {
                 throw new Exception("Product not exists in WooCommerce. product_id:{$this->product->id}");
             }
 
@@ -88,17 +88,17 @@ class Update implements ShouldQueue
                 $payload['images'] = $this->getImages();
             }
 
-            $result = \Codexshaper\WooCommerce\Facades\Product::update($this->product->wiProduct->wp_product_id, $payload);
+            $result = \Codexshaper\WooCommerce\Facades\Product::update($this->product->bzProduct->wp_product_id, $payload);
 
             if (!$result) {
-                throw new Exception("Failed to update Product in WooCommerce. product_id:{$this->product->id} -> wp_product_id:{$this->product->wiProduct->wp_product_id}");
+                throw new Exception("Failed to update Product in WooCommerce. product_id:{$this->product->id} -> wp_product_id:{$this->product->bzProduct->wp_product_id}");
             }
 
-            $wiProduct = $this->product->wiProduct;
-            $wiProduct->wp_post_status = $publish_status;
+            $bzProduct = $this->product->bzProduct;
+            $bzProduct->wp_post_status = $publish_status;
 
-            if (!$wiProduct->save()) {
-                $wiProduct->touch();
+            if (!$bzProduct->save()) {
+                $bzProduct->touch();
             }
         } catch (\Throwable $th) {
             $this->fail($th->getMessage());
@@ -115,24 +115,24 @@ class Update implements ShouldQueue
         $categories = [];
 
         // Category
-        if (!$this->product->commerceCategory->wiCategory) {
-            WiCategoryCreate::dispatch($this->product->commerceCategory)->afterCommit()->onQueue('high');
+        if (!$this->product->commerceCategory->bzCategory) {
+            BzCategoryCreate::dispatch($this->product->commerceCategory)->afterCommit()->onQueue('high');
             return null;
         }
 
         $categories[] = [
-            'id' => $this->product->commerceCategory->wiCategory->wp_product_category_id
+            'id' => $this->product->commerceCategory->bzCategory->wp_product_category_id
         ];
 
         // Festivity
         if ($this->product->festivity) {
-            if (!$this->product->festivity->wiCategory) {
-                WiCategoryCreate::dispatch($this->product->festivity)->afterCommit()->onQueue('high');
+            if (!$this->product->festivity->bzCategory) {
+                BzCategoryCreate::dispatch($this->product->festivity)->afterCommit()->onQueue('high');
                 return null;
             }
 
             $categories[] = [
-                'id' => $this->product->festivity->wiCategory->wp_product_category_id
+                'id' => $this->product->festivity->bzCategory->wp_product_category_id
             ];
         }
 
@@ -146,7 +146,7 @@ class Update implements ShouldQueue
     {
         $images = [];
 
-        $_online_product = \Codexshaper\WooCommerce\Facades\Product::find($this->product->wiProduct->wp_product_id);
+        $_online_product = \Codexshaper\WooCommerce\Facades\Product::find($this->product->bzProduct->wp_product_id);
 
         if ($_online_product) {
             $images = $_online_product->images;
@@ -171,12 +171,12 @@ class Update implements ShouldQueue
         $metadata = [];
 
         // $metadata[] = [
-        //     'key' => '_wi_product_size',
+        //     'key' => '_erp_product_size',
         //     'value' => '30cm x 30cm',
         // ];
 
         $metadata[] = [
-            'key' => '_wi_erp_season',
+            'key' => '_erp_season',
             'value' => $this->product->season,
         ];
 

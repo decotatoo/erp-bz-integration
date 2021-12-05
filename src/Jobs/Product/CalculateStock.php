@@ -1,6 +1,6 @@
 <?php
 
-namespace Decotatoo\WoocommerceIntegration\Jobs\Product;
+namespace Decotatoo\Bz\Jobs\Product;
 
 use App\Models\ProductInCatalog;
 use Illuminate\Bus\Queueable;
@@ -53,33 +53,33 @@ class CalculateStock implements ShouldQueue
      */
     public function handle()
     {
-        if (!$this->product->wiProduct) {
+        if (!$this->product->bzProduct) {
             return;
         }
 
-        $wi_product = $this->product->wiProduct;
+        $bz_product = $this->product->bzProduct;
 
         if ($this->op !== false) {
             switch ($this->op) {
                 case 'in':
-                    $wi_product->stock_in_quantity += $this->value;
+                    $bz_product->stock_in_quantity += $this->value;
                     break;
 
                 case 'out':
-                    $wi_product->stock_out_quantity += $this->value;
+                    $bz_product->stock_out_quantity += $this->value;
                     break;
 
                 default:
                     break;
             }
         } else {
-            $wi_product->stock_in_quantity = $this->product->productStockIn->count('id');
-            $wi_product->stock_out_quantity = $this->product->productStockOut->count('id');
+            $bz_product->stock_in_quantity = $this->product->productStockIn->count('id');
+            $bz_product->stock_out_quantity = $this->product->productStockOut->count('id');
         }
 
-        $wi_product->save();
-        $wi_product->refresh();
+        $bz_product->save();
+        $bz_product->refresh();
 
-        UpdateStock::dispatch($wi_product)->onQueue('high');
+        UpdateStock::dispatch($bz_product)->onQueue('high');
     }
 }
