@@ -2,14 +2,15 @@
 
 namespace Decotatoo\Bz;
 
+use Decotatoo\Bz\Commands\BzCommand;
 use Decotatoo\Bz\Commands\Schedule\UpdateExchangeRateCommand;
 use Decotatoo\Bz\Commands\Schedule\UpdateProductCommand;
-use Spatie\LaravelPackageTools\Package;
-use Spatie\LaravelPackageTools\PackageServiceProvider;
-use Decotatoo\Bz\Commands\BzCommand;
+use Decotatoo\Bz\Commands\Task\PushProductCommand;
 use Decotatoo\Bz\Providers\EventServiceProvider;
 use Decotatoo\Bz\Services\WooCommerceApi\WooCommerceApi;
 use Decotatoo\Bz\Services\WordPressRestApi;
+use Spatie\LaravelPackageTools\Package;
+use Spatie\LaravelPackageTools\PackageServiceProvider;
 use Illuminate\Console\Scheduling\Schedule;
 
 class BzServiceProvider extends PackageServiceProvider
@@ -27,7 +28,10 @@ class BzServiceProvider extends PackageServiceProvider
                 'bz', // b2b business
                 // 'cx', // b2c consumer
             ])
-            ->hasRoute('web')
+            ->hasRoutes([
+                'api',
+                'web',
+            ])
             ->hasViews()
             ->hasMigrations([
                 'alter_many_table',
@@ -41,9 +45,10 @@ class BzServiceProvider extends PackageServiceProvider
                 'create_packing_simlulations_table',
             ])
             ->hasCommands([
+                BzCommand::class,
                 UpdateExchangeRateCommand::class,
                 UpdateProductCommand::class,
-                BzCommand::class,
+                PushProductCommand::class,
             ]);
     }
 

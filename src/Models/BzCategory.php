@@ -14,7 +14,7 @@ class BzCategory extends Model
 
     protected $table = 'bz_categories';
 
-    protected $timestamps = false;
+    public $timestamps = false;
 
     public function categoryable()
     {

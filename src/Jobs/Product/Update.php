@@ -14,9 +14,10 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Storage;
 
 /**
- * TODO:TEST
+ * TODO:FINAL-TEST
  * 
  * @task add weight attribute to product
  */
@@ -98,9 +99,7 @@ class Update implements ShouldQueue
             $bzProduct = $this->product->bzProduct;
             $bzProduct->wp_post_status = $publish_status;
 
-            if (!$bzProduct->save()) {
-                $bzProduct->touch();
-            }
+            $bzProduct->save();
         } catch (\Throwable $th) {
             $this->fail($th->getMessage());
         }
@@ -114,6 +113,10 @@ class Update implements ShouldQueue
     private function getCategories()
     {
         $categories = [];
+
+        if (!$this->product->commerceCategory) {
+            return $categories;
+        }
 
         // Category
         if (!$this->product->commerceCategory->bzCategory) {
@@ -153,7 +156,7 @@ class Update implements ShouldQueue
             $images = $_online_product->images;
         }
 
-        if ($this->product->wasChanged('pic') && $this->product->pic) {
+        if ($this->product->wasChanged('pic') && $this->product->pic && Storage::disk('public')->exists('images/product/' . $this->product->pic)) {
             $images[0] = [
                 'src' => asset('images/product/' . $this->product->pic) // absolute url of image
             ];
@@ -165,20 +168,68 @@ class Update implements ShouldQueue
     /**
      * Get the meta data for the product.
      * 
+     * @TODO: add more metadata to expose to ecommerce
+     * 
      * @return array 
      */
     private function getMetadata()
     {
         $metadata = [];
 
-        // $metadata[] = [
-        //     'key' => '_erp_product_size',
-        //     'value' => '30cm x 30cm',
-        // ];
+        $metadata[] = [
+            'key' => '_erp_size',
+            'value' => $this->product->size,
+        ];
+
+        if (substr($this->product->prod_id, 0, 2) == 'FP') {
+            $metadata[] = [
+                'key' => '_erp_chocolate_size',
+                'value' => $this->product->cho_size,
+            ];
+
+            $metadata[] = [
+                'key' => '_erp_chocolate_type',
+                'value' => $this->product->fp_cklt,
+            ];
+        }
+
+        $metadata[] = [
+            'key' => '_erp_net_weight',
+            'value' => $this->product->net_weight * (substr($this->product->prod_id, 0, 2) == 'FP' ? intval($this->product->total_box) : 1),
+        ];
+
+        $metadata[] = [
+            'key' => '_erp_gross_weight',
+            'value' => $this->product->gross_weight,
+        ];
+
+        if ($this->product->commerceCategory) {
+            $metadata[] = [
+                'key' => '_erp_industrial_use_only',
+                'value' => strpos($this->product->commerceCategory->name, 'B2B') !== false,
+            ];
+        }
 
         $metadata[] = [
             'key' => '_erp_season',
             'value' => $this->product->season,
+        ];
+
+        // Quantity per box
+        if (substr($this->product->prod_id, 0, 2) == 'FP' && strpos($this->product->qty_box, 'sheet') !== false) {
+            $_qty_per_box = strtoupper($this->product->total_box);
+        } elseif (substr($this->product->prod_id, 0, 2) == 'TR' && (strpos($this->product->prod_name, 'cd') !== false || strpos($this->product->prod_name, 'tablet') !== false)) {
+            $_qty_per_box = strtoupper($this->product->total_box);
+        } else {
+            if ($this->product->total_box && trim($this->product->total_box) != '') {
+                $_qty_per_box = strtoupper($this->product->qty_box) . " ({$this->product->total_box})";
+            } else {
+                $_qty_per_box = strtoupper($this->product->qty_box);
+            }
+        }
+        $metadata[] = [
+            'key' => '_erp_quantity_per_box',
+            'value' => $_qty_per_box,
         ];
 
         return $metadata;

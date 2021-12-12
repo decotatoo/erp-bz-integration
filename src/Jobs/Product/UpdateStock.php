@@ -27,6 +27,13 @@ class UpdateStock implements ShouldQueue, ShouldBeUnique
     protected $bz_product;
 
     /**
+     * Onhold stock of bzOrder with `pending` status.
+     * 
+     * @var int
+     */
+    protected $onhold_quantity;
+
+    /**
      * The unique ID of the job.
      *
      * @return string
@@ -41,9 +48,10 @@ class UpdateStock implements ShouldQueue, ShouldBeUnique
      *
      * @return void
      */
-    public function __construct(BzProduct $bz_product)
+    public function __construct(BzProduct $bz_product, $onhold_quantity = 0)
     {
         $this->bz_product = $bz_product;
+        $this->onhold_quantity = $onhold_quantity;
     }
 
     /**
@@ -65,12 +73,7 @@ class UpdateStock implements ShouldQueue, ShouldBeUnique
      */
     public function handle()
     {
-        // if product doesn't meet condition for public visibility, skip
-        // if ($this->bz_product->wp_post_status !== 'publish') {
-        //     return;
-        // }
-
-        $stockQuantity = $this->bz_product->stock_in_quantity - $this->bz_product->stock_out_quantity;
+        $stockQuantity = $this->bz_product->stock_in_quantity - $this->bz_product->stock_out_quantity - $this->onhold_quantity;
 
         try {
             $payload = [
@@ -84,7 +87,6 @@ class UpdateStock implements ShouldQueue, ShouldBeUnique
                 throw new Exception("Failed to update Product wp_product_id:{$this->bz_product->wp_product_id} in WooCommerce.");
             }
 
-            $this->bz_product->stock_updated_at = Carbon::now();
             $this->bz_product->save();
         } catch (\Throwable $th) {
             $this->fail($th->getMessage());

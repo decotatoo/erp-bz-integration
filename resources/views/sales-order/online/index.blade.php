@@ -74,7 +74,6 @@
                             <tr class="text-uppercase bg-lightest">
                                 <th style="min-width: 1px"><span class="text-dark">No</span></th>
                                 <th style="min-width: 25px"><span class="text-dark">SO Number</span></th>
-                                <th style="min-width: 25px"><span class="text-dark">SO Category</span></th>
                                 <th style="min-width: 20px"><span class="text-dark">Customer Name</span></th>
                                 <th style="min-width: 20px"><span class="text-dark">Delivery Date</span></th>
                                 <th style="min-width: 20px"><span class="text-dark">Product Order</span></th>
@@ -153,7 +152,22 @@
                                 <a href="/sales-order/online/edit/${value.id}" data-toggle="tooltip" data-placement="top" title="Edit" class="waves-effect waves-light btn btn-sm btn-warning-light btn-circle mx-5"><span class="icon-Write"><span class="path1"></span><span class="path2"></span></span></a>
                             `;
 
-                            let tr = $(`<tr class="${(value.qtyReleaseTotal > 0) ? `bg-success` : ``}"><td>${number}</td><td><a href="/sales-order/online/${(value.qtyReleaseTotal > 0) ? `detail-release` : `edit-release`}/${value.id}" class="text-primary text-bold">${value.so_no}</a></td><td>${value.so_category}</td><td>${value.customer_name}</td><td>${value.po_number}</td><td>${value.estimation_delivery_date}</td><td>${detailProductOrder}</td><td>${action}</td></tr>`);
+                            let tr = $(`
+                                <tr class="${(value.released == true) ? `bg-success` : ``}">
+                                    <td>${number}</td>
+                                    <td>
+                                        <a href="/sales-order/online/${(value.qtyReleaseTotal > 0) ? `detail-release` : `edit-release`}/${value.id}" class="text-primary text-bold">
+                                            ${value.so_no}
+                                        </a>
+                                    </td>
+                                    <td>${value.customer_name}</td>
+                                    <td>${value.order_date}</td>
+                                    <td>${detailProductOrder}</td>
+                                    <td>
+                                        <!-- ${action} -->
+                                    </td>
+                                </tr>
+                            `);
                             salesOrderTable.row.add(tr[0]).draw();
                             number++;
                         });

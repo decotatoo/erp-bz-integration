@@ -22,6 +22,34 @@ class PermissionSeeder extends Seeder
                 'menu_description' => 'TODO-PERMISSION-WI',
             ],
 
+            [
+                'name' => 'bin-list',
+                'modul_name' => 'Inventory',
+                'submodul_name' => 'Bin Setup',
+                'menu_description' => 'View a Bin Setup',
+            ],
+
+            [
+                'name' => 'bin-create',
+                'modul_name' => 'Inventory',
+                'submodul_name' => 'Bin Setup',
+                'menu_description' => 'Create a New Bin Setup',
+            ],
+
+            [
+                'name' => 'bin-edit',
+                'modul_name' => 'Inventory',
+                'submodul_name' => 'Bin Setup',
+                'menu_description' => 'Edit a Bin Setup',
+            ],
+
+            [
+                'name' => 'bin-delete',
+                'modul_name' => 'Inventory',
+                'submodul_name' => 'Bin Setup',
+                'menu_description' => 'Delete a Bin Setup',
+            ],
+
         ];
 
 

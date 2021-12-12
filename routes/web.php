@@ -1,9 +1,8 @@
 <?php
 
-use Decotatoo\Bz\Http\Controllers\BinPackerController;
+use Decotatoo\Bz\Http\Controllers\BinController;
 use Decotatoo\Bz\Http\Controllers\CommerceCategoryController;
 use Decotatoo\Bz\Http\Controllers\SalesOrderController;
-use Decotatoo\Bz\Http\Controllers\WebhookController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -17,12 +16,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::prefix('woocommerce')->name('woocommerce.')->group(function () {
-    // Route::post('webhook', WebhookController::class)->name('webhook');
-
-    Route::post('bin-packer', [BinPackerController::class, 'simulate'])->name('bin-packer.simulate');
-});
-
 
 Route::middleware(['web', 'auth'])->group(function () {
     // Website Management
@@ -33,6 +26,20 @@ Route::middleware(['web', 'auth'])->group(function () {
     });
 
     Route::prefix('sales-order')->name('sales-order.')->group(function () {
-        Route::get('/online', [SalesOrderController::class, 'index'])->name('online');
+        // Sales Order Online
+        Route::prefix('online')->name('online.')->group(function () {
+            Route::get('/', [SalesOrderController::class, 'index'])->name('index');
+            Route::post('/list', [SalesOrderController::class, 'list'])->name('list');
+            Route::get('/detail-product/{id}', [SalesOrderController::class, 'detailProduct'])->name('detail-product');
+
+            Route::get('/edit-release/{id}', [SalesOrderController::class, 'editRelease'])->name('edit-release');
+        });
+    });
+
+    
+    // Inventory
+    Route::prefix('inventory')->name('inventory.')->group(function () {
+        //Box Type Setup
+        Route::resource('bin', BinController::class)->except(['show']);
     });
 });

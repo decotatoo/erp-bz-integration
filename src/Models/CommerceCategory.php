@@ -17,13 +17,14 @@ class CommerceCategory extends Model
     
     protected $timestamp = false;
 
-    public function wiCategory()
+    public function bzCategory()
     {
-        return $this->morphOne(WiCategory::class, 'categoryable');  
+        return $this->morphOne(BzCategory::class, 'categoryable');  
     }
 
     public function products()
     {
         return $this->hasMany(ProductInCatalog::class);
     }
+
 }

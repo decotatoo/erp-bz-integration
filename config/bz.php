@@ -21,7 +21,7 @@ return [
         'consumer_secret' => env('BZ_WOOCOMMERCE_CONSUMER_SECRET', '__secret__'),
         'verify_ssl' => env('BZ_WOOCOMMERCE_VERIFY_SSL', false),
         'api_version' => env('BZ_WOOCOMMERCE_API_VERSION', 'v3'),
-        'wp_api' => env('WP_API_INTEGRATION', true),
+        'wp_api' => env('BZ_API_INTEGRATION', true),
         'query_string_auth' => env('BZ_WOOCOMMERCE_WP_QUERY_STRING_AUTH', false),
         'timeout' => env('BZ_WOOCOMMERCE_WP_TIMEOUT', 15),
         'header_total' => env('BZ_WOOCOMMERCE_WP_HEADER_TOTAL', 'X-WP-Total'),

@@ -13,16 +13,16 @@ return new class extends Migration
         DB::statement('ALTER TABLE box_types ALTER COLUMN lebar TYPE FLOAT USING (lebar)::float');
         DB::statement('ALTER TABLE box_types ALTER COLUMN tinggi TYPE FLOAT USING (tinggi)::float');
         
-        Schema::table('products', function (Blueprint $table) {
-            $table->unsignedFloat('packing_weight')->nullable();
-        });
+        // Schema::table('products', function (Blueprint $table) {
+        //     $table->unsignedFloat('packing_weight')->nullable();
+        // });
 
         Schema::table('festivities', function (Blueprint $table) {
             $table->string('slug')->nullable();
         });
 
         Schema::table('product_stock_outs', function (Blueprint $table) {
-            $table->nullableMorphs('ownable');
+            $table->nullableMorphs('stockable');
         });
     }
 
@@ -34,16 +34,16 @@ return new class extends Migration
             $table->string('tinggi')->change();
         });
         
-        Schema::table('products', function (Blueprint $table) {
-            $table->dropColumn('packing_weight');        
-        });
+        // Schema::table('products', function (Blueprint $table) {
+        //     $table->dropColumn('packing_weight');        
+        // });
         
         Schema::table('festivities', function (Blueprint $table) {
             $table->dropColumn('slug');
         });
         
         Schema::table('festivities', function (Blueprint $table) {
-            $table->dropMorphs('ownable');
+            $table->dropMorphs('stockable');
         });
     }
 };

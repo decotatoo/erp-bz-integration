@@ -16,9 +16,11 @@ use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 /**
- * TODO:TEST
+ * TODO:FINAL-TEST
  * 
  * @task add weight attribute to product
  */
@@ -86,11 +88,12 @@ class Create implements ShouldQueue
                 'short_description' => '',
                 'categories' => $categories,
                 'tags' => [],
-                'images' => $this->product->pic ? ['src' => asset('images/product/' . $this->product->pic)] : [],
+                'images' => $this->product->pic && Storage::disk('public')->exists('images/product/' . $this->product->pic) ? [['src' => asset('images/product/' . $this->product->pic)]] : [],
                 'meta_data' => $this->getMetadata(),
                 'manage_stock' => true,
                 'stock_quantity' => 0,
-                'status' => 'publish'
+                'status' => 'publish',
+                'weight' => $this->product->gross_weight,
             ];
 
             $result = (new Product(App::make('bz.woocommerce')))->create($payload);
@@ -99,7 +102,6 @@ class Create implements ShouldQueue
             $bzProduct->product()->associate($this->product);
             $bzProduct->wp_product_id = $result['id'];
             $bzProduct->wp_post_status = $result['status'];
-            $bzProduct->stock_updated_at = Carbon::now();
             $saved = $bzProduct->save();
 
             if ($result && $saved) {
@@ -115,20 +117,68 @@ class Create implements ShouldQueue
     /**
      * Get the meta data for the product.
      * 
+     * @TODO: add more metadata to expose to ecommerce
+     * 
      * @return array 
      */
     private function getMetadata()
     {
         $metadata = [];
 
-        // $metadata[] = [
-        //     'key' => '_erp_product_size',
-        //     'value' => '30cm x 30cm',
-        // ];
+        $metadata[] = [
+            'key' => '_erp_size',
+            'value' => $this->product->size,
+        ];
+
+        if (substr($this->product->prod_id, 0, 2) == 'FP') {
+            $metadata[] = [
+                'key' => '_erp_chocolate_size',
+                'value' => $this->product->cho_size,
+            ];
+
+            $metadata[] = [
+                'key' => '_erp_chocolate_type',
+                'value' => $this->product->fp_cklt,
+            ];
+        }
+
+        $metadata[] = [
+            'key' => '_erp_net_weight',
+            'value' => $this->product->net_weight * (substr($this->product->prod_id, 0, 2) == 'FP' ? intval($this->product->total_box) : 1),
+        ];
+
+        $metadata[] = [
+            'key' => '_erp_gross_weight',
+            'value' => $this->product->gross_weight,
+        ];
+
+        if ($this->product->commerceCategory) {
+            $metadata[] = [
+                'key' => '_erp_industrial_use_only',
+                'value' => strpos($this->product->commerceCategory->name, 'B2B') !== false,
+            ];
+        }
 
         $metadata[] = [
             'key' => '_erp_season',
             'value' => $this->product->season,
+        ];
+
+        // Quantity per box
+        if (substr($this->product->prod_id, 0, 2) == 'FP' && strpos($this->product->qty_box, 'sheet') !== false) {
+            $_qty_per_box = strtoupper($this->product->total_box);
+        } elseif (substr($this->product->prod_id, 0, 2) == 'TR' && (strpos($this->product->prod_name, 'cd') !== false || strpos($this->product->prod_name, 'tablet') !== false)) {
+            $_qty_per_box = strtoupper($this->product->total_box);
+        } else {
+            if ($this->product->total_box && trim($this->product->total_box) != '') {
+                $_qty_per_box = strtoupper($this->product->qty_box) . " ({$this->product->total_box})";
+            } else {
+                $_qty_per_box = strtoupper($this->product->qty_box);
+            }
+        }
+        $metadata[] = [
+            'key' => '_erp_quantity_per_box',
+            'value' => $_qty_per_box,
         ];
 
         return $metadata;
@@ -142,6 +192,10 @@ class Create implements ShouldQueue
     private function getCategories()
     {
         $categories = [];
+
+        if (!$this->product->commerceCategory) {
+            return $categories;
+        }
 
         // Category
         if (!$this->product->commerceCategory->bzCategory) {

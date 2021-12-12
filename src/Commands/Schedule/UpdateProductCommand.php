@@ -43,7 +43,7 @@ class UpdateProductCommand extends Command
      */
     public function handle()
     {
-        $bz_products = BzProduct::where('wp_post_status', 'publish')->get();
+        $bz_products = BzProduct::all();
 
         $this->alert('Start update product. Total: '. $bz_products->count());
 

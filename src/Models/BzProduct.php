@@ -3,6 +3,7 @@
 namespace Decotatoo\Bz\Models;
 
 use App\Models\ProductInCatalog;
+use App\Models\ProductStockOut;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -15,14 +16,14 @@ class BzProduct extends Model
 
     protected $table = 'bz_products';
 
-    protected $timestamp = false;
+    public $timestamps = false;
 
     public function product()
     {
         return $this->belongsTo(ProductInCatalog::class, 'product_id', 'id');
     }
 
-    public function wiOrderItems()
+    public function bzOrderItems()
     {
         return $this->hasMany(BzOrderItem::class);
     }

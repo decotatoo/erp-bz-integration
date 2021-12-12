@@ -8,6 +8,7 @@ use Decotatoo\Bz\Models\PackingSimulation;
 use Decotatoo\Bz\Models\BzProduct;
 use Decotatoo\Bz\Services\BinPacker\Packer;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 /**
  * TODO:PLACEHOLDER
@@ -15,13 +16,12 @@ use Illuminate\Http\Request;
 class BinPackerController extends Controller
 {
     public function __construct() {
-        $this->middleware(VerifyDwiSignature::class);
+        // $this->middleware(VerifyDwiSignature::class);
     }
 
     public function simulate(Request $request)
     {
         $request->validate([
-            'order_id' => 'required|integer',
             'items' => 'required|array',
             'items.*.id' => 'required|integer',
             'items.*.quantity' => 'required|integer',
@@ -33,7 +33,7 @@ class BinPackerController extends Controller
             $bzProduct = BzProduct::where('wp_product_id', $item['id'])->first();
             if ($bzProduct) {
                 $items[] = [
-                    'product' => $bzProduct,
+                    'product' => $bzProduct->product,
                     'quantity' => $item['quantity'],
                 ];
             }
@@ -41,17 +41,23 @@ class BinPackerController extends Controller
 
         $bins = Bin::all();
 
-        $result = Packer::pack($bins, $items);
-
-        $packingSimulation = new PackingSimulation();
-        $packingSimulation->items = $items;
-        $packingSimulation->bins = $bins;
-        $packingSimulation->result = $result;
-        $packingSimulation->save();
-
-        return response()->json([
-            'simulation_id' => $packingSimulation->id,
-            'result' => $result,
-        ]);
+        try {
+            $result = Packer::pack($bins, $items);
+            $packingSimulation = new PackingSimulation();
+            $packingSimulation->items = collect($items);
+            $packingSimulation->bins = collect($bins);
+            $packingSimulation->result = collect($result);
+            $packingSimulation->save();
+    
+            return response()->json([
+                'simulation_id' => $packingSimulation->id,
+                'result' => $result,
+            ]);
+    
+        } catch (\Throwable $th) {
+            return response()->json([
+                'error' => $th->getMessage(),
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 }

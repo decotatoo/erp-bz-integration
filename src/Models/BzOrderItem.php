@@ -2,6 +2,7 @@
 
 namespace Decotatoo\Bz\Models;
 
+use App\Models\ProductStockOut;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -22,5 +23,10 @@ class BzOrderItem extends Model
     public function bzProduct()
     {
         return $this->belongsTo(BzProduct::class, 'bz_product_id');
+    }
+
+    public function productStockOuts()
+    {
+        return $this->morphMany(ProductStockOut::class, 'stockable');
     }
 }

@@ -8,6 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
 class CalculateStock implements ShouldQueue
 {
@@ -16,7 +17,7 @@ class CalculateStock implements ShouldQueue
     /**
      * The product instance.
      *
-     * @var \App\Models\ProductInCatalog
+     * @var ProductInCatalog
      */
     protected $product;
 
@@ -54,9 +55,11 @@ class CalculateStock implements ShouldQueue
     public function handle()
     {
         if (!$this->product->bzProduct) {
+            // $this->fail('Product not found in BZ');
             return;
         }
 
+        /** @var \Decotatoo\Bz\Models\BzProduct $bz_product */
         $bz_product = $this->product->bzProduct;
 
         if ($this->op !== false) {
@@ -77,9 +80,18 @@ class CalculateStock implements ShouldQueue
             $bz_product->stock_out_quantity = $this->product->productStockOut->count('id');
         }
 
+        // Find the pending order, and deduct the stock counter
+        $pendingOrderItems = $bz_product->bzOrderItems()->whereHas('bzOrder', function ($query) {
+            $query->where('status', 'processing');
+        })->get();
+
+        $onhold_quantity = $pendingOrderItems->map(function ($item) {
+            return $item->quantity - $item->productStockOuts()->count();
+        })->sum();
+
         $bz_product->save();
         $bz_product->refresh();
 
-        UpdateStock::dispatch($bz_product)->onQueue('high');
+        UpdateStock::dispatch($bz_product, $onhold_quantity)->onQueue('high');
     }
 }

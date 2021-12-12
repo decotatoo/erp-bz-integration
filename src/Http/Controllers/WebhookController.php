@@ -48,7 +48,7 @@ class WebhookController extends Controller
      */
     protected function missingMethod($parameters = [])
     {
-        return new Response;
+        return new Response('Webhook Not Handled', 400);
     }
 
     /**

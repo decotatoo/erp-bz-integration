@@ -46,11 +46,9 @@ class Item implements BoxPackerItem
             $this->depth = $this->normalizeDimentionalValue($boxType->tinggi);
         }
 
-        if ($this->product->packing_weight) {
-            $this->weight = $this->product->packing_weight;
-        }
+        $this->weight = $this->product->gross_weight ?? 0;
 
-        $this->keep_flat = $this->product->keep_flat ?? false;
+        // $this->keep_flat = $this->product->keep_flat ?? false;
     }
 
     /**
@@ -94,12 +92,12 @@ class Item implements BoxPackerItem
     public function jsonSerialize()
     {
         return [
-            'description' => $this->description,
-            'width' => $this->width,
-            'length' => $this->length,
-            'depth' => $this->depth,
-            'weight' => $this->weight,
-            'keepFlat' => $this->keep_flat,
+            'description' => $this->getDescription(),
+            'width' => $this->getWidth(),
+            'length' => $this->getLength(),
+            'depth' => $this->getDepth(),
+            'weight' => $this->getWeight(),
+            'keepFlat' => $this->getKeepFlat(),
         ];
     }
 }
