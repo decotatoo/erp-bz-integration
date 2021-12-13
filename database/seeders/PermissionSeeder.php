@@ -50,6 +50,74 @@ class PermissionSeeder extends Seeder
                 'menu_description' => 'Delete a Bin Setup',
             ],
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            [
+                'name' => 'unit-box-list',
+                'modul_name' => 'Inventory',
+                'submodul_name' => 'Unit Boxes Setup',
+                'menu_description' => 'View a Unit Box Setup',
+            ],
+
+            [
+                'name' => 'unit-box-create',
+                'modul_name' => 'Inventory',
+                'submodul_name' => 'Unit Boxes Setup',
+                'menu_description' => 'Create a New Unit Box Setup',
+            ],
+
+            [
+                'name' => 'unit-box-edit',
+                'modul_name' => 'Inventory',
+                'submodul_name' => 'Unit Boxes Setup',
+                'menu_description' => 'Edit a Unit Box Setup',
+            ],
+
+            [
+                'name' => 'unit-box-delete',
+                'modul_name' => 'Inventory',
+                'submodul_name' => 'Unit Boxes Setup',
+                'menu_description' => 'Delete a Unit Box Setup',
+            ],
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         ];
 
 

@@ -2,12 +2,12 @@
 
 namespace Decotatoo\Bz\Http\Controllers;
 
-use Decotatoo\Bz\Models\Bin;
+use Decotatoo\Bz\Models\UnitBox;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\Rule;
 
-class BinController extends Controller
+class UnitBoxController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -17,10 +17,10 @@ class BinController extends Controller
 
     public function __construct()
     {
-        $this->middleware('permission:bin-list', ['only' => 'index']);
-        $this->middleware('permission:bin-create', ['only' => ['create', 'store']]);
-        $this->middleware('permission:bin-edit', ['only' => ['edit', 'update']]);
-        $this->middleware('permission:bin-delete', ['only' => ['destroy']]);
+        $this->middleware('permission:unit-box-list', ['only' => 'index']);
+        $this->middleware('permission:unit-box-create', ['only' => ['create', 'store']]);
+        $this->middleware('permission:unit-box-edit', ['only' => ['edit', 'update']]);
+        $this->middleware('permission:unit-box-delete', ['only' => ['destroy']]);
     }
 
     public function index()

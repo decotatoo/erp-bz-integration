@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * TODO:PLACEHOLDER
+ * Master Box
  * 
  * 
  * Dimensions is in integer milimeter.

@@ -27,7 +27,9 @@
 
 ### Simulate Bin Packing:
 
-1. [x] Bin / Masterbox management page
+1. [x] Masterbox/Bin management page
+1. [] Product's Dimension management page
+1. Product's gross acording to the Product's Dimension
 
 1. [x] on the cart page, send cart data to erp
 1. [x] simulate the bin packing and return the simulation result to cart page. the simulation also saved to erp database for future referencing

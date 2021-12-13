@@ -3,7 +3,7 @@
 @section('breadcumb')
 <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="mdi mdi-view-grid"></i></a></li>
 <li class="breadcrumb-item" aria-current="page"><a href="{{ route('inventory.index') }}">Inventory</a></li>
-<li class="breadcrumb-item" aria-current="page"><a href="{{ route('inventory.bin.index') }}">Bin</a></li>
+<li class="breadcrumb-item" aria-current="page"><a href="{{ route('inventory.bin.index') }}">Master Box</a></li>
 <li class="breadcrumb-item active" aria-current="page">Create</li>
 @endsection
 
@@ -11,7 +11,7 @@
 <div class="col-lg-6 col-12">
     <div class="box">
         <div class="box-header with-border">
-            <h4 class="box-title">Create A New Bin</h4>
+            <h4 class="box-title">Create A New Master Box</h4>
             {{-- <h4 class="box-title"></h4> --}}
         </div>
 

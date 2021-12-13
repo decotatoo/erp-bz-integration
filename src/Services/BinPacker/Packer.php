@@ -30,14 +30,32 @@ class Packer
         }
 
         return array_map(function ($packedBox) {
+            $items = [];
+
+            foreach (iterator_to_array($packedBox->getItems()) as $item) {
+                $_item = $item->jsonSerialize();
+
+                $_item['item']['id'] = $item->getItem()->product->id;
+                $_item['item']['sku'] = $_item['item']['description'];
+
+                $_item['item']['name'] = $item->getItem()->product->prod_name;
+                // $_item['item']['unit_box'] = $item->getItem()->product->unitBox;
+
+                $items[] = $_item;
+            }
+
             /** @var PackedBox $packedBox */
             return [
-                'bin' => $packedBox->getBox()->getReference(),
-                'items' => $packedBox->getItems()->asItemArray(),
+                'box' => $packedBox->getBox()->jsonSerialize(),
                 'weight' => $packedBox->getWeight(),
                 'volume' => $packedBox->getBox()->getOuterDepth() * $packedBox->getBox()->getOuterWidth() * $packedBox->getBox()->getOuterLength(),
+                'items' => $items,
             ];
 
         }, $packer->pack()->jsonSerialize());
+
+
+
+
     }
 }
