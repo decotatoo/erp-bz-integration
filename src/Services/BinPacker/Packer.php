@@ -30,32 +30,23 @@ class Packer
         }
 
         return array_map(function ($packedBox) {
-            $items = [];
+            $_packedBox = $packedBox->jsonSerialize();
+
+            $_packedBox['weight'] = $packedBox->getWeight();
+            $_packedBox['volume'] = $packedBox->getBox()->getOuterDepth() * $packedBox->getBox()->getOuterWidth() * $packedBox->getBox()->getOuterLength();
+            $_packedBox['items'] = [];
 
             foreach (iterator_to_array($packedBox->getItems()) as $item) {
                 $_item = $item->jsonSerialize();
 
                 $_item['item']['id'] = $item->getItem()->product->id;
-                $_item['item']['sku'] = $_item['item']['description'];
-
                 $_item['item']['name'] = $item->getItem()->product->prod_name;
                 // $_item['item']['unit_box'] = $item->getItem()->product->unitBox;
 
-                $items[] = $_item;
+                $_packedBox['items'][] = $_item;
             }
 
-            /** @var PackedBox $packedBox */
-            return [
-                'box' => $packedBox->getBox()->jsonSerialize(),
-                'weight' => $packedBox->getWeight(),
-                'volume' => $packedBox->getBox()->getOuterDepth() * $packedBox->getBox()->getOuterWidth() * $packedBox->getBox()->getOuterLength(),
-                'items' => $items,
-            ];
-
+            return $_packedBox;
         }, $packer->pack()->jsonSerialize());
-
-
-
-
     }
 }

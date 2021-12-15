@@ -15,10 +15,10 @@ class CommerceCategoryController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('permission:TODO-PERMISSION-WI', ['only' => 'index']);
-        $this->middleware('permission:TODO-PERMISSION-WI', ['only' => ['create', 'store']]);
-        $this->middleware('permission:TODO-PERMISSION-WI', ['only' => ['edit', 'update']]);
-        $this->middleware('permission:TODO-PERMISSION-WI', ['only' => ['destroy']]);
+        $this->middleware('permission:commerce-category-list', ['only' => 'index']);
+        $this->middleware('permission:commerce-category-create', ['only' => ['create', 'store']]);
+        $this->middleware('permission:commerce-category-edit', ['only' => ['edit', 'update']]);
+        $this->middleware('permission:commerce-category-delete', ['only' => ['destroy']]);
     }
 
     /**
@@ -67,9 +67,9 @@ class CommerceCategoryController extends Controller
 
             $category->save();
 
-            return redirect()->route('website-management.ecommerce-category.index')->with(['success' => 'New data added successfully!']);
+            return redirect()->route('website-management.commerce-category.index')->with(['success' => 'New data added successfully!']);
         } catch (\Throwable $th) {
-            return redirect()->route('website-management.ecommerce-category.index')->with(['failed' => $th->getMessage()]);
+            return redirect()->route('website-management.commerce-category.index')->with(['failed' => $th->getMessage()]);
         }
     }
 
@@ -94,7 +94,7 @@ class CommerceCategoryController extends Controller
     {
         $data['page_title'] = 'Edit Data';
         $data['category'] = $commerceCategory;
-        return view('bz::website-management.ecommerce-category.edit', $data);
+        return view('bz::website-management.commerce-category.edit', $data);
     }
 
     /**
@@ -120,9 +120,9 @@ class CommerceCategoryController extends Controller
 
             $commerceCategory->save();
 
-            return redirect()->route('website-management.ecommerce-category.index')->with(['success' => 'Data edited successfully!']);
+            return redirect()->route('website-management.commerce-category.index')->with(['success' => 'Data edited successfully!']);
         } catch (\Throwable $th) {
-            return redirect()->route('website-management.ecommerce-category.index')->with(['failed' => $th->getMessage()]);
+            return redirect()->route('website-management.commerce-category.index')->with(['failed' => $th->getMessage()]);
         }
     }
 
@@ -135,10 +135,6 @@ class CommerceCategoryController extends Controller
     public function destroy(CommerceCategory $commerceCategory)
     {
         try {
-            // $commerceCategory->products()->detach();
-            
-            // detach model from morph table of unified category
-
             $commerceCategory->delete();
             Session::flash('success', 'Commerce Category Successfully Deleted!');
 

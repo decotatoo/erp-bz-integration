@@ -250,7 +250,7 @@ class Update implements ShouldQueue
             && $this->product->season !== 'Personalize'
             && $this->product->category_prod !== null
             && ($this->product->festivity && $this->product->festivity->status === 'Yes')
-            && $this->product->catalog === 'Yes'
+            && ($this->product->season === 'Four Season' || ($this->product->commerceCatalog()->exists() && $this->product->commerceCatalog->is_published === true))
         ) {
             return 'publish';
         } else {

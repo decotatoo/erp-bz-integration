@@ -25,9 +25,9 @@ class UnitBoxController extends Controller
 
     public function index()
     {
-        $data['page_title'] = 'Master Box Setup';
-        $data['bins'] = Bin::orderBy('id','asc')->get();
-        return view('bz::inventory.bin.index', $data);
+        $data['page_title'] = 'Unit Box Setup';
+        $data['unit_boxes'] = UnitBox::orderBy('id','asc')->get();
+        return view('bz::inventory.unit-box.index', $data);
     }
 
     /**
@@ -37,8 +37,58 @@ class UnitBoxController extends Controller
      */
     public function create()
     {
-        $data['page_title'] = 'Create new Master Box';
-        return view('bz::inventory.bin.create', $data);
+        $data['page_title'] = 'Create new Unit Box';
+        return view('bz::inventory.unit-box.create', $data);
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  UnitBox  $unitBox
+     * @return \Illuminate\Http\Response
+     */
+    public function show(UnitBox $unitBox)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  UnitBox  $unitBox
+     * @return \Illuminate\Http\Response
+     */
+    public function edit(UnitBox $unitBox)
+    {
+        $data['page_title'] = 'Edit Data';
+        $data['unit_box'] = $unitBox;
+        return view('bz::inventory.unit-box.edit', $data);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  UnitBox  $unitBox
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(UnitBox $unitBox)
+    {
+        try {
+            $unitBox->delete();
+            Session::flash('success', 'Unit Box Setup Successfully Deleted!');
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Unit Box Setup successfully deleted',
+            ], 200);
+        } catch (\Throwable $th) {
+            Session::flash('failed', $th->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage(),
+            ], 200);
+        }
     }
 
     /**
@@ -50,147 +100,72 @@ class UnitBoxController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'ref' => ['required', 'string', 'unique:'. Bin::class . ',ref'],
-            'inner_width' => ['required', 'numeric'],
-            'inner_length' => ['required', 'numeric'],
-            'inner_depth' => ['required', 'numeric'],
-            'outer_width' => ['required', 'numeric'],
-            'outer_length' => ['required', 'numeric'],
-            'outer_depth' => ['required', 'numeric'],
-            'empty_weight' => ['required', 'numeric'],
-            'max_weight' => ['required', 'numeric'],
+            'width' => ['required', 'numeric'],
+            'length' => ['required', 'numeric'],
+            'height' => ['required', 'numeric'],
             'name' => ['nullable', 'string'],
             'description' => ['nullable', 'string'],
         ]);
 
         try {
 
-            $bin = new Bin();
+            $unitBox = new UnitBox();
 
-            $bin->ref = $request->ref;
-            $bin->inner_width = $request->inner_width;
-            $bin->inner_length = $request->inner_length;
-            $bin->inner_depth = $request->inner_depth;
-            $bin->outer_width = $request->outer_width;
-            $bin->outer_length = $request->outer_length;
-            $bin->outer_depth = $request->outer_depth;
-            $bin->empty_weight = $request->empty_weight;
-            $bin->max_weight = $request->max_weight;
+            $unitBox->width = $request->width;
+            $unitBox->length = $request->length;
+            $unitBox->height = $request->height;
 
             if ($request->has('name') && !empty($request->name)) {
-                $bin->name = $request->name;
+                $unitBox->name = $request->name;
             }
 
             if ($request->has('description') && !empty($request->description)) {
-                $bin->description = $request->description;
+                $unitBox->description = $request->description;
             }
 
-            $bin->save();
+            $unitBox->save();
 
-            return redirect()->route('inventory.bin.index')->with(['success' => 'New data added successfully!']);
+            return redirect()->route('inventory.unit-box.index')->with(['success' => 'New data added successfully!']);
         } catch (\Throwable $th) {
-            return redirect()->route('inventory.bin.index')->with(['failed' => $th->getMessage()]);
+            return redirect()->route('inventory.unit-box.index')->with(['failed' => $th->getMessage()]);
         }
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  Bin  $bin
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Bin $bin)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  Bin  $bin
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Bin $bin)
-    {
-        $data['page_title'] = 'Edit Data';
-        $data['bin'] = $bin;
-        return view('bz::inventory.bin.edit', $data);
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  Bin  $bin
+     * @param  UnitBox  $unitBox
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Bin $bin)
+    public function update(Request $request, UnitBox $unitBox)
     {
-        
         $request->validate([
-            'ref' => ['required', 'string', Rule::unique(Bin::class, 'ref')->ignore($bin->id)],
-            'inner_width' => ['required', 'numeric'],
-            'inner_length' => ['required', 'numeric'],
-            'inner_depth' => ['required', 'numeric'],
-            'outer_width' => ['required', 'numeric'],
-            'outer_length' => ['required', 'numeric'],
-            'outer_depth' => ['required', 'numeric'],
-            'empty_weight' => ['required', 'numeric'],
-            'max_weight' => ['required', 'numeric'],
+            'width' => ['required', 'numeric'],
+            'length' => ['required', 'numeric'],
+            'height' => ['required', 'numeric'],
             'name' => ['nullable', 'string'],
             'description' => ['nullable', 'string'],
         ]);
 
         try {
-            $bin->ref = $request->ref;
-            $bin->inner_width = $request->inner_width;
-            $bin->inner_length = $request->inner_length;
-            $bin->inner_depth = $request->inner_depth;
-            $bin->outer_width = $request->outer_width;
-            $bin->outer_length = $request->outer_length;
-            $bin->outer_depth = $request->outer_depth;
-            $bin->empty_weight = $request->empty_weight;
-            $bin->max_weight = $request->max_weight;
+            $unitBox->width = $request->width;
+            $unitBox->length = $request->length;
+            $unitBox->height = $request->height;
 
             if ($request->has('name') && !empty($request->name)) {
-                $bin->name = $request->name;
+                $unitBox->name = $request->name;
             }
 
             if ($request->has('description') && !empty($request->description)) {
-                $bin->description = $request->description;
+                $unitBox->description = $request->description;
             }
 
-            $bin->save();
+            $unitBox->save();
 
-            return redirect()->route('inventory.bin.index')->with(['success' => 'Data edited successfully!']);
+            return redirect()->route('inventory.unit-box.index')->with(['success' => 'Data edited successfully!']);
         } catch (\Throwable $th) {
-            return redirect()->route('inventory.bin.index')->with(['failed' => $th->getMessage()]);
-        }
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  Bin  $bin
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Bin $bin)
-    {
-        try {
-            $bin->delete();
-            Session::flash('success', 'Master Box Setup Successfully Deleted!');
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Master Box Setup successfully deleted',
-            ], 200);
-        } catch (\Throwable $th) {
-            Session::flash('failed', $th->getMessage());
-
-            return response()->json([
-                'success' => false,
-                'message' => $th->getMessage(),
-            ], 200);
+            return redirect()->route('inventory.unit-box.index')->with(['failed' => $th->getMessage()]);
         }
     }
 }

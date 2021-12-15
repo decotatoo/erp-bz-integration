@@ -19,6 +19,6 @@ class UnitBox extends Model
 
     public function product()
     {
-        return $this->hasMany(ProductInCatalog::class);
+        return $this->hasMany(ProductInCatalog::class, 'unit_box_id', 'id');
     }
 }

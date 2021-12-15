@@ -40,13 +40,10 @@ class PushProductCommand extends Command
      */
     public function handle()
     {
-
         $products = ProductInCatalog::query()
             ->doesntHave('bzProduct')
             ->where('category', 'catalog')
-            ->where('catalog', 'Yes')
             ->where('customer_id', null)
-            ->where('season', '!=', null)
             ->where('season', '!=', 'None')
             ->where('season', '!=', 'Personalize')
             ->whereHas('productCategory', function (Builder $query) {
@@ -55,15 +52,23 @@ class PushProductCommand extends Command
             ->whereHas('festivity', function (Builder $query) {
                 $query->where('status', 'Yes');
             })
+            ->where(function (Builder $query) {
+                $query->where('season', 'Four Season')
+                    ->orWhereHas('commerceCatalog', function (Builder $query) {
+                        $query->where('is_published', true);
+                    });
+            })
             ->get();
 
         $this->alert(sprintf('Found %d product(s) to push', $products->count()));
 
         foreach ($products as $product) {
-            $this->line(sprintf('[bz] Pushing product: %s', $product->prod_id));
-            Create::dispatch($product)->afterCommit()->onQueue('high');
+            $this->line(sprintf('[bz] Pushing product: %s (%s)', $product->prod_id, $product->prod_name));
+            
+            /** @TODO: uncomment on deploy */
+            // Create::dispatch($product)->afterCommit()->onQueue('high');
 
-            $this->newLine();
+            // $this->newLine();
         }
 
         return 0;

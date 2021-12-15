@@ -4,6 +4,7 @@ namespace Decotatoo\Bz\Services\BinPacker;
 
 use App\Models\ProductInCatalog;
 use DVDoug\BoxPacker\Item as BoxPackerItem;
+use DVDoug\BoxPacker\Rotation;
 
 class Item implements BoxPackerItem
 {
@@ -32,7 +33,10 @@ class Item implements BoxPackerItem
      */
     private $weight = 0;
 
-    private $keep_flat = false;
+    /**
+     * @var Rotation
+     */
+    private $allowedRotation;
 
     public function __construct(ProductInCatalog $product)
     {
@@ -84,9 +88,10 @@ class Item implements BoxPackerItem
         return $this->weight;
     }
 
-    public function getKeepFlat(): bool
+    public function getAllowedRotations(): int
     {
-        return $this->keep_flat;
+        return 6;
+        return $this->allowedRotation;
     }
 
     public function jsonSerialize()
@@ -97,7 +102,7 @@ class Item implements BoxPackerItem
             'length' => $this->getLength(),
             'depth' => $this->getDepth(),
             'weight' => $this->getWeight(),
-            'keepFlat' => $this->getKeepFlat(),
+            'allowedRotation' => $this->getAllowedRotations(),
         ];
     }
 }

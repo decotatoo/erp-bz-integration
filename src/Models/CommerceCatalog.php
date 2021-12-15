@@ -9,22 +9,17 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * TODO:PLACEHOLDER
  */
-class CommerceCategory extends Model
+class CommerceCatalog extends Model
 {
     use HasFactory;
 
-    protected $table = 'commerce_categories';
+    protected $table = 'commerce_catalogs';
     
     public $timestamps = false;
 
-    public function bzCategory()
-    {
-        return $this->morphOne(BzCategory::class, 'categoryable');  
-    }
-
     public function products()
     {
-        return $this->hasMany(ProductInCatalog::class, 'commerce_category_id', 'id');
+        return $this->hasMany(ProductInCatalog::class, 'commerce_catalog_id', 'id');
     }
 
 }

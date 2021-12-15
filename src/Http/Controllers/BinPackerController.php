@@ -16,7 +16,15 @@ use Illuminate\Http\Response;
 class BinPackerController extends Controller
 {
     public function __construct() {
-        // $this->middleware(VerifyDwiSignature::class);
+        $this->middleware('permission:bin-packer-visualiser', ['only' => ['visualiser']]);
+        $this->middleware(VerifyDwiSignature::class, ['only' => ['simulate']]);
+    }
+
+    public function visualiser(Request $request, PackingSimulation $packingSimulation) {
+        $data['page_title'] = 'Packing Simulation #'. $packingSimulation->id;
+        $data['packing_simulation'] = $packingSimulation;
+        
+        return view('bz::packing-management.packing-simulation.visualiser', $data);
     }
 
     public function simulate(Request $request)
@@ -52,6 +60,7 @@ class BinPackerController extends Controller
             return response()->json([
                 'simulation_id' => $packingSimulation->id,
                 'result' => $result,
+                'visualiser_url' => route('packing-management.packing-simulation.visualiser', ['packingSimulation' => $packingSimulation->id]),
             ]);
     
         } catch (\Throwable $th) {

@@ -3,6 +3,8 @@
 return [
     'base_url' => env('BZ_BASE_URL', 'http://localhost:8080'),
 
+    'dashboard_path' => env('BZ_DASHBOARD_PATH', '/wp/wp-admin/'),
+
     'rest_api' => [
         'base_path' => env('BZ_REST_BASE_PATH', '/wp-json/dwi-erp/v1'),
         'credential' => [

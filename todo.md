@@ -1,5 +1,10 @@
 # General
 
+## Catalog & Category
+
+1. [x] Catalog management (Hard-coded 2 season, Autumn-Winter + Spring-Summer)
+1. [x] Category management
+
 <!-- @TODAY -->
 ## Processing SO Online Flow
 
@@ -13,6 +18,7 @@
 1. once the AWB number and provider submitted, set the order's STATUS to "completed"
 1. show on the WooCommerce site the order status as "completed" and another another status named "delivered" with the hyperlink to courier's tracker page.
 
+<!-- @TODAY -->
 ## Reporting
 
 1. [] Report
@@ -28,14 +34,23 @@
 ### Simulate Bin Packing:
 
 1. [x] Masterbox/Bin management page
-1. [] Product's Dimension management page
-1. Product's gross acording to the Product's Dimension
+1. [x] UnitBox management page
 
 1. [x] on the cart page, send cart data to erp
 1. [x] simulate the bin packing and return the simulation result to cart page. the simulation also saved to erp database for future referencing
 1. [x] if cart page updated, repeat the step 1
 1. [x] in checkout process, include the simulation result that to be sent via webhook to erp
 1. reference the order number to bin packing simulation record
+
+1. [] rounding on the subtotal instead per bin
+
+
+e.g:
+UnitBox: P × l × t = 125 × 30 × 40
+MasterBox Outer: P × l × t = 215 × 155 × 85
+MasterBox Inner: P × l × t = 210 × 150 × 80
+Max Weight: 480
+
 
 ### Local courier
 
@@ -73,18 +88,19 @@ TBA
     - update product galery
     - SEO thing
 
+- Product Introduction (custom page)
+- field to update page and design the page
+
+
 ## Documenting the ERP integration
 
 - [] Installation
-- erd
+- ERD
 - flowchart
 - usecase
-- 
 
 ## Documenting the WooCommerce site
 
 - [] Installation
 - workflow
-
-
 

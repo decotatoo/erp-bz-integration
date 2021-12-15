@@ -1,8 +1,11 @@
 <?php
 
 use Decotatoo\Bz\Http\Controllers\BinController;
+use Decotatoo\Bz\Http\Controllers\BinPackerController;
+use Decotatoo\Bz\Http\Controllers\CommerceCatalogController;
 use Decotatoo\Bz\Http\Controllers\CommerceCategoryController;
 use Decotatoo\Bz\Http\Controllers\SalesOrderController;
+use Decotatoo\Bz\Http\Controllers\UnitBoxController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -22,6 +25,7 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::prefix('website-management')->name('website-management.')->group(function () {
 
         // commerce-category
+        Route::resource('commerce-catalog', CommerceCatalogController::class)->except(['store', 'destroy']);
         Route::resource('commerce-category', CommerceCategoryController::class);
     });
 
@@ -41,5 +45,12 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::prefix('inventory')->name('inventory.')->group(function () {
         //Box Type Setup
         Route::resource('bin', BinController::class)->except(['show']);
+        Route::resource('unit-box', UnitBoxController::class)->except(['show']);
     });
+    
+    // Packing Management
+    Route::prefix('packing-management')->name('packing-management.')->group(function () {
+        Route::get('/packing-simulation/{packingSimulation}', [BinPackerController::class, 'visualiser'])->name('packing-simulation.visualiser');
+    });
+
 });

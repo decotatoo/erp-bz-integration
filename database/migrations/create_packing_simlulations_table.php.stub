@@ -11,6 +11,9 @@ return new class extends Migration
         Schema::create('packing_simulations', function (Blueprint $table) {
             $table->id();
 
+            $table->unsignedBigInteger('bz_order_id')->nullable();
+            $table->foreign('bz_order_id')->references('id')->on('bz_orders')->onDelete('cascade');
+
             $table->json('items')->nullable();
             $table->json('bins')->nullable();
             $table->json('result')->nullable();

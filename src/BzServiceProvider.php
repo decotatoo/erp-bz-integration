@@ -34,10 +34,12 @@ class BzServiceProvider extends PackageServiceProvider
             ])
             ->hasViews()
             ->hasMigrations([
-                'alter_many_table',
                 'create_commerce_categories_table',
+                'create_commerce_catalogs_table',
                 'create_bz_categories_table',
+                'create_unit_boxes_table',
                 'create_bins_table',
+                'alter_many_table',
                 'create_bz_products_table',
                 'create_bz_customers_table',
                 'create_bz_orders_table',
