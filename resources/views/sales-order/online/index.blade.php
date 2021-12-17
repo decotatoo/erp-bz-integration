@@ -8,7 +8,16 @@
 
 @section('content')
 
+
 <div class="col-12">
+
+    <div class="d-flex flex-row justify-content-between">
+        <h4 class="box-title align-items-start flex-column">
+            Sales Order [ONLINE]
+            <small class="subtitle">A list of sales order online</small>
+        </h4>
+    </div>
+
     <div class="bg-info-light px-20 py-10 rounded mt-10">
         <div class="d-lg-flex justify-content-between align-items-center">
             <div class="col-12">
@@ -44,7 +53,7 @@
                             <select name="status" id="status" class="form-select">
                                 <option value="all" {{ (Request::get('status') == "all") ? 'selected' : ''  }}>All</option>
                                 <option value="Release" {{ (Request::get('status') == "Release") ? 'selected' : ''  }}>Release</option>
-                                <option value="NotReleasedYet" {{ (Request::get('NotReleasedYet') == "all") ? 'selected' : ''  }}>Not released yet</option>
+                                <option value="NotReleasedYet" {{ (Request::get('status') == "NotReleasedYet") ? 'selected' : ''  }}>Not released yet</option>
                             </select>
                         </div>
                     </div>

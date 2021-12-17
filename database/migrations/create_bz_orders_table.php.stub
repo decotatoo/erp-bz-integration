@@ -51,8 +51,12 @@ return new class extends Migration
 
             $table->string('customer_note')->nullable();
 
-            $table->string('awb_number')->nullable();
-            $table->boolean('released')->default(false);
+            $table->timestamp('date_released')->nullable();
+
+            $table->string('shipment_provider')->nullable();
+            $table->string('shipment_tracking_number')->nullable();
+            $table->timestamp('shipment_shipped_date')->nullable();
+            $table->timestamp('shipment_delivered_date')->nullable();
 
             $table->index('wp_order_id');
         });

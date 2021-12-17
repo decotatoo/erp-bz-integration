@@ -26,7 +26,6 @@ class BzServiceProvider extends PackageServiceProvider
             ->name('bz')
             ->hasConfigFile([
                 'bz', // b2b business
-                // 'cx', // b2c consumer
             ])
             ->hasRoutes([
                 'api',

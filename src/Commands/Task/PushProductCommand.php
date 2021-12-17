@@ -66,9 +66,8 @@ class PushProductCommand extends Command
             $this->line(sprintf('[bz] Pushing product: %s (%s)', $product->prod_id, $product->prod_name));
             
             /** @TODO: uncomment on deploy */
-            // Create::dispatch($product)->afterCommit()->onQueue('high');
-
-            // $this->newLine();
+            Create::dispatch($product)->afterCommit()->onQueue('high');
+            $this->newLine();
         }
 
         return 0;

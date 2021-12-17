@@ -13,7 +13,6 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Str;
 
 class Update implements ShouldQueue
 {
@@ -55,11 +54,12 @@ class Update implements ShouldQueue
      */
     public function handle()
     {
-
         try {
             $payload = [
                 'status' => $this->bzOrder->status,
             ];
+
+            // TODO: check and add the AWB to the payload.
             
             $result = (new Order(App::make('bz.woocommerce')))->update($this->bzOrder->wp_order_id, $payload);
 

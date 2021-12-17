@@ -21,7 +21,8 @@ class SalesOrderController extends Controller
         return view('bz::sales-order.online.index', $data);
     }
 
-    function list(Request $request) {
+    public function list(Request $request)
+    {
         try {
             $start = date('Y-m-d', strtotime($request->startDate));
             $end = date('Y-m-d', strtotime($request->endDate));

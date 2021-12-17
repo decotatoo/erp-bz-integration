@@ -34,8 +34,8 @@ class ProductObserver
             && $productInCatalog->season !== 'None'
             && $productInCatalog->season !== 'Personalize'
             && $productInCatalog->category_prod !== null
-            && ($productInCatalog->festivity && $productInCatalog->festivity->status === 'Yes')
-            && $productInCatalog->catalog === 'Yes'
+            && ($productInCatalog->festivity->exists() && $productInCatalog->festivity->status === 'Yes')
+            && ($productInCatalog->season === 'Four Season' || ($productInCatalog->commerceCatalog()->exists() && $productInCatalog->commerceCatalog->is_published === true))
         ) {
             Create::dispatch($productInCatalog)->afterCommit()->onQueue('default');
         }

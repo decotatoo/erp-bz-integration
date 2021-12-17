@@ -23,40 +23,40 @@
   },
   "license": "MIT",
   "autoload": {
-      "psr-4": {
-          "Decotatoo\\Bz\\": "src/",
-          "Decotatoo\\Bz\\Database\\Factories\\": "database/factories",
-          "Decotatoo\\Bz\\Database\\Seeders\\": "database/seeders/"
-      }
+    "psr-4": {
+      "Decotatoo\\Bz\\": "src/",
+      "Decotatoo\\Bz\\Database\\Factories\\": "database/factories",
+      "Decotatoo\\Bz\\Database\\Seeders\\": "database/seeders/"
+    }
   },
   "autoload-dev": {
-      "psr-4": {
-          "Decotatoo\\Bz\\Tests\\": "tests"
-      }
+    "psr-4": {
+      "Decotatoo\\Bz\\Tests\\": "tests"
+    }
   },
   "scripts": {
-      "phpstan": "vendor/bin/phpstan analyse",
-      "test": "vendor/bin/pest",
-      "test-coverage": "vendor/bin/pest coverage"
+    "phpstan": "vendor/bin/phpstan analyse",
+    "test": "vendor/bin/pest",
+    "test-coverage": "vendor/bin/pest coverage"
   },
   "authors": [
-      {
-          "name": "decotatoo",
-          "email": "it@deco-tatoo.com"
-      }
+    {
+      "name": "decotatoo",
+      "email": "it@deco-tatoo.com"
+    }
   ],
   "config": {
-      "sort-packages": true
+    "sort-packages": true
   },
   "extra": {
-      "laravel": {
-          "providers": [
-              "Decotatoo\\Bz\\BzServiceProvider"
-          ],
-          "aliases": {
-              "Bz": "Decotatoo\\Bz\\BzFacade"
-          }
+    "laravel": {
+      "providers": [
+        "Decotatoo\\Bz\\BzServiceProvider"
+      ],
+      "aliases": {
+        "Bz": "Decotatoo\\Bz\\BzFacade"
       }
+    }
   },
   "minimum-stability": "dev",
   "prefer-stable": true,
