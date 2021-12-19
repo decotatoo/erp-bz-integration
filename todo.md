@@ -40,7 +40,7 @@
 - [x] simulate the bin packing and return the simulation result to cart page. the simulation also saved to erp database for future referencing
 - [x] if cart page updated, repeat the step 1
 - [x] in checkout process, include the simulation result that to be sent via webhook to erp
-- reference the order number to bin packing simulation record
+- [ ] reference the order number to bin packing simulation record
 
 - [ ] rounding on the subtotal instead per bin (WooCommerce Side)
 
@@ -104,3 +104,6 @@ TBA
 - [ ] Installation
 - workflow
 
+# Latest
+
+- Migrate old customer and order record

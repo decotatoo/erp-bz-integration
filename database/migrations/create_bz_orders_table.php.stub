@@ -12,16 +12,19 @@ return new class extends Migration
             $table->id();
 
             $table->unsignedBigInteger('wp_order_id')->nullable(); // WooCommerce Order ID
+            $table->unsignedBigInteger('bz_customer_id')->nullable();
+            $table->foreign('bz_customer_id')->references('id')->on('bz_customers')->onDelete('set null');
 
             $table->string('uid')->unique(); // column UID is a Sales order number with format "SOOLYY-MMXXXX" where "SOOL" is the stand for "Sales Order Online", "YY" is the year of the order and "XXXX" is the order line number. Example: "SOOL19-020001"
             $table->string('cart_hash')->nullable();
             $table->string('order_key')->nullable();
-            
-            $table->unsignedBigInteger('bz_customer_id')->nullable();
-            $table->foreign('bz_customer_id')->references('id')->on('bz_customers')->onDelete('set null');
-
             $table->string('status')->default('pending');
             $table->string('currency')->default('IDR');
+            $table->string('payment_method')->nullable();
+            $table->string('payment_method_title')->nullable();
+            $table->string('transaction_id')->nullable();
+            $table->string('customer_note')->nullable();
+
             $table->float('discount_total')->default(0);
             $table->float('discount_tax')->default(0);
             $table->float('shipping_total')->default(0);
@@ -29,16 +32,6 @@ return new class extends Migration
             $table->float('cart_tax')->default(0);
             $table->float('total');
             $table->float('total_tax')->default(0);
-
-            $table->string('payment_method')->nullable();
-            $table->string('payment_method_title')->nullable();
-            $table->string('transaction_id')->nullable();
-
-            $table->timestamp('date_paid')->nullable();
-            $table->timestamp('date_completed')->nullable();
-            
-            $table->timestamp('date_created')->nullable();
-            $table->timestamp('date_modified')->nullable();
 
             $table->json('billing')->nullable();
             $table->json('shipping')->nullable();
@@ -48,15 +41,20 @@ return new class extends Migration
             $table->json('tax_lines')->nullable();
             $table->json('shipping_lines')->nullable();
             $table->json('coupon_lines')->nullable();
+            
+            $table->timestamp('date_created')->nullable();
+            $table->timestamp('date_modified')->nullable();
 
-            $table->string('customer_note')->nullable();
+            $table->timestamp('date_paid')->nullable();
+            $table->timestamp('date_completed')->nullable();
 
             $table->timestamp('date_released')->nullable();
 
+            $table->timestamp('date_shipment_shipped')->nullable();
+            $table->timestamp('date_shipment_delivered')->nullable();
+
             $table->string('shipment_provider')->nullable();
             $table->string('shipment_tracking_number')->nullable();
-            $table->timestamp('shipment_shipped_date')->nullable();
-            $table->timestamp('shipment_delivered_date')->nullable();
 
             $table->index('wp_order_id');
         });
