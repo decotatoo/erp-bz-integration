@@ -16,6 +16,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class OrderCreated implements ShouldQueue
@@ -25,7 +26,7 @@ class OrderCreated implements ShouldQueue
     /**
      * The request instance.
      * 
-     * @var Request
+     * @var object
      */
     protected $request;
 
@@ -34,21 +35,9 @@ class OrderCreated implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(Request $request)
+    public function __construct($request)
     {
         $this->request = $request;
-    }
-
-    /**
-     * Get the middleware the job should pass through.
-     *
-     * @return array
-     */
-    public function middleware()
-    {
-        return [
-            (new WithoutOverlapping($this->request->id))->dontRelease()
-        ];
     }
 
     /**
@@ -59,20 +48,30 @@ class OrderCreated implements ShouldQueue
     public function handle()
     {
         try {
+            $bzOrder = BzOrder::where('wp_order_id', $this->request->id)->first();
+
+            if (!$bzOrder) {
+                $bzOrder = new BzOrder();
+                $bzOrder->wp_order_id = $this->request->id;
+
+                // $uid is a Sales order number with format "SOOLYY-MMXXXX" where "SOOL" is the stand for "Sales Order Online", "YY" is the year of the order and "XXXX" is the order line number. Example: "SOOL19-020001"
+                $prefix = sprintf('SOOL%s', Carbon::now()->format('YY-MM'));
+                $next_increment = BzOrder::where('uid', 'like', $prefix.'%')->count() + 1;
+
+                $bzOrder->uid = sprintf('%s-%04d', $prefix, $next_increment);
+            }
+
             /** @var BzCustomer $bzCustomer */
             $bzCustomer = BzCustomer::where('wp_customer_id', $this->request->customer_id)->first();
-
-            $bzOrder = new BzOrder();
 
             if ($bzCustomer) {
                 $bzOrder->bz_customer_id = $bzCustomer->id;
             }
 
-            $bzOrder->wp_order_id = $this->request->id;
             $bzOrder->cart_hash = $this->request->cart_hash;
             $bzOrder->order_key = $this->request->order_key;
 
-            $bzOrder->status = 'processing';
+            $bzOrder->status = $this->request->status;
             $bzOrder->currency = $this->request->currency;
             $bzOrder->discount_total = $this->request->discount_total;
             $bzOrder->discount_tax = $this->request->discount_tax;
@@ -88,6 +87,9 @@ class OrderCreated implements ShouldQueue
                 $bzOrder->transaction_id = $this->request->transaction_id;
             }
 
+            $bzOrder->date_created = Carbon::parse($this->request->date_created_gmt);
+            $bzOrder->date_modified = Carbon::parse($this->request->date_modified_gmt);
+
             if ($this->request->date_paid) {
                 $bzOrder->date_paid = Carbon::parse($this->request->date_paid);
             }
@@ -95,10 +97,6 @@ class OrderCreated implements ShouldQueue
             if ($this->request->date_completed) {
                 $bzOrder->date_completed = Carbon::parse($this->request->date_completed);
             }
-
-            $bzOrder->date_created = Carbon::parse($this->request->date_created_gmt);
-            $bzOrder->date_modified = Carbon::parse($this->request->date_modified_gmt);
-
 
             $bzOrder->billing = $this->request->billing;
             $bzOrder->shipping = $this->request->shipping;
@@ -141,9 +139,10 @@ class OrderCreated implements ShouldQueue
 
             $bzOrder->bzOrderItems()->saveMany($items);
 
-            // TODO: add the order to production and shipment
+            // add the order release
             
         } catch (\Throwable $th) {
+            Log::error($th->getMessage());
             $this->fail($th->getMessage());
         }
     }

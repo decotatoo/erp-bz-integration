@@ -31,6 +31,8 @@ APP_URL=
 
 BZ_BASE_URL="http://localhost:8080"
 
+BZ_DASHBOARD_PATH="/wp/wp-admin/"
+
 BZ_REST_BASE_PATH="/wp-json/dwi-erp/v1"
 BZ_REST_USERNAME=
 BZ_REST_PASSWORD=

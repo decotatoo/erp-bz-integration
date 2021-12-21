@@ -59,7 +59,7 @@
                     </div>
     
                     <div class="text-end mt-20">
-                        @if (auth()->user()->can('TODO-PERMISSION-WI'))
+                        @if (auth()->user()->can('journal-create'))
                             <a href="#" class="btn btn-warning btn-rounded" onclick="showFilterdData()"><i class="fa fa-eye"></i> Show</a>
                         @endif
                     </div>

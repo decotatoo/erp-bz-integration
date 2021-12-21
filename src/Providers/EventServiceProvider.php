@@ -8,12 +8,14 @@ use App\Models\ProductInCatalog as Product;
 use Decotatoo\Bz\Models\CommerceCategory;
 use Decotatoo\Bz\Models\BzCustomer;
 use Decotatoo\Bz\Models\BzOrder;
+use Decotatoo\Bz\Models\BzProduct;
 use Decotatoo\Bz\Observers\CommerceCategoryObserver;
 use Decotatoo\Bz\Observers\ExchangeRateObserver;
 use Decotatoo\Bz\Observers\FestivityObserver;
 use Decotatoo\Bz\Observers\ProductObserver;
 use Decotatoo\Bz\Observers\BzCustomerObserver;
 use Decotatoo\Bz\Observers\BzOrderObserver;
+use Decotatoo\Bz\Observers\BzProductObserver;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
 class EventServiceProvider extends ServiceProvider
@@ -34,7 +36,7 @@ class EventServiceProvider extends ServiceProvider
         ExchangeRate::observe(ExchangeRateObserver::class);
         Festivity::observe(FestivityObserver::class);
         Product::observe(ProductObserver::class);
-
+        BzProduct::observe(BzProductObserver::class);
         BzCustomer::observe(BzCustomerObserver::class);
         BzOrder::observe(BzOrderObserver::class);
     }

@@ -18,7 +18,7 @@ return [
     ],
 
     'woocommerce' => [
-        'store_url' => config('bz.base_url'),
+        'store_url' => env('BZ_BASE_URL', 'http://localhost:8080'),
         'consumer_key' => env('BZ_WOOCOMMERCE_CONSUMER_KEY', '__key__'),
         'consumer_secret' => env('BZ_WOOCOMMERCE_CONSUMER_SECRET', '__secret__'),
         'verify_ssl' => env('BZ_WOOCOMMERCE_VERIFY_SSL', false),

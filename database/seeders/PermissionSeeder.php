@@ -16,14 +16,6 @@ class PermissionSeeder extends Seeder
     {
         $permissions = [
             [
-                'name' => 'TODO-PERMISSION-WI',
-                'modul_name' => 'TODO-PERMISSION-WI',
-                'submodul_name' => 'TODO-PERMISSION-WI',
-                'menu_description' => 'TODO-PERMISSION-WI',
-            ],
-
-            
-            [
                 'name' => 'bin-packer-visualiser',
                 'modul_name' => 'Packing Management',
                 'submodul_name' => 'Bin Packer',
@@ -137,29 +129,6 @@ class PermissionSeeder extends Seeder
                 'submodul_name' => 'Website Catalog',
                 'menu_description' => 'Delete a Website Catalog',
             ],
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
         ];
 

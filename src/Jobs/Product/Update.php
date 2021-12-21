@@ -249,8 +249,14 @@ class Update implements ShouldQueue
             && $this->product->season !== 'None'
             && $this->product->season !== 'Personalize'
             && $this->product->category_prod !== null
-            && ($this->product->festivity && $this->product->festivity->status === 'Yes')
-            && ($this->product->season === 'Four Season' || ($this->product->commerceCatalog()->exists() && $this->product->commerceCatalog->is_published === true))
+            && strpos($this->product->category_prod, 'PERSONALIZE') === false
+            && (
+                (
+                    $this->product->season === 'Four Season'
+                    || ($this->product->commerceCatalog()->exists() && $this->product->commerceCatalog->is_published === true)
+                )
+                && (!$this->product->festivity()->exists() || $this->product->festivity->status === 'Yes') 
+            )
         ) {
             return 'publish';
         } else {

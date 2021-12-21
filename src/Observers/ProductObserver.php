@@ -5,6 +5,7 @@ namespace Decotatoo\Bz\Observers;
 use App\Models\ProductInCatalog;
 use Decotatoo\Bz\Jobs\Product\Create;
 use Decotatoo\Bz\Jobs\Product\Update;
+use Illuminate\Support\Facades\Log;
 
 /**
  * TODO:PLACEHOLDER
@@ -34,9 +35,16 @@ class ProductObserver
             && $productInCatalog->season !== 'None'
             && $productInCatalog->season !== 'Personalize'
             && $productInCatalog->category_prod !== null
-            && ($productInCatalog->festivity->exists() && $productInCatalog->festivity->status === 'Yes')
-            && ($productInCatalog->season === 'Four Season' || ($productInCatalog->commerceCatalog()->exists() && $productInCatalog->commerceCatalog->is_published === true))
+            && strpos($productInCatalog->category_prod, 'PERSONALIZE') === false
+            && (
+                (
+                    $productInCatalog->season === 'Four Season'
+                    || ($productInCatalog->commerceCatalog()->exists() && $productInCatalog->commerceCatalog->is_published === true)
+                )
+                && (!$productInCatalog->festivity()->exists() || $productInCatalog->festivity->status === 'Yes') 
+            )
         ) {
+            Log::debug(__CLASS__ . '::' . __FUNCTION__ . '() - ' . $productInCatalog->id);
             Create::dispatch($productInCatalog)->afterCommit()->onQueue('default');
         }
     }

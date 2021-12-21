@@ -5,12 +5,14 @@ namespace Decotatoo\Bz\Http\Controllers;
 use Decotatoo\Bz\Http\Middleware\VerifyWebhookSignature;
 use Decotatoo\Bz\Jobs\Webhook\CustomerCreated;
 use Decotatoo\Bz\Jobs\Webhook\OrderCreated;
+use Decotatoo\Bz\Jobs\Webhook\OrderUpdated;
 use Decotatoo\Bz\Models\BzCustomer;
 use Decotatoo\Bz\Models\BzOrder;
 use Decotatoo\Bz\Models\BzProduct;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -108,17 +110,13 @@ class WebhookController extends Controller
         /** @var BzCustomer $bzCustomer */
         $bzCustomer = BzCustomer::where('wp_customer_id', $request->id)->first();
 
-        if (!$bzCustomer) {
-            $bzCustomer = new BzCustomer();
-            $bzCustomer->wp_customer_id = $request->id;
-        } else {
+        if ($bzCustomer) {
             $this->validate($request, [
                 'email' => ['required', 'email', 'unique:' . BzCustomer::class . ',email,' . $bzCustomer->id],
             ]);
         }
 
-        // Passing the request object or the request's  input?
-        CustomerCreated::dispatch($bzCustomer, $request)->afterCommit()->onQueue('webhook');
+        CustomerCreated::dispatch((object) $request->all())->afterCommit()->onQueue('webhook');
 
         return $this->successMethod();
     }
@@ -131,34 +129,12 @@ class WebhookController extends Controller
 
         $bzProduct = BzProduct::where('wp_product_id', $request->input('id'))->first();
 
-        $bzProduct->delete();
+        if ($bzProduct) {
+            $bzProduct->delete();
+        }
 
         return $this->successMethod();
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -182,15 +158,34 @@ class WebhookController extends Controller
             'status' => 'required',
         ]);
 
-        // Passing the request object or the request's  input?
-        OrderCreated::dispatch($request)->afterCommit()->onQueue('webhook');
+        if (
+            $request->status === 'processing'
+            || $request->status === 'completed'
+        ) {
+            OrderCreated::dispatch((object) $request->all())->afterCommit()->onQueue('webhook');
+        }
 
         return $this->successMethod();
     }
 
     protected function handleOrderUpdated(Request $request)
     {
-        // $bzOrder->saveSilently();
-        // return $this->successMethod();
+        $request->validate([
+            'id' => 'required|integer',
+            'cart_hash' => 'required|string',
+            'order_key' => 'required|string',
+            'status' => 'required',
+        ]);
+
+        /** @var BzOrder $bzOrder */
+        $bzOrder = BzOrder::where('wp_order_id', $request->id)->first();
+
+        if (!$bzOrder) {
+            return $this->handleOrderCreated($request);
+        } else {
+            OrderUpdated::dispatch((object) $request->all())->afterCommit()->onQueue('webhook');
+
+            return $this->successMethod();
+        }
     }
 }

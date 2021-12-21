@@ -12,7 +12,10 @@ class SalesOrderController extends Controller
 {
     public function __construct()
     {
-        // $this->middleware('permission:TODO-PERMISSION-WI', ['only' => ['index']]);
+        /**
+         * @TODO: Check if user has permission to access this page
+         */
+        // $this->middleware('permission:TODO-PERMISSION', ['only' => ['index']]);
     }
 
     public function index()

@@ -42,25 +42,21 @@ class Item implements BoxPackerItem
     {
         $this->product = $product;
 
-        if ($this->product->boxType) {
-            $boxType = $this->product->boxType;
+        if ($this->product->unitBox()->exists()) {
+            $dimension = $this->product->unitBox;
+            
+            $this->width = $dimension->width;
+            $this->length = $dimension->length;
+            $this->depth = $dimension->height;
+        } elseif ($this->product->boxType()->exists()) {
+            $dimension = $this->product->boxType;
 
-            $this->width = $this->normalizeDimentionalValue($boxType->lebar);
-            $this->length = $this->normalizeDimentionalValue($boxType->panjang);
-            $this->depth = $this->normalizeDimentionalValue($boxType->tinggi);
+            $this->width = intval($dimension->lebar * 10);
+            $this->length = intval($dimension->panjang * 10);
+            $this->depth = intval($dimension->tinggi * 10);
         }
 
-        $this->weight = $this->product->gross_weight ?? 0;
-
-        // $this->keep_flat = $this->product->keep_flat ?? false;
-    }
-
-    /**
-     * Convert the dimentional value from cm to mm
-     */
-    private function normalizeDimentionalValue($value): int
-    {
-        return intval($value * 10);
+        $this->weight = $this->product->packed_weight ?? $this->product->gross_weight;
     }
 
     public function getDescription(): string

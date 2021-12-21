@@ -14,6 +14,8 @@ class BzCustomer extends Model
 
     protected $table = 'bz_customers';
 
+    public $timestamps = false;
+
     public function bzOrders()
     {
         return $this->hasMany(BzOrder::class);

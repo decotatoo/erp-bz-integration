@@ -14,7 +14,8 @@ class PushProductCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'bz:task:push-product';
+    protected $signature = 'bz:task:push-product 
+                            {--dry-run : Run the command in dry-run mode}';
 
     /**
      * The console command description.
@@ -49,13 +50,18 @@ class PushProductCommand extends Command
             ->whereHas('productCategory', function (Builder $query) {
                 $query->where('category', 'NOT LIKE', '%PERSONALIZE%');
             })
-            ->whereHas('festivity', function (Builder $query) {
-                $query->where('status', 'Yes');
-            })
             ->where(function (Builder $query) {
-                $query->where('season', 'Four Season')
-                    ->orWhereHas('commerceCatalog', function (Builder $query) {
-                        $query->where('is_published', true);
+                $query->where(function (Builder $query) {
+                    $query->where('season', 'Four Season')
+                        ->orWhereHas('commerceCatalog', function (Builder $query) {
+                            $query->where('is_published', true);
+                        });
+                })
+                    ->where(function (Builder $query) {
+                        $query->whereDoesntHave('festivity')
+                            ->orWhereHas('festivity', function (Builder $query) {
+                                $query->where('status', 'Yes');
+                            });
                     });
             })
             ->get();
@@ -64,10 +70,10 @@ class PushProductCommand extends Command
 
         foreach ($products as $product) {
             $this->line(sprintf('[bz] Pushing product: %s (%s)', $product->prod_id, $product->prod_name));
-            
-            /** @TODO: uncomment on deploy */
-            Create::dispatch($product)->afterCommit()->onQueue('high');
-            $this->newLine();
+
+            if (!$this->option('dry-run')) {
+                Create::dispatch($product)->afterCommit()->onQueue('default');
+            }
         }
 
         return 0;

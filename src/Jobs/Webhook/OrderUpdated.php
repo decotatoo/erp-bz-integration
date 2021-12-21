@@ -16,6 +16,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 /**
@@ -30,7 +31,7 @@ class OrderUpdated implements ShouldQueue
     /**
      * The request instance.
      * 
-     * @var Request
+     * @var object
      */
     protected $request;
 
@@ -39,21 +40,9 @@ class OrderUpdated implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(Request $request)
+    public function __construct($request)
     {
         $this->request = $request;
-    }
-
-    /**
-     * Get the middleware the job should pass through.
-     *
-     * @return array
-     */
-    public function middleware()
-    {
-        return [
-            (new WithoutOverlapping($this->request->id))->dontRelease()
-        ];
     }
 
     /**
@@ -64,14 +53,21 @@ class OrderUpdated implements ShouldQueue
     public function handle()
     {
         try {
-            /** @var BzCustomer $bzCustomer */
-            $bzCustomer = BzCustomer::where('wp_customer_id', $this->request->customer_id)->first();
-
             $bzOrder = BzOrder::where('wp_order_id', $this->request->id)->first();
 
             if (!$bzOrder) {
                 throw new Exception("Order with wp_order_id:{$this->request->id} not found");
             }
+
+            if (
+                $bzOrder->status === 'completed'
+                && $bzOrder->released_date
+            ) {
+                throw new Exception("Order with wp_order_id:{$this->request->id} already released");
+            }
+
+            /** @var BzCustomer $bzCustomer */
+            $bzCustomer = BzCustomer::where('wp_customer_id', $this->request->customer_id)->first();
 
             if ($bzCustomer) {
                 $bzOrder->bz_customer_id = $bzCustomer->id;
@@ -107,7 +103,6 @@ class OrderUpdated implements ShouldQueue
 
             $bzOrder->date_created = Carbon::parse($this->request->date_created_gmt);
             $bzOrder->date_modified = Carbon::parse($this->request->date_modified_gmt);
-
 
             $bzOrder->billing = $this->request->billing;
             $bzOrder->shipping = $this->request->shipping;
@@ -182,12 +177,8 @@ class OrderUpdated implements ShouldQueue
 
             $bzOrder->refresh();
 
-            // if ($bzOrder->status !== $this->request->status) {
-            //     if ($this->request->status === 'completed') {
-            //         // TODO: add the order to production and shipment
-            //     }
-            // }
         } catch (\Throwable $th) {
+            Log::error($th->getMessage());
             $this->fail($th->getMessage());
         }
     }
