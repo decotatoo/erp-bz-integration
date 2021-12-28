@@ -130,6 +130,25 @@ class PermissionSeeder extends Seeder
                 'menu_description' => 'Delete a Website Catalog',
             ],
 
+
+
+
+
+
+
+
+
+
+
+
+
+            [
+                'name' => 'sales-order-online-list',
+                'modul_name' => 'Sales Order',
+                'submodul_name' => 'Sales Order [ONLINE]',
+                'menu_description' => 'View the Sales Order [ONLINE] list',
+            ],
+
         ];
 
 

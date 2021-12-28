@@ -15,6 +15,16 @@ class BzOrderItem extends Model
 
     protected $table = 'bz_order_items';
 
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'taxes' => 'array',
+        'meta_data' => 'array',
+    ];
+
     public function bzOrder()
     {
         return $this->belongsTo(BzOrder::class, 'bz_order_id');

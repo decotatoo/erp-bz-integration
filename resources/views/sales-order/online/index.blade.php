@@ -46,14 +46,26 @@
                             
                             <input type="date" class="form-control" id="end_date" name="end_date" value="{{ Request::get('end_date') ?? date('Y-m-t') }}" placeholder="Start Date">
                         </div>
+
+                        <div class="form-group" style="margin-right: 5px">
+                            <label for="date_type" class="form-label">Date based on</label>
+                            <select name="date_type" id="date_type" class="form-select">
+                                <option value="date_created">Creation</option>
+                                <option value="date_paid">Payment date</option>
+                                <option value="date_completed">Order Completed</option>
+                                <option value="date_released">Order Released</option>
+                                <option value="date_shipment_shipped">Order Shipped</option>
+                                {{-- <option value="date_shipment_delivered">Order Delivered</option> --}}
+                            </select>
+                        </div>
+
     
                         <div class="form-group" style="margin-right: 5px">
-                            <label for="status" class="form-label">Status</label>
-        
-                            <select name="status" id="status" class="form-select">
-                                <option value="all" {{ (Request::get('status') == "all") ? 'selected' : ''  }}>All</option>
-                                <option value="Release" {{ (Request::get('status') == "Release") ? 'selected' : ''  }}>Release</option>
-                                <option value="NotReleasedYet" {{ (Request::get('status') == "NotReleasedYet") ? 'selected' : ''  }}>Not released yet</option>
+                            <label for="order_status" class="form-label">Status</label>
+                            <select name="order_status" id="order_status" class="form-select">
+                                <option value="">All</option>
+                                <option value="released">Released</option>
+                                <option value="notreleasedyet">Not released yet</option>
                             </select>
                         </div>
                     </div>

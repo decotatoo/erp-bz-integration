@@ -1,5 +1,4 @@
-
-@if ($status == 'report')  
+@if ($status == 'report')
 <div class="table-responsive ">
     <table class="table " id="productLists" width="100%">
         <thead>
@@ -24,7 +23,7 @@
                 <td>{{ $item->qty_order }}</td>
                 <td>{{ $item->sub_total }}</td>
             </tr>
-        @endforeach
+            @endforeach
         </tbody>
     </table>
 </div>
@@ -51,11 +50,11 @@
                 <td>{{ $item->qty_order }}</td>
                 <td>{{ $item->qty_release }}</td>
             </tr>
-        @endforeach
+            @endforeach
         </tbody>
     </table>
 </div>
-@else 
+@else
 <div class="table-responsive ">
     <table class="table " id="productLists" width="100%">
         <thead>
@@ -68,14 +67,14 @@
         </thead>
         <tbody>
             @foreach ($products as $item)
-                <tr>
-                    <td>{{ $loop->iteration }}</td>
-                    <td>{{ $item->code }}</td>
-                    <td>{{ $item->name }}</td>
-                    <td>{{ $item->size }}</td>
-                    <td>{{ $item->qty_order }}</td>
-                    <td>{{ $item->qty_release }}</td>
-                </tr>
+            <tr>
+                <td>{{ $loop->iteration }}</td>
+                <td>{{ $item->code }}</td>
+                <td>{{ $item->name }}</td>
+                <td>{{ $item->size }}</td>
+                <td>{{ $item->qty_order }}</td>
+                <td>{{ $item->qty_release }}</td>
+            </tr>
             @endforeach
         </tbody>
     </table>

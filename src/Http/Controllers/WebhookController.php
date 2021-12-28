@@ -54,7 +54,7 @@ class WebhookController extends Controller
     }
 
     /**
-     * Handle the incoming request.
+     * Proxy the incoming request to the appropriate handler.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
@@ -135,19 +135,6 @@ class WebhookController extends Controller
 
         return $this->successMethod();
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     protected function handleOrderCreated(Request $request)
     {

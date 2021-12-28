@@ -149,26 +149,26 @@ class OrderUpdated implements ShouldQueue
             $toSaveItems = [];
 
             foreach ($line_items as $line_item) {
-                $bzOrderItem = $bzOrder->bzOrderItems->where('wp_order_line_item_id', $line_item->id)->first();
+                $bzOrderItem = $bzOrder->bzOrderItems->where('wp_order_line_item_id', $line_item['id'])->first();
 
                 if (!$bzOrderItem) {
                     $bzOrderItem = new BzOrderItem();
                 }
 
-                $bzOrderItem->bz_product_id = BzProduct::where('wp_product_id', $line_item->product_id)->first()->id;
+                $bzOrderItem->bz_product_id = BzProduct::where('wp_product_id', $line_item['product_id'])->first()->id;
 
-                $bzOrderItem->sku = $line_item->sku;
-                $bzOrderItem->name = $line_item->name;
-                $bzOrderItem->price = $line_item->price;
-                $bzOrderItem->quantity = $line_item->quantity;
-                $bzOrderItem->subtotal = $line_item->subtotal;
-                $bzOrderItem->subtotal_tax = $line_item->subtotal_tax;
-                $bzOrderItem->total = $line_item->total;
-                $bzOrderItem->total_tax = $line_item->total_tax;
-                $bzOrderItem->taxes = $line_item->taxes;
-                $bzOrderItem->variation_id = $line_item->variation_id;
+                $bzOrderItem->sku = $line_item['sku'];
+                $bzOrderItem->name = $line_item['name'];
+                $bzOrderItem->price = $line_item['price'];
+                $bzOrderItem->quantity = $line_item['quantity'];
+                $bzOrderItem->subtotal = $line_item['subtotal'];
+                $bzOrderItem->subtotal_tax = $line_item['subtotal_tax'];
+                $bzOrderItem->total = $line_item['total'];
+                $bzOrderItem->total_tax = $line_item['total_tax'];
+                $bzOrderItem->taxes = $line_item['taxes'];
+                $bzOrderItem->variation_id = $line_item['variation_id'];
 
-                $bzOrderItem->meta_data = $line_item->meta_data;
+                $bzOrderItem->meta_data = $line_item['meta_data'];
 
                 $toSaveItems[] = $bzOrderItem;
             }

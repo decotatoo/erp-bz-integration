@@ -55,10 +55,12 @@ class OrderCreated implements ShouldQueue
                 $bzOrder->wp_order_id = $this->request->id;
 
                 // $uid is a Sales order number with format "SOOLYY-MMXXXX" where "SOOL" is the stand for "Sales Order Online", "YY" is the year of the order and "XXXX" is the order line number. Example: "SOOL19-020001"
-                $prefix = sprintf('SOOL%s', Carbon::now()->format('YY-MM'));
+                
+                // @TODO: fix format
+                $prefix = sprintf('SOOL%s', Carbon::now()->format('y-m'));
                 $next_increment = BzOrder::where('uid', 'like', $prefix.'%')->count() + 1;
 
-                $bzOrder->uid = sprintf('%s-%04d', $prefix, $next_increment);
+                $bzOrder->uid = sprintf('%s%04d', $prefix, $next_increment);
             }
 
             /** @var BzCustomer $bzCustomer */
@@ -108,7 +110,7 @@ class OrderCreated implements ShouldQueue
             $bzOrder->meta_data = $this->request->meta_data;
 
             // save without triggering events
-            $bzOrder->saveQuietly(['timestamps' => false]);
+            $bzOrder->saveQuietly();
 
             $bzOrder->refresh();
 
@@ -118,21 +120,21 @@ class OrderCreated implements ShouldQueue
             foreach ($this->request->line_items as $line_item) {
                 $item = new BzOrderItem();
 
-                $item->wp_order_line_item_id = $line_item->id;
-                $item->bz_product_id = BzProduct::where('wp_product_id', $line_item->product_id)->first()->id;
+                $item->wp_order_line_item_id = $line_item['id'];
+                $item->bz_product_id = BzProduct::where('wp_product_id', $line_item['product_id'])->first()->id;
 
-                $item->sku = $line_item->sku;
-                $item->name = $line_item->name;
-                $item->price = $line_item->price;
-                $item->quantity = $line_item->quantity;
-                $item->subtotal = $line_item->subtotal;
-                $item->subtotal_tax = $line_item->subtotal_tax;
-                $item->total = $line_item->total;
-                $item->total_tax = $line_item->total_tax;
-                $item->taxes = $line_item->taxes;
-                $item->variation_id = $line_item->variation_id;
+                $item->sku = $line_item['sku'];
+                $item->name = $line_item['name'];
+                $item->price = $line_item['price'];
+                $item->quantity = $line_item['quantity'];
+                $item->subtotal = $line_item['subtotal'];
+                $item->subtotal_tax = $line_item['subtotal_tax'];
+                $item->total = $line_item['total'];
+                $item->total_tax = $line_item['total_tax'];
+                $item->taxes = $line_item['taxes'];
+                $item->variation_id = $line_item['variation_id'];
 
-                $item->meta_data = $line_item->meta_data;
+                $item->meta_data = $line_item['meta_data'];
 
                 $items[] = $item;
             }
@@ -142,7 +144,8 @@ class OrderCreated implements ShouldQueue
             // add the order release
             
         } catch (\Throwable $th) {
-            Log::error($th->getMessage());
+            throw $th;
+            // Log::error($th->getMessage(), [$th]);
             $this->fail($th->getMessage());
         }
     }

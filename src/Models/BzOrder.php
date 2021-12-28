@@ -18,6 +18,22 @@ class BzOrder extends Model
 
     public $timestamps = false;
 
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'billing' => 'array',
+        'shipping' => 'array',
+        'shipping_lines' => 'array',
+        'line_items' => 'array',
+        'tax_lines' => 'array',
+        'fee_lines' => 'array',
+        'coupon_lines' => 'array',
+        'meta_data' => 'array',
+    ];
+
     public function bzCustomer()
     {
         return $this->belongsTo(BzCustomer::class, 'bz_customer_id');
