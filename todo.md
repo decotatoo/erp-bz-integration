@@ -102,3 +102,13 @@ Max Weight: 480
 # Latest
 
 - Migrate old customer and order record
+
+# Dashboard
+
+- Production Dashboard:
+    - calendar
+    - product production
+
+- Calendar with internal agenda / event data.
+    allow to share the agenda to internal staff.
+

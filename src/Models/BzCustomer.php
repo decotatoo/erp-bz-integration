@@ -16,9 +16,18 @@ class BzCustomer extends Model
 
     public $timestamps = false;
 
+    /**
+     * Get the user's full name.
+     *
+     * @return string
+     */
+    public function getFullNameAttribute()
+    {
+        return "{$this->first_name} {$this->last_name}";
+    }
+
     public function bzOrders()
     {
         return $this->hasMany(BzOrder::class);
     }
-
 }

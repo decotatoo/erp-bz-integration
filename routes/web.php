@@ -34,23 +34,38 @@ Route::middleware(['web', 'auth'])->group(function () {
         Route::prefix('online')->name('online.')->group(function () {
             Route::get('/', [SalesOrderController::class, 'index'])->name('index');
             Route::post('/list', [SalesOrderController::class, 'list'])->name('list');
-            Route::get('/detail-product/{id}', [SalesOrderController::class, 'detailProduct'])->name('detail-product');
+            Route::get('/detail-product/{bzOrder}', [SalesOrderController::class, 'detailProduct'])->name('detail-product');
 
-            Route::get('/edit-release/{id}', [SalesOrderController::class, 'editRelease'])->name('edit-release');
+            Route::get('/edit-release/{bzOrder}', [SalesOrderController::class, 'editRelease'])->name('edit-release');
+
+
+
+
+
+
+
+            // @TODO:
+            Route::get('/list-product/{bzOrder}', [SalesOrderController::class, 'listProductWithStock'])->name('listproduct');
+            Route::get('/list-scan-out/{bzOrder}', [SalesOrderController::class, 'listScanOut'])->name('listscanout');
+            Route::post('/release-product/{bzOrder}', [SalesOrderController::class, 'releaseProduct'])->name('releaseproduct');
+            Route::post('/delete-last-product', [SalesOrderController::class, 'deleteLastProduct'])->name('deletelastproduct');
+
+
+
+
         });
     });
 
-    
+
     // Inventory
     Route::prefix('inventory')->name('inventory.')->group(function () {
         //Box Type Setup
         Route::resource('bin', BinController::class)->except(['show']);
         Route::resource('unit-box', UnitBoxController::class)->except(['show']);
     });
-    
+
     // Packing Management
     Route::prefix('packing-management')->name('packing-management.')->group(function () {
         Route::get('/packing-simulation/{packingSimulation}', [BinPackerController::class, 'visualiser'])->name('packing-simulation.visualiser');
     });
-
 });

@@ -132,7 +132,8 @@
         function showFilterdData() {
             startDate = fixDate($('#start_date').val());
             endDate = fixDate($('#end_date').val());
-            status = $('#status').val();
+            date_type = $('#date_type').val();
+            order_status = $('#order_status').val();
 
             salesOrderTable.clear().draw();
 
@@ -158,26 +159,26 @@
                         "_token": "{{ csrf_token() }}",
                         startDate: startDate.formDate,
                         endDate: endDate.formDate,
-                        status,
+                        order_status,
+                        date_type,
                     },
                     success: function (data) {
                         console.log(data);
                         number = 1;
                         data.data.salesOrders.forEach((value, index) => {
                             let detailProductOrder = `
-                                <a href="#" data-toggle="tooltip" data-placement="top" title="Detail product order" class="btn btn-sm btn-primary btn-rounded" onclick="detailModal('Detail Product Order', ' /sales-order/online/detail-product/${value.id}/online', 'x-large')"><i class="fa fa-eye"></i> Detail</a>
+                                <a href="#" data-toggle="tooltip" data-placement="top" title="Detail product order" class="btn btn-sm btn-primary btn-rounded" onclick="detailModal('Detail Product Order', ' /sales-order/online/detail-product/${value.id}', 'x-large')"><i class="fa fa-eye"></i> Detail</a>
                             `;
 
                             const action = `
-                                <a href="#" data-toggle="tooltip" data-placement="top" title="Delete" class="waves-effect waves-light btn btn-sm btn-danger-light btn-circle" onclick="modalDelete('Sales Order', 'this data', '/sales-order/online/online-delete/${value.id}', '')"><span class="icon-Trash1 fs-18"><span class="path1"></span><span class="path2"></span></span></a>
-                                <a href="/sales-order/online/edit/${value.id}" data-toggle="tooltip" data-placement="top" title="Edit" class="waves-effect waves-light btn btn-sm btn-warning-light btn-circle mx-5"><span class="icon-Write"><span class="path1"></span><span class="path2"></span></span></a>
+                                <a href="/sales-order/online/edit-release/${value.id}" data-toggle="tooltip" data-placement="top" title="Edit" class="waves-effect waves-light btn btn-sm btn-warning-light btn-circle mx-5"><span class="icon-Write"><span class="path1"></span><span class="path2"></span></span></a>
                             `;
 
                             let tr = $(`
-                                <tr class="${(value.released == true) ? `bg-success` : ``}">
+                                <tr class="${(value.date_released != null) ? `bg-success` : ``}">
                                     <td>${number}</td>
                                     <td>
-                                        <a href="/sales-order/online/${(value.qtyReleaseTotal > 0) ? `detail-release` : `edit-release`}/${value.id}" class="text-primary text-bold">
+                                        <a href="/sales-order/online/${(value.released) ? `detail-release` : `edit-release`}/${value.id}" class="text-primary text-bold">
                                             ${value.so_no}
                                         </a>
                                     </td>
@@ -185,7 +186,7 @@
                                     <td>${value.order_date}</td>
                                     <td>${detailProductOrder}</td>
                                     <td>
-                                        <!-- ${action} -->
+                                        ${action}
                                     </td>
                                 </tr>
                             `);

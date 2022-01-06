@@ -20,7 +20,7 @@
                         <div class="pull-right d-flex">
                             <div style="" class="" id="status_quotation">
                                 <a class="btn  btn-info btn-sm " style="" id=""
-                                    href="{{ route('sales-order.online') }}">Back</a>
+                                    href="{{ route('sales-order.online.index') }}">Back</a>
                             </div>
                         </div>
                     </div>
@@ -32,113 +32,73 @@
                                     <div class="row">
 
                                         <div class="col-lg-6">
-                                            <div class="form-group @error('qo_number') error @enderror row">
-                                                <label class="col-sm-4 col-form-label">SO Number <span
-                                                        class="text-danger">*</span></label>
+                                            <div class="form-group row">
+                                                <label class="col-sm-4 col-form-label">
+                                                    SO Number
+                                                    @if (auth()->user()->can('sales-order-online-edit'))
+                                                        <a target="_blank" href="{{ config('bz.base_url') . config('bz.dashboard_path') . '/post.php?action=edit&post=' . $sales_order->wp_order_id }}">🔗</a>
+                                                    @endif
+                                                </label>
                                                 <div class="col-sm-8">
-                                                    <input type="text" class="form-control  "
-                                                        value="{{ $sales_order->so_no }}" disabled>
-                                                    <input type="hidden" id="product_id" value="">
-                                                    @error('qo_number')
-                                                        <span class="text-danger">{{ $message }}</span>
-                                                    @enderror
+                                                    <input type="text" class="form-control" value="{{ $sales_order->uid }}" disabled>
                                                 </div>
                                             </div>
 
-                                            {{-- product code --}}
-                                            <div class="form-group @error('so_category') error @enderror row">
-                                                <label class="col-sm-4 form-label">SO Category <span
-                                                        class="text-danger">*</span></label>
-
-
-                                                <div class="col-sm-8">
-                                                    <select name="so_category" id="select" class="form-select" disabled>
-                                                        <option value="">Select SO Category</option>
-                                                        <option value="Reguler SO"
-                                                            {{ (old('so_category') ?? optional($sales_order)->so_category) == 'Reguler SO' ? 'selected' : '' }}>
-                                                            Reguler SO</option>
-                                                        <option value="Reguler SO (Only Fee)"
-                                                            {{ (old('so_category') ?? optional($sales_order)->so_category) == 'Reguler SO (Only Fee)' ? 'selected' : '' }}>
-                                                            Reguler SO (Only Fee)</option>
-                                                        <option value="Sample"
-                                                            {{ (old('so_category') ?? optional($sales_order)->so_category) == 'Sample' ? 'selected' : '' }}>
-                                                            Sample</option>
-                                                        <option value="Sponsor"
-                                                            {{ (old('so_category') ?? optional($sales_order)->so_category) == 'Sponsor' ? 'selected' : '' }}>
-                                                            Sponsor</option>
-                                                        <option value="Expired"
-                                                            {{ (old('so_category') ?? optional($sales_order)->so_category) == 'Expired' ? 'selected' : '' }}>
-                                                            Expired</option>
-                                                        <option value="Spoilage"
-                                                            {{ (old('so_category') ?? optional($sales_order)->so_category) == 'Spoilage' ? 'selected' : '' }}>
-                                                            Spoilage</option>
-                                                    </select>
-                                                </div>
-
-                                                @error('so_category')
-                                                    <span class="text-danger">{{ $message }}</span>
-                                                @enderror
-                                            </div>
 
                                             {{-- customer name --}}
-                                            <div class="form-group @error('currency') error @enderror row">
-                                                <label class="col-sm-4 col-form-label">Customer Name</label>
+                                            <div class="form-group row">
+                                                <label class="col-sm-4 col-form-label">
+                                                    Customer Name
+                                                    @if (auth()->user()->can('sales-order-online-edit'))
+                                                        <a target="_blank" href="{{ config('bz.base_url') . config('bz.dashboard_path') . '/edit.php?post_status=all&post_type=shop_order&_customer_user=' . $sales_order->bzCustomer->wp_customer_id }}">🔗</a>
+                                                    @endif
+                                                </label>
                                                 <div class="col-sm-8">
-                                                    <input type="text" class="form-control" placeholder="" name=""
-                                                        id="customer_name"
-                                                        value="{{ optional(optional($sales_order)->customer)->name }}"
+                                                    <input type="text" class="form-control"
+                                                        value="{{ $sales_order->bzCustomer->full_name }}"
                                                         readonly>
                                                 </div>
-                                                @error('currency')
-                                                    <span class="text-danger">{{ $message }}</span>
-                                                @enderror
                                             </div>
 
-                                            <div class="form-group @error('currency') error @enderror row">
-                                                <label class="col-sm-4 col-form-label">Customer Address</label>
+                                            <div class="form-group row">
+                                                <label class="col-sm-4 col-form-label">Billing</label>
                                                 <div class="col-sm-8">
-                                                    <textarea readonly class="form-control  " name="notes" id="" cols="30"
-                                                        rows="3">{{ optional(optional($sales_order)->customer)->address }}</textarea>
+                                                    Name
+                                                    <input type="text" class="form-control"
+                                                        value="{{ $sales_order->billing['first_name'] }} {{ $sales_order->billing['last_name'] }}"
+                                                        readonly>
+                                                    Address
+                                                    <textarea readonly class="form-control" cols="30" rows="3">{{ $sales_order->billing['address_1'] }} {{ $sales_order->billing['address_2'] ?? '' }}, {{ $sales_order->billing['city'] }}, {{ $sales_order->billing['state'] }}, {{ $sales_order->billing['country'] }}, {{ $sales_order->billing['postcode'] }}</textarea>
                                                 </div>
-                                                @error('currency')
-                                                    <span class="text-danger">{{ $message }}</span>
-                                                @enderror
+                                            </div>
+
+                                            <div class="form-group row">
+                                                <label class="col-sm-4 col-form-label">Shipping</label>
+                                                <div class="col-sm-8">
+                                                    Name
+                                                    <input type="text" class="form-control" value="{{ $sales_order->shipping['first_name'] }} {{ $sales_order->shipping['last_name'] }}" readonly>
+                                                    Address
+                                                    <textarea readonly class="form-control" cols="30" rows="3">{{ $sales_order->shipping['address_1'] }} {{ $sales_order->shipping['address_2'] ? ', '. $sales_order->shipping['address_2'] : '' }}, {{ $sales_order->shipping['city'] }}, {{ $sales_order->shipping['state'] }}, {{ $sales_order->shipping['country'] }}, {{ $sales_order->shipping['postcode'] }}</textarea>
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="col-lg-6">
-                                            <div class="form-group @error('po_number') error @enderror row">
-                                                <label class="col-sm-4 col-form-label">PO Number</label>
+                                            <div class="form-group row">
+                                                <label class="col-sm-4 col-form-label">Creation Date</label>
                                                 <div class="col-sm-8">
-                                                    <input readonly type="text" class="form-control  " placeholder=""
-                                                        name="po_number"
-                                                        value="{{ old('po_number') ?? $sales_order->po_number }}">
-                                                </div>
-                                                @error('po_number')
-                                                    <span class="text-danger">{{ $message }}</span>
-                                                @enderror
-                                            </div>
-
-                                            <div class="form-group @error('estimation_delivery_date') error @enderror row">
-                                                <label class="col-sm-4 col-form-label">Estimation Delivery Date</label>
-                                                <div class="col-sm-8">
-                                                    <input readonly type="date" class="form-control  " placeholder=""
-                                                        name="estimation_delivery_date"
-                                                        value="{{ old('estimation_delivery_date') ?? $sales_order->estimation_delivery_date }}">
+                                                    <input readonly type="date" class="form-control" name="estimation_delivery_date"
+                                                        value="{{ \Illuminate\Support\Carbon::parse($sales_order->date_created)->toDateString() }}">
                                                 </div>
                                                 @error('estimation_delivery_date')
                                                     <span class="text-danger">{{ $message }}</span>
                                                 @enderror
                                             </div>
 
-                                            <div class="form-group @error('currency') error @enderror row">
+                                            <div class="form-group row">
                                                 <label class="col-sm-4 col-form-label">Notes</label>
                                                 <div class="col-sm-8">
-                                                    <textarea readonly class="form-control  " name="notes" id="" cols="30"
-                                                        rows="3">{{ optional($sales_order)->notes }}</textarea>
+                                                    <textarea readonly class="form-control" cols="30" rows="3">{{ optional($sales_order)->customer_note }}</textarea>
                                                 </div>
-                                                @error('currency')
-                                                    <span class="text-danger">{{ $message }}</span>
-                                                @enderror
                                             </div>
 
 
@@ -300,7 +260,9 @@
             $('#productOrderDetails').DataTable({
                 processing: true,
                 serverSide: true,
-                ajax: "{{ route('sales-order.online.listproduct') }}?id={{ $sales_order->id }}",
+                ajax: route('sales-order.online.listproduct', {
+                    bzOrder: {{ $sales_order->id }}
+                }),
                 columns: [{
 
                         data: 'product_id',
@@ -352,7 +314,9 @@
             $('#scanOutDetails').DataTable({
                 processing: true,
                 serverSide: true,
-                ajax: "{{ route('sales-order.online.listscanout') }}?id={{ $sales_order->id }}",
+                ajax: route('sales-order.online.listscanout', {
+                    bzOrder: {{ $sales_order->id }}
+                }),
                 columns: [{
 
                         data: 'product_id',
@@ -400,10 +364,20 @@
 
         async function releaseProduct(e) {
             if (e.key == "Enter") {
-                let resp = await axios.post(`{{ route('sales-order.online.releaseproduct') }}`, {
-                    so_no: '{{ $sales_order->so_no }}',
-                    code: $('#barcode').val()
-                });
+                let resp = await axios.post(
+                    route('sales-order.online.releaseproduct', { 
+                        bzOrder: {{ $sales_order->id }} 
+                    }), 
+                    {
+                        code: $('#barcode').val()
+                    }
+                );
+                // let resp = await axios.post(route('sales-order.online.releaseproduct'), {
+                //     bzOrder: {{ $sales_order->id }},
+                //     _query: {
+                //         code: $('#barcode').val()
+                //     }
+                // });
                 resp = resp.data;
                 $('#barcode').val('')
                 console.log(resp);
@@ -548,6 +522,18 @@
         .table-detail>tbody>tr>td,
         .table>tbody>tr>th {
             border: 1px #323539 solid !important;
+        }
+
+        
+        .dataTable tbody .details-control:before {
+            margin-right: 10px;
+            content: "\f05a";
+            color: #38c1f1;
+        }
+
+        .dataTable tbody .shown .details-control::before {
+            content: "\f05a";
+            color: #7e6e71;
         }
 
     </style>

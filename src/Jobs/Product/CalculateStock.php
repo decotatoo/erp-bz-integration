@@ -75,8 +75,8 @@ class CalculateStock implements ShouldQueue
                     break;
             }
         } else {
-            $bz_product->stock_in_quantity = $this->product->productStockIn->count('id');
-            $bz_product->stock_out_quantity = $this->product->productStockOut->count('id');
+            $bz_product->stock_in_quantity = (clone $this->product)->productStockIn()->isReleaseable()->count('id');
+            $bz_product->stock_out_quantity = (clone $this->product)->productStockOut()->isReleaseable()->count('id');
         }
 
         // Find the pending order, and deduct the stock counter

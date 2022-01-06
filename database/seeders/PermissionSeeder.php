@@ -148,6 +148,12 @@ class PermissionSeeder extends Seeder
                 'submodul_name' => 'Sales Order [ONLINE]',
                 'menu_description' => 'View the Sales Order [ONLINE] list',
             ],
+            [
+                'name' => 'sales-order-online-edit',
+                'modul_name' => 'Sales Order',
+                'submodul_name' => 'Sales Order [ONLINE]',
+                'menu_description' => 'Edit a Sales Order [ONLINE]',
+            ],
 
         ];
 
