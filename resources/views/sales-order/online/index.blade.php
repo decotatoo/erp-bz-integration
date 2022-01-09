@@ -163,22 +163,35 @@
                         date_type,
                     },
                     success: function (data) {
-                        console.log(data);
+                        console.log(data, route('sales-order.online.detail-product', { bzOrder: 10 } ));
                         number = 1;
                         data.data.salesOrders.forEach((value, index) => {
                             let detailProductOrder = `
-                                <a href="#" data-toggle="tooltip" data-placement="top" title="Detail product order" class="btn btn-sm btn-primary btn-rounded" onclick="detailModal('Detail Product Order', ' /sales-order/online/detail-product/${value.id}', 'x-large')"><i class="fa fa-eye"></i> Detail</a>
+                                <a href="#" data-toggle="tooltip" data-placement="top" title="Detail product order" class="btn btn-sm btn-primary btn-rounded" onclick="detailModal('Detail Product Order', '${route('sales-order.online.detail-product', { bzOrder: value.id } )}', 'x-large')"><i class="fa fa-eye"></i> Detail</a>
                             `;
 
-                            const action = `
-                                <a href="/sales-order/online/edit-release/${value.id}" data-toggle="tooltip" data-placement="top" title="Edit" class="waves-effect waves-light btn btn-sm btn-warning-light btn-circle mx-5"><span class="icon-Write"><span class="path1"></span><span class="path2"></span></span></a>
+                            let _url_edit_release = route('sales-order.online.edit-release', { bzOrder: value.id } );
+                            let _url_detail_release = route('sales-order.online.detail-release', { bzOrder: value.id } );
+
+                            let action = `
+                                <a href="${_url_edit_release}" data-toggle="tooltip" data-placement="top" title="Release" class="waves-effect waves-light btn btn-sm btn-warning-light btn-circle mx-5">
+                                    <i class="fas fa-qrcode"></i>
+                                </a>
                             `;
+
+                            if (value.date_released != null) {
+                                action += `
+                                <a href="${_url_edit_release}" data-toggle="tooltip" data-placement="top" title="Detail" class="waves-effect waves-light btn btn-sm btn-info-light btn-circle mx-5">
+                                    <i class="fas fa-info"></i>
+                                </a>
+                            `;
+                            }
 
                             let tr = $(`
                                 <tr class="${(value.date_released != null) ? `bg-success` : ``}">
                                     <td>${number}</td>
                                     <td>
-                                        <a href="/sales-order/online/${(value.released) ? `detail-release` : `edit-release`}/${value.id}" class="text-primary text-bold">
+                                        <a href="${(value.date_released) ? _url_detail_release : _url_edit_release}" class="text-primary text-bold">
                                             ${value.so_no}
                                         </a>
                                     </td>

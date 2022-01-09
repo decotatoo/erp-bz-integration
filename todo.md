@@ -11,9 +11,9 @@
 - [x] consider the "Pending Release Stock counter" for the stock syncornation.
 
 - [x] Payment confirmed, order STATUS = "processing". Send data to erp
-- [ ] _STAFF_ take action [release the stock and deduct the "Pending Release Stock counter"]: scan the product label (barcode) in stock.
+- [x] _STAFF_ take action [release the stock and deduct the "Pending Release Stock counter"]: scan the product label (barcode) in stock.
 - [ ] once the order stock fulfilled, automatic change the release status to "OK" and order STATUS to "completed" (send data to woocommerce), and allow to print **Invoice and Delivery Order**
-- [ ] (optional action) allow to input the no resi / awb number and shipment provider
+- [x] (optional action) allow to input the no resi / awb number and shipment provider
 
 - [ ] show on the WooCommerce site the order status as "completed" and another another status named "delivered" with the hyperlink to courier's tracker page.
 

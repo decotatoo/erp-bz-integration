@@ -10,7 +10,7 @@
 @section('content')
     <div class="row">
         <div class="col-lg-12 col-12">
-            <form class="form" action="#" method="POST" id="voucher" onsubmit="return false">
+            <form class="form" action="#" method="POST" id="" onsubmit="return false">
                 @method('put')
                 @csrf
                 <div class="box">
@@ -43,7 +43,6 @@
                                                     <input type="text" class="form-control" value="{{ $sales_order->uid }}" disabled>
                                                 </div>
                                             </div>
-
 
                                             {{-- customer name --}}
                                             <div class="form-group row">
@@ -86,13 +85,27 @@
                                             <div class="form-group row">
                                                 <label class="col-sm-4 col-form-label">Creation Date</label>
                                                 <div class="col-sm-8">
-                                                    <input readonly type="date" class="form-control" name="estimation_delivery_date"
+                                                    <input readonly type="date" class="form-control" name="date_created"
                                                         value="{{ \Illuminate\Support\Carbon::parse($sales_order->date_created)->toDateString() }}">
                                                 </div>
-                                                @error('estimation_delivery_date')
+                                                @error('date_created')
                                                     <span class="text-danger">{{ $message }}</span>
                                                 @enderror
                                             </div>
+
+                                            @if ($sales_order->date_released)
+                                                <div class="form-group row">
+                                                    <label class="col-sm-4 col-form-label">Released Date</label>
+                                                    <div class="col-sm-8">
+                                                        <input readonly type="date" class="form-control" name="date_released"
+                                                            value="{{ \Illuminate\Support\Carbon::parse($sales_order->date_released)->toDateString() }}">
+                                                    </div>
+                                                    @error('date_released')
+                                                        <span class="text-danger">{{ $message }}</span>
+                                                    @enderror
+                                                </div>
+                                            @endif
+
 
                                             <div class="form-group row">
                                                 <label class="col-sm-4 col-form-label">Notes</label>
@@ -102,17 +115,55 @@
                                             </div>
 
 
-                                            <div class="form-group @error('barcode') error @enderror row">
-                                                <label class="col-sm-4 col-form-label">Stock Out Product</label>
-                                                <div class="col-sm-8">
-                                                    <input type="text" class="form-control" placeholder="Scan Barcode Here"
-                                                        name="barcode" value="" id="barcode"
-                                                        onkeypress="releaseProduct(event)">
+                                            @if ($sales_order->date_released)
+                                                <div class="form-group @error('shipment') error @enderror row">
+                                                    <label class="col-sm-4 col-form-label">Shipment</label>
+                                                    <div class="col-sm-8">
+                                                        <div>
+                                                            <select class="form-select" name="shipment_provider" id="shipment_provider" title="Provider">
+                                                                @foreach ($shipments as $shipment)
+                                                                    <option value="{{ $shipment['id'] }}"
+                                                                        {{ $sales_order->shipment_provider == $shipment['id'] ? 'selected' : '' }}>
+                                                                        {{ $shipment['name'] }}
+                                                                    </option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                        <div style="display: inline-flex;width: 100%;padding-top: 5px;">
+                                                            <input type="text" name="shipment_tracking_number" id="shipment_tracking_number" value="{{ $sales_order->shipment_tracking_number }}" placeholder="AWB/Tracking number" class="form-control" style="width: 70%;">
+                                                            <button class="btn btn-success btn-sm" style="width: 20%;margin-left: 5px;" onclick="updateShipment(event)" {{ ($sales_order->date_shipment_shipped && \Illuminate\Support\Carbon::parse($sales_order->date_shipment_shipped)->addDays(1)->lessThan(\Illuminate\Support\Carbon::now())) || \Illuminate\Support\Carbon::parse($sales_order->date_released)->addDays(7)->lessThan(\Illuminate\Support\Carbon::now()) ? 'disabled' : '' }}>
+                                                                Update
+                                                            </button>
+                                                        </div>                                                  
+                                                    </div>
+                                                    @error('shipment')
+                                                        <span class="text-danger">{{ $message }}</span>
+                                                    @enderror
                                                 </div>
-                                                @error('barcode')
-                                                    <span class="text-danger">{{ $message }}</span>
-                                                @enderror
-                                            </div>
+                                            @else
+                                                <div class="form-group @error('barcode') error @enderror row">
+                                                    <label class="col-sm-4 col-form-label">Stock Out Product</label>
+                                                    <div class="col-sm-8">
+                                                        <input type="text" class="form-control" placeholder="Scan Barcode Here"
+                                                            name="barcode" value="" id="barcode"
+                                                            onkeypress="releaseProduct(event)">
+                                                        <div style="padding-top: 5px;">
+                                                            
+                                                            <a target="_blank" href="{{ route('packing-management.packing-simulation.visualiser', ['packingSimulation' => $sales_order->getMetaData('_dwi_simulation_id') ]) }}">                              
+                                                                <i class="fas fa-boxes fa-lg"></i> Packing Simulation
+                                                            </a>
+                                                        </div>
+                                                        
+                                                    
+                                                    </div>
+                                                    @error('barcode')
+                                                        <span class="text-danger">{{ $message }}</span>
+                                                    @enderror
+                                                </div>
+                                            @endif
+
+
+
                                         </div>
                                     </div>
                                 </div>
@@ -344,7 +395,6 @@
                     },
                 ],
                 createdRow: function(row, data, dataIndex) {
-                    console.log(row, data, dataIndex);
                     if (data.qty_release == 0) {
                         this.api().row(row).remove() //<-----
                     }
@@ -372,12 +422,6 @@
                         code: $('#barcode').val()
                     }
                 );
-                // let resp = await axios.post(route('sales-order.online.releaseproduct'), {
-                //     bzOrder: {{ $sales_order->id }},
-                //     _query: {
-                //         code: $('#barcode').val()
-                //     }
-                // });
                 resp = resp.data;
                 $('#barcode').val('')
                 console.log(resp);
@@ -404,6 +448,29 @@
                         hideAfter: 3000,
                         stack: 6
                     });
+
+                    
+
+                    if (resp.is_released == true) {
+                        console.log('is_released');
+                        $.toast({
+                            heading: 'Refreshing the page !',
+                            text: resp.message,
+                            position: 'top-right',
+                            loaderBg: '#4970ff',
+                            icon: 'info',
+                            hideAfter: 8000,
+                            stack: 6
+                        });
+
+                        setTimeout(() => {
+                            location.reload();
+                        }, 8000);
+                    } else {
+                        console.log('not_released');
+                    }
+
+
                 } catch (error) {
                     $.toast({
                         heading: 'Failed',
@@ -415,13 +482,64 @@
                         stack: 6
                     });
                 }
-                console.log('test');
                 getScanOutDetails();
                 getSalesOrderDetails();
             }
         }
 
-        async function deleteLastItem(soNo, productId) {
+        async function updateShipment(e) {
+            provider = document.getElementById('shipment_provider').value;
+            tracking_numner = document.getElementById('shipment_tracking_number').value;
+
+            if (tracking_numner == '') {
+                $.toast({
+                    heading: 'Failed',
+                    text: 'Please enter tracking number',
+                    position: 'top-right',
+                    loaderBg: '#ff6849',
+                    icon: 'warning',
+                    hideAfter: 3000,
+                    stack: 6
+                });
+                return false;
+            }
+
+            let resp = await axios.post(
+                route('sales-order.online.updateshipment', { 
+                    bzOrder: {{ $sales_order->id }} 
+                }), 
+                {
+                    provider: provider,
+                    tracking_number: tracking_numner
+                }
+            );
+
+            resp = resp.data;
+
+            if (resp.status === 200) {
+                $.toast({
+                    heading: 'Success !',
+                    text: resp.message,
+                    position: 'top-right',
+                    loaderBg: '#ff6849',
+                    icon: 'success',
+                    hideAfter: 3000,
+                    stack: 6
+                });
+            } else {
+                $.toast({
+                    heading: 'Failed !',
+                    text: resp.message,
+                    position: 'top-right',
+                    loaderBg: '#ff6849',
+                    icon: 'danger',
+                    hideAfter: 3000,
+                    stack: 6
+                });
+            }
+        }
+
+        async function deleteLastItem(id) {
             swal({
                 title: "Confirmation !",
                 text: "are you sure delete last scan out this product? ",
@@ -432,9 +550,10 @@
                 closeOnConfirm: false
             }, async function() {
                 swal.close();
-                let resp = await axios.post("{{ route('sales-order.online.deletelastproduct') }}", {
-                    productId,
-                    soNo
+                let resp = await axios.post(route('sales-order.online.deletelastproduct', { 
+                        bzOrder: {{ $sales_order->id }} 
+                    }), {
+                    id,
                 });
                 resp = resp.data;
                 if (resp.status === 200) {

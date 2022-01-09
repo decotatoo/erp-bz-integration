@@ -5,8 +5,10 @@ namespace Decotatoo\Bz\Http\Controllers;
 use App\Models\ProductStockIn;
 use App\Models\ProductStockOut;
 use Carbon\CarbonImmutable;
+use Decotatoo\Bz\Jobs\BzOrder\Update;
 use Decotatoo\Bz\Models\BzOrder;
 use Decotatoo\Bz\Models\BzOrderItem;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -122,6 +124,21 @@ class SalesOrderController extends Controller
         $data['sales_order'] = $bzOrder;
         $data['customer'] = $data['sales_order']->bzCustomer;
 
+        $data['shipments'] = [
+            [
+                'id' => null,
+                'name' => 'Provider: Other',
+            ],
+            [
+                'id' => 'jnt',
+                'name' => 'J&T',
+            ],
+            [
+                'id' => 'lion',
+                'name' => 'Lion Parcel',
+            ],
+        ];
+
         return view('bz::sales-order.online.release-edit', $data);
     }
 
@@ -180,7 +197,7 @@ class SalesOrderController extends Controller
             })
             ->addColumn('btnAction', function (BzOrderItem $item) {
                 return '<div class="btn-group">
-                            <a href="#"><button type="button" class="waves-effect waves-light btn btn-danger btn-sm" data-toggle="tooltip" title="Delete 1 item" onClick="deleteLastItem(\'' . $item->bzOrder->uid . '\',' . $item->bzProduct->product->id . ')"><i class="fa fa-trash"></i></button></a>
+                            <a href="#"><button type="button" class="waves-effect waves-light btn btn-danger btn-sm" data-toggle="tooltip" title="Delete 1 item" onClick="deleteLastItem(' . $item->id . ')"><i class="fa fa-trash"></i></button></a>
                         </div>';
             })
             ->rawColumns(['qty_in_stock', 'btnAction'])
@@ -208,6 +225,14 @@ class SalesOrderController extends Controller
             $response = (object) [
                 'status' => 500,
                 'message' => "System is not able to releasing this kind of product. Please contact administrator.",
+            ];
+            return json_encode($response);
+        }
+
+        if ($this->isOrderFulfilled($bzOrder)) {
+            $response = (object) [
+                'status' => 500,
+                'message' => "Can't release. The order has been released [1]",
             ];
             return json_encode($response);
         }
@@ -279,7 +304,7 @@ class SalesOrderController extends Controller
 
         $expiredDate = Carbon::createFromFormat('dmY', $stockIn->expired_date);
         $now = CarbonImmutable::now();
-        
+
         // check if stock_in expire date is not less than 3 months
         try {
             $min_expired_duration = config('bz.min_month_of_stock_expire_duration');
@@ -318,8 +343,8 @@ class SalesOrderController extends Controller
 
         //     $saved = ProductStockOut::insert($insertStockOutProducts);
 
-        // CalculateStock::dispatchIf($saved, $matchedOrderedProduct->bzProduct->product, 'out', $sheet)->afterCommit()->onQueue('high');
-            
+        //     CalculateStock::dispatchIf($saved, $matchedOrderedProduct->bzProduct->product, 'out', $sheet)->afterCommit()->onQueue('high');
+
         //     $response = (object) [
         //         'status' => 200,
         //         'message' => "Stock out success",
@@ -338,9 +363,12 @@ class SalesOrderController extends Controller
 
         $matchedOrderedProduct->productStockOuts()->save($stockOut);
 
+        $isOrderReleased = $this->releaseOrder($bzOrder);
+
         $response = (object) [
             'status' => 200,
             'message' => "Stock out success",
+            'is_released' => $isOrderReleased,
         ];
         return json_encode($response);
     }
@@ -370,29 +398,26 @@ class SalesOrderController extends Controller
             ->make(true);
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-
-    public function deleteLastProduct(BzOrder $bzOrder)
+    public function deleteLastProduct(BzOrder $bzOrder, Request $request)
     {
         try {
-            $productId = $request->productId;
-            $soNo = $request->soNo;
-            $productStockOut = ProductStockOut::where('so_id', $soNo)->where('product_id', $productId)->orderBy('id', 'DESC')->first();
-            $productStockOut->delete();
+            if ($this->isOrderFulfilled($bzOrder)) {
+                throw new \Exception("Can't delete. The order has been fulfilled");
+            }
+
+            $orderedItem = $bzOrder->bzOrderItems()->find($request->id);
+
+            if (!$orderedItem) {
+                throw new Exception("Can't find the ordered item");
+            }
+
+            $releasedStockToDelete = $orderedItem->productStockOuts()->orderBy('id', 'desc')->first();
+
+            if (!$releasedStockToDelete) {
+                throw new Exception("Can't find the released stock to delete");
+            }
+
+            $releasedStockToDelete->delete();
 
             return json_encode(
                 [
@@ -411,37 +436,58 @@ class SalesOrderController extends Controller
         }
     }
 
+    public function releaseOrder(BzOrder $bzOrder)
+    {
+        $bzOrder->refresh();
+        if ($this->isOrderFulfilled($bzOrder)) {
+            $bzOrder->date_released = Carbon::now();
+            $bzOrder->status = 'completed';
+            if ($bzOrder->save()) {
+                // Update::dispatch($bzOrder);
+                return true;
+            }
+        }
 
+        return false;
+    }
 
+    public function isOrderFulfilled(BzOrder $bzOrder)
+    {
+        $orderedItems = $bzOrder->bzOrderItems;
 
+        $fulfilled = true;
 
+        if (!$bzOrder->date_released) {
+            foreach ($orderedItems as $value) {
+                if ($value->productStockOuts->count() <  $value->quantity) {
+                    $fulfilled = false;
+                    break;
+                }
+            }
+        }
 
+        return $fulfilled;
+    }
 
+    public function updateShipment(BzOrder $bzOrder, Request $request)
+    {
+        $request->validate([
+            // 'provider' => 'in:',
+            'tracking_number' => 'required|string',
+        ]);
 
-    
+        if (!$bzOrder->date_shipment_shipped) {
+            $bzOrder->date_shipment_shipped = Carbon::now();
+        }
 
-    // public function deleteLastProduct(Request $request)
-    // {
-    //     try {
-    //         $productId = $request->productId;
-    //         $soNo = $request->soNo;
-    //         $productStockOut = ProductStockOut::where('so_id', $soNo)->where('product_id', $productId)->orderBy('id', 'DESC')->first();
-    //         $productStockOut->delete();
-
-    //         return json_encode(
-    //             [
-    //                 'status' => 200,
-    //                 'message' => 'Item successfully deleted !',
-    //             ]
-    //         );
-    //     } catch (\Throwable $th) {
-    //         //throw $th;
-    //         return json_encode(
-    //             [
-    //                 'status' => 400,
-    //                 'message' => $th->getMessage(),
-    //             ]
-    //         );
-    //     }
-    // }
+        $bzOrder->shipment_provider = $request->provider;
+        $bzOrder->shipment_tracking_number = $request->tracking_number;
+        $bzOrder->save();
+        
+        $response = (object) [
+            'status' => 200,
+            'message' => "Shipment info successfully updated",
+        ];
+        return json_encode($response);
+    }
 }

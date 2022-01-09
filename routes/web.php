@@ -38,21 +38,15 @@ Route::middleware(['web', 'auth'])->group(function () {
 
             Route::get('/edit-release/{bzOrder}', [SalesOrderController::class, 'editRelease'])->name('edit-release');
 
-
-
-
-
-
-
             // @TODO:
+            Route::get('/detail-release/{bzOrder}', [SalesOrderController::class, 'detailRelease'])->name('detail-release');
+
+
             Route::get('/list-product/{bzOrder}', [SalesOrderController::class, 'listProductWithStock'])->name('listproduct');
             Route::get('/list-scan-out/{bzOrder}', [SalesOrderController::class, 'listScanOut'])->name('listscanout');
             Route::post('/release-product/{bzOrder}', [SalesOrderController::class, 'releaseProduct'])->name('releaseproduct');
-            Route::post('/delete-last-product', [SalesOrderController::class, 'deleteLastProduct'])->name('deletelastproduct');
-
-
-
-
+            Route::post('/delete-last-product/{bzOrder}', [SalesOrderController::class, 'deleteLastProduct'])->name('deletelastproduct');
+            Route::post('/update-shipment/{bzOrder}', [SalesOrderController::class, 'updateShipment'])->name('updateshipment');
         });
     });
 

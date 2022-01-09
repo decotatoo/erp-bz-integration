@@ -12,6 +12,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\App;
 
 class Update implements ShouldQueue
@@ -54,13 +55,16 @@ class Update implements ShouldQueue
      */
     public function handle()
     {
+        $metadata = [];
+
         try {
             $payload = [
                 'status' => $this->bzOrder->status,
+                'meta_data' => $this->getMetadata(),
             ];
 
             // TODO: check and add the AWB to the payload.
-            
+
             $result = (new Order(App::make('bz.woocommerce')))->update($this->bzOrder->wp_order_id, $payload);
 
             if (!$result) {
@@ -69,5 +73,36 @@ class Update implements ShouldQueue
         } catch (\Throwable $th) {
             $this->fail($th->getMessage());
         }
+    }
+
+    /**
+     * Get the meta data for the product.
+     * 
+     * @TODO: add more metadata to expose to ecommerce
+     * 
+     * @return array 
+     */
+    private function getMetadata()
+    {
+        $metadata = [];
+
+        if ($this->bzOrder->date_shipment_shipped !== null) {
+            $metadata[] = [
+                'key' => '_wc_shipment_tracking_items',
+                'value' => [
+                    [
+                        'tracking_provider'        => $this->bzOrder->shipment_provider,
+                        'custom_tracking_provider' => '',
+                        'custom_tracking_link'     => '',
+                        'tracking_number'          => $this->bzOrder->shipment_tracking_number,
+                        'date_shipped'             => Carbon::parse($this->bzOrder->date_shipment_shipped)->timestamp,
+                        'tracking_id'              => md5( "{$this->bzOrder->shipment_provider}-{$this->bzOrder->shipment_tracking_number}" . microtime() ), 
+                    ]
+                ],
+            ];
+        }
+
+
+        return $metadata;
     }
 }

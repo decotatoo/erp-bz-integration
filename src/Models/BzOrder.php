@@ -48,4 +48,15 @@ class BzOrder extends Model
     {
         return $this->hasMany(PackingSimulation::class);
     }
+
+    public function getMetaData($key)
+    {
+        $metaIndex = array_search($key, array_column($this->meta_data, 'key')); 
+
+        if ($metaIndex !== false) {
+            return $this->meta_data[$metaIndex]['value'];
+        }
+
+        return false;
+    }
 }
