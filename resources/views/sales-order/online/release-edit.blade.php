@@ -3,7 +3,7 @@
 @section('breadcumb')
     <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="mdi mdi-view-grid"></i></a></li>
     <li class="breadcrumb-item" aria-current="page"><a href="{{ route('sales-order.index') }}">Sales Order</a></li>
-    <li class="breadcrumb-item" aria-current="page"><a href="{{ route('sales-order.online.index') }}">Online List</a></li>
+    <li class="breadcrumb-item" aria-current="page"><a href="{{ route('sales-order.online.base.index') }}">Online List</a></li>
     <li class="breadcrumb-item active" aria-current="page">Add</li>
 @endsection
 
@@ -20,7 +20,7 @@
                         <div class="pull-right d-flex">
                             <div style="" class="" id="status_quotation">
                                 <a class="btn  btn-info btn-sm " style="" id=""
-                                    href="{{ route('sales-order.online.index') }}">Back</a>
+                                    href="{{ route('sales-order.online.base.index') }}">Back</a>
                             </div>
                         </div>
                     </div>
@@ -119,8 +119,8 @@
                                                 <div class="form-group @error('shipment') error @enderror row">
                                                     <label class="col-sm-4 col-form-label">Shipment</label>
                                                     <div class="col-sm-8">
-                                                        <div>
-                                                            <select class="form-select" name="shipment_provider" id="shipment_provider" title="Provider">
+                                                        <div style="display: inline-flex;width: 100%;">
+                                                            <select class="form-select" name="shipment_provider" id="shipment_provider" title="Provider" style="width: 50%;">
                                                                 @foreach ($shipments as $shipment)
                                                                     <option value="{{ $shipment['id'] }}"
                                                                         {{ $sales_order->shipment_provider == $shipment['id'] ? 'selected' : '' }}>
@@ -128,10 +128,12 @@
                                                                     </option>
                                                                 @endforeach
                                                             </select>
+
+                                                            <input type="date" class="form-control" placeholder="Date Shipped" name="date_shipment_shipped" id="date_shipment_shipped" value="{{ $sales_order->date_shipment_shipped ? \Illuminate\Support\Carbon::parse($sales_order->date_shipment_shipped)->format('Y-m-d') : date('Y-m-d') }}" style="width: 45%;margin-left: 5px;">
                                                         </div>
                                                         <div style="display: inline-flex;width: 100%;padding-top: 5px;">
                                                             <input type="text" name="shipment_tracking_number" id="shipment_tracking_number" value="{{ $sales_order->shipment_tracking_number }}" placeholder="AWB/Tracking number" class="form-control" style="width: 70%;">
-                                                            <button class="btn btn-success btn-sm" style="width: 20%;margin-left: 5px;" onclick="updateShipment(event)" {{ ($sales_order->date_shipment_shipped && \Illuminate\Support\Carbon::parse($sales_order->date_shipment_shipped)->addDays(1)->lessThan(\Illuminate\Support\Carbon::now())) || \Illuminate\Support\Carbon::parse($sales_order->date_released)->addDays(7)->lessThan(\Illuminate\Support\Carbon::now()) ? 'disabled' : '' }}>
+                                                            <button class="btn btn-success btn-sm" style="width: 20%;margin-left: 5px;" onclick="updateShipment(event)" {{ ($sales_order->date_shipment_shipped && \Illuminate\Support\Carbon::parse($sales_order->date_shipment_shipped)->addDays(3)->lessThan(\Illuminate\Support\Carbon::now())) || \Illuminate\Support\Carbon::parse($sales_order->date_released)->addDays(7)->lessThan(\Illuminate\Support\Carbon::now()) ? 'disabled' : '' }}>
                                                                 Update
                                                             </button>
                                                         </div>                                                  
@@ -140,6 +142,18 @@
                                                         <span class="text-danger">{{ $message }}</span>
                                                     @enderror
                                                 </div>
+                                                
+                                                @if (auth()->user()->can('bz-permisi'))
+                                                <div class="form-group row">
+                                                    <label class="col-sm-4 col-form-label">Invoice & Delivery Order</label>
+                                                    <div class="col-sm-8" style="align-self: center;">
+                                                        <a href="{{ route('sales-order.online.invoice.consumer.print', ['bzOrder' => $sales_order->id]) }}" target="_blank">
+                                                            <i class="fas fa-file-invoice"></i>
+                                                            Print Invoice and Delivery Order
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                                @endif
                                             @else
                                                 <div class="form-group @error('barcode') error @enderror row">
                                                     <label class="col-sm-4 col-form-label">Stock Out Product</label>
@@ -311,7 +325,7 @@
             $('#productOrderDetails').DataTable({
                 processing: true,
                 serverSide: true,
-                ajax: route('sales-order.online.listproduct', {
+                ajax: route('sales-order.online.base.listproduct', {
                     bzOrder: {{ $sales_order->id }}
                 }),
                 columns: [{
@@ -365,7 +379,7 @@
             $('#scanOutDetails').DataTable({
                 processing: true,
                 serverSide: true,
-                ajax: route('sales-order.online.listscanout', {
+                ajax: route('sales-order.online.base.listscanout', {
                     bzOrder: {{ $sales_order->id }}
                 }),
                 columns: [{
@@ -415,7 +429,7 @@
         async function releaseProduct(e) {
             if (e.key == "Enter") {
                 let resp = await axios.post(
-                    route('sales-order.online.releaseproduct', { 
+                    route('sales-order.online.base.releaseproduct', { 
                         bzOrder: {{ $sales_order->id }} 
                     }), 
                     {
@@ -490,6 +504,7 @@
         async function updateShipment(e) {
             provider = document.getElementById('shipment_provider').value;
             tracking_numner = document.getElementById('shipment_tracking_number').value;
+            date_shipment_shipped = document.getElementById('date_shipment_shipped').value;
 
             if (tracking_numner == '') {
                 $.toast({
@@ -505,12 +520,13 @@
             }
 
             let resp = await axios.post(
-                route('sales-order.online.updateshipment', { 
+                route('sales-order.online.base.updateshipment', { 
                     bzOrder: {{ $sales_order->id }} 
                 }), 
                 {
                     provider: provider,
-                    tracking_number: tracking_numner
+                    tracking_number: tracking_numner,
+                    date_shipment_shipped: date_shipment_shipped
                 }
             );
 
@@ -550,7 +566,7 @@
                 closeOnConfirm: false
             }, async function() {
                 swal.close();
-                let resp = await axios.post(route('sales-order.online.deletelastproduct', { 
+                let resp = await axios.post(route('sales-order.online.base.deletelastproduct', { 
                         bzOrder: {{ $sales_order->id }} 
                     }), {
                     id,

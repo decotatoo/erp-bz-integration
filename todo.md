@@ -112,3 +112,4 @@ Max Weight: 480
 - Calendar with internal agenda / event data.
     allow to share the agenda to internal staff.
 
+- update placeholder permission `bz-permisi`

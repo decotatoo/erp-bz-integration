@@ -49,6 +49,7 @@ return new class extends Migration
             $table->timestamp('date_completed')->nullable();
 
             $table->timestamp('date_released')->nullable();
+            $table->timestamp('date_invoice_print')->nullable();
 
             $table->timestamp('date_shipment_shipped')->nullable();
             $table->timestamp('date_shipment_delivered')->nullable();

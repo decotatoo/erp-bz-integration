@@ -25,7 +25,7 @@ class BzServiceProvider extends PackageServiceProvider
         $package
             ->name('bz')
             ->hasConfigFile([
-                'bz', // b2b business
+                'bz',
             ])
             ->hasRoutes([
                 'api',
@@ -96,10 +96,6 @@ class BzServiceProvider extends PackageServiceProvider
                  * @var \Illuminate\Console\Scheduling\Schedule $schedule
                  */
                 $schedule = $this->app->make(Schedule::class);
-
-                $schedule->command('bz:schedule:update-exchange-rate')
-                    ->dailyAt('20:00')
-                    ->timezone('Asia/Jakarta');
 
                 $schedule->command('bz:schedule:update-product')
                     ->dailyAt('23:00')

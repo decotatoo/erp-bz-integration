@@ -14,9 +14,8 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -64,6 +63,8 @@ class Create implements ShouldQueue
      */
     public function handle()
     {
+        DB::beginTransaction();
+
         try {
             if ($this->product->bzProduct) {
                 throw new Exception("Product already exists in WooCommerce. product_id:{$this->product->id} -> wp_product_id:{$this->product->bzProduct->wp_product_id}");
@@ -109,7 +110,10 @@ class Create implements ShouldQueue
             } else {
                 throw new Exception("Failed to create Product in WooCommerce. product_id:{$this->product->id}");
             }
+
+            DB::commit();
         } catch (\Throwable $th) {
+            DB::rollBack();
             $this->fail($th->getMessage());
         }
     }

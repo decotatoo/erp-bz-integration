@@ -54,7 +54,6 @@ class CalculateStock implements ShouldQueue
     public function handle()
     {
         if (!$this->product->bzProduct) {
-            // $this->fail('Product not found in BZ');
             return;
         }
 

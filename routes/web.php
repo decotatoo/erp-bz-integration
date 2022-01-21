@@ -32,21 +32,39 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::prefix('sales-order')->name('sales-order.')->group(function () {
         // Sales Order Online
         Route::prefix('online')->name('online.')->group(function () {
-            Route::get('/', [SalesOrderController::class, 'index'])->name('index');
-            Route::post('/list', [SalesOrderController::class, 'list'])->name('list');
-            Route::get('/detail-product/{bzOrder}', [SalesOrderController::class, 'detailProduct'])->name('detail-product');
 
-            Route::get('/edit-release/{bzOrder}', [SalesOrderController::class, 'editRelease'])->name('edit-release');
+            Route::prefix('base')->name('base.')->group(function () {
+                Route::get('/', [SalesOrderController::class, 'index'])->name('index');
+                Route::post('/list', [SalesOrderController::class, 'list'])->name('list');
+                Route::get('/detail-product/{bzOrder}', [SalesOrderController::class, 'detailProduct'])->name('detail-product');
 
-            // @TODO:
-            Route::get('/detail-release/{bzOrder}', [SalesOrderController::class, 'detailRelease'])->name('detail-release');
+                Route::get('/edit-release/{bzOrder}', [SalesOrderController::class, 'editRelease'])->name('edit-release');
 
+                // @TODO:
+                Route::get('/detail-release/{bzOrder}', [SalesOrderController::class, 'detailRelease'])->name('detail-release');
 
-            Route::get('/list-product/{bzOrder}', [SalesOrderController::class, 'listProductWithStock'])->name('listproduct');
-            Route::get('/list-scan-out/{bzOrder}', [SalesOrderController::class, 'listScanOut'])->name('listscanout');
-            Route::post('/release-product/{bzOrder}', [SalesOrderController::class, 'releaseProduct'])->name('releaseproduct');
-            Route::post('/delete-last-product/{bzOrder}', [SalesOrderController::class, 'deleteLastProduct'])->name('deletelastproduct');
-            Route::post('/update-shipment/{bzOrder}', [SalesOrderController::class, 'updateShipment'])->name('updateshipment');
+                Route::get('/list-product/{bzOrder}', [SalesOrderController::class, 'listProductWithStock'])->name('listproduct');
+                Route::get('/list-scan-out/{bzOrder}', [SalesOrderController::class, 'listScanOut'])->name('listscanout');
+                Route::post('/release-product/{bzOrder}', [SalesOrderController::class, 'releaseProduct'])->name('releaseproduct');
+                Route::post('/delete-last-product/{bzOrder}', [SalesOrderController::class, 'deleteLastProduct'])->name('deletelastproduct');
+                Route::post('/update-shipment/{bzOrder}', [SalesOrderController::class, 'updateShipment'])->name('updateshipment');
+            });
+
+            Route::prefix('report')->name('report.')->group(function () {
+                Route::get('/', [SalesOrderController::class, 'report'])->name('index');
+                Route::post('/list', [SalesOrderController::class, 'reportList'])->name('list');
+                Route::get('print/{bzOrder}', [SalesOrderController::class, 'printReport'])->name('print');
+            });
+
+            Route::prefix('invoice')->name('invoice.')->group(function () {
+                Route::prefix('consumer')->name('consumer.')->group(function () {
+                    Route::get('print/{bzOrder}', [SalesOrderController::class, 'printInvoice'])->name('print');
+                });
+
+                Route::prefix('pt-to-ltd')->name('pt-to-ltd.')->group(function () {
+                    Route::get('print-pt-to-ltd/{bzOrder}', [SalesOrderController::class, 'printInvoicePtToLtd'])->name('print-pt-to-ltd');
+                });
+            });
         });
     });
 

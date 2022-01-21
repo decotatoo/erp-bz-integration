@@ -3,18 +3,18 @@
 @section('breadcumb')
 <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i class="mdi mdi-view-grid"></i></a></li>
 <li class="breadcrumb-item" aria-current="page"><a href="{{ route('sales-order.index') }}">Sales Order</a></li>
-<li class="breadcrumb-item active" aria-current="page">Online</li>
+<li class="breadcrumb-item" aria-current="page"><a href="{{ route('sales-order.online.base.index') }}">Online</a></li>
+<li class="breadcrumb-item active" aria-current="page">Report</li>
 @endsection
 
 @section('content')
-
 
 <div class="col-12">
 
     <div class="d-flex flex-row justify-content-between">
         <h4 class="box-title align-items-start flex-column">
-            Sales Order [ONLINE]
-            <small class="subtitle">A list of sales order online</small>
+            Sales Order [ONLINE] - <span style="text-decoration-line: underline;"> Report </span>
+            <small class="subtitle">Report of sales order online</small>
         </h4>
     </div>
 
@@ -24,13 +24,11 @@
                 <div class="d-flex flex-row justify-content-between">
                     <div class="align-items-start">
                         <div class="text-dark text-bold">
-                            Note
+                            {{-- Note --}}
                         </div>
                         <div class="mt-5">
-                            <span class="text-success text-bold">Green</span>: <span class="text-dark">Released</span>
                         </div>
                         <div class="mt-0">
-                            <span class="text-light text-bold">White</span>: <span class="text-dark">Not Released Yet</span>
                         </div>
                     </div>
 
@@ -56,16 +54,6 @@
                                 <option value="date_released">Order Released</option>
                                 <option value="date_shipment_shipped">Order Shipped</option>
                                 {{-- <option value="date_shipment_delivered">Order Delivered</option> --}}
-                            </select>
-                        </div>
-
-    
-                        <div class="form-group" style="margin-right: 5px">
-                            <label for="order_status" class="form-label">Status</label>
-                            <select name="order_status" id="order_status" class="form-select">
-                                <option value="">All</option>
-                                <option value="released">Released</option>
-                                <option value="notreleasedyet">Not released yet</option>
                             </select>
                         </div>
                     </div>
@@ -97,7 +85,12 @@
                                 <th style="min-width: 25px"><span class="text-dark">SO Number</span></th>
                                 <th style="min-width: 20px"><span class="text-dark">Customer Name</span></th>
                                 <th style="min-width: 20px"><span class="text-dark">Order Date</span></th>
-                                <th style="min-width: 20px"><span class="text-dark">Product Order</span></th>
+                                <th style="min-width: 20px"><span class="text-dark">Delivery Date</span></th>
+                                <th style="min-width: 20px"><span class="text-dark">Items</span></th>
+                                <th style="min-width: 20px"><span class="text-dark">Product Value</span></th>
+                                <th style="min-width: 20px"><span class="text-dark">Tax</span></th>
+                                <th style="min-width: 20px"><span class="text-dark">Shipping Cost</span></th>
+                                <th style="min-width: 20px"><span class="text-dark">Notes</span></th>
                                 <th style="min-width: 80px" class="text-center"><span class="text-dark">Action</span></th>
                             </tr>
                         </thead>
@@ -107,7 +100,86 @@
                 </form>
             </div>
         </div>
-    </div>  
+    </div>
+
+
+
+
+
+
+
+
+
+
+    <div class="bg-info p-20 rounded mt-30" style="background-color: #17586f !important">
+        <div class="d-lg-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <div class="me-15 bg-white h-40 w-40 l-h-50 rounded text-center">
+                    <h2 class="fs-18 text-info" style="color: #17586f !important;">Rp</h2>
+                </div>
+                <div class="d-flex flex-column fw-500">
+                    <a href="#" class="text-white hover-success fs-16" id="revenue_idr">0,00</a>
+                    <span class="text-white-50">Total Revenue (IDR)</span>
+                </div>
+            </div>
+            <div class="d-flex align-items-center">
+                <div class="me-15 bg-white h-40 w-40 l-h-50 rounded text-center">
+                    <h2 class="fs-18 text-info" style="color: #17586f !important;">HK$</h2>
+                </div>
+                <div class="d-flex flex-column fw-500">
+                    <a href="#" class="text-white hover-danger fs-16" id="revenue_hkd">0,00</a>
+                    <span class="text-white-50">Total Revenue (HKD)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </div>
 @endsection
 
@@ -166,45 +238,26 @@
                         number = 1;
                         data.data.salesOrders.forEach((value, index) => {
                             let detailProductOrder = `
-                                <a href="#" data-toggle="tooltip" data-placement="top" title="Detail product order" class="btn btn-sm btn-primary btn-rounded" onclick="detailModal('Detail Product Order', '${route('sales-order.online.base.detail-product', { bzOrder: value.id } )}', 'x-large')"><i class="fa fa-eye"></i> Detail</a>
+                                <a href="#" data-toggle="tooltip" data-placement="top" title="Detail product order" class="btn btn-sm btn-primary btn-rounded" onclick="detailModal('Detail Product Order', '${route('sales-order.online.base.detail-product', { bzOrder: value.id, view_type: 'report' } )}', 'x-large')"><i class="fa fa-eye"></i> Detail</a>
                             `;
 
-                            let _url_edit_release = route('sales-order.online.base.edit-release', { bzOrder: value.id } );
-                            let _url_detail_release = route('sales-order.online.base.detail-release', { bzOrder: value.id } );
 
                             let action = `
-                                <a href="${_url_edit_release}" data-toggle="tooltip" data-placement="top" title="Release" class="waves-effect waves-light btn btn-sm btn-warning-light btn-circle mx-5">
-                                    <i class="fas fa-qrcode"></i>
-                                </a>
+                                <a href="${route('sales-order.online.base.detail-release', { bzOrder: value.id})}" class="btn btn-sm btn-info btn-rounded" target="blank"><i class="fa fa-print"></i> Print</a>
                             `;
-
-                            if (value.date_released != null) {
-                                action += `
-                                <a href="${_url_edit_release}" data-toggle="tooltip" data-placement="top" title="Detail" class="waves-effect waves-light btn btn-sm btn-info-light btn-circle mx-5">
-                                    <i class="fas fa-info"></i>
-                                </a>
-                            `;
-                            }
-
-                            let rowBgClass = '';
-
-                            if (value.date_released != null) {
-                                rowBgClass = 'bg-success';
-                            } else if (value.has_some_stockout) {
-                                rowBgClass = 'bg-warning';
-                            }
 
                             let tr = $(`
-                                <tr class="${rowBgClass}">
+                                <tr>
                                     <td>${number}</td>
-                                    <td>
-                                        <a href="${(value.date_released) ? _url_detail_release : _url_edit_release}" class="text-primary text-bold">
-                                            ${value.so_no}
-                                        </a>
-                                    </td>
+                                    <td>${value.so_no}</td>
                                     <td>${value.customer_name}</td>
                                     <td>${value.date_order}</td>
+                                    <td>${value.date_shipped ?? ''}</td>
                                     <td>${detailProductOrder}</td>
+                                    <td>${value.currency + ' ' + value.total_order_value}</td>
+                                    <td>${value.total_tax ? value.currency + ' ' + value.total_tax : ''}</td>
+                                    <td>${value.shipping_total ? value.currency + ' ' + value.shipping_total : ''}</td>
+                                    <td>${value.customer_note ?? ''}</td>
                                     <td>
                                         ${action}
                                     </td>
@@ -213,7 +266,11 @@
                             salesOrderTable.row.add(tr[0]).draw();
                             number++;
                         });
+
+
                         
+                        $('#revenue_idr').text(data.data._idr);
+                        $('#revenue_hkd').text(data.data._hkd);
                     },
                     error: function (data) {
                         $.alert(data);
@@ -223,3 +280,5 @@
         }
     </script>    
 @endpush
+
+

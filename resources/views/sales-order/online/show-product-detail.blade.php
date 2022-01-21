@@ -1,4 +1,4 @@
-@if ($status == 'report')
+@if ($view_type === 'report')
 <div class="table-responsive ">
     <table class="table " id="productLists" width="100%">
         <thead>
@@ -27,7 +27,7 @@
         </tbody>
     </table>
 </div>
-@elseif ($status == 'invoice')
+@elseif ($view_type == 'invoice')
 <div class="table-responsive ">
     <table class="table " id="productLists" width="100%">
         <thead>

@@ -30,5 +30,4 @@ return [
         'header_total_pages' => env('BZ_WOOCOMMERCE_WP_HEADER_TOTAL_PAGES', 'X-WP-TotalPages'),
     ],
 
-    'min_month_of_stock_expire_duration' => env('BZ_MIN_MONTH_OF_STOCK_EXPIRE_DURATION', 3),
 ];
