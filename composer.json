@@ -1,12 +1,13 @@
 {
-  "name": "decotatoo/woocommerce-integration",
-  "description": "WooCommerce integration for ERP",
+  "name": "decotatoo/bz-integration",
+  "description": "B2B WooCommerce integration for ERP",
   "type": "library",
   "require": {
     "php": "^8.0",
-    "codexshaper/laravel-woocommerce": "dev-master",
-    "dvdoug/boxpacker": "^3.9",
+    "automattic/woocommerce": "dev-master",
+    "dvdoug/boxpacker": "dev-php-8.x",
     "illuminate/contracts": "^8.37",
+    "laravel-notification-channels/telegram": "^1.0",
     "spatie/laravel-package-tools": "^1.9.2"
   },
   "require-dev": {
@@ -23,41 +24,51 @@
   },
   "license": "MIT",
   "autoload": {
-      "psr-4": {
-          "Decotatoo\\WoocommerceIntegration\\": "src/",
-          "Decotatoo\\WoocommerceIntegration\\Database\\Factories\\": "database/factories",
-          "Decotatoo\\WoocommerceIntegration\\Database\\Seeders\\": "database/seeders/"
-      }
+    "psr-4": {
+      "Decotatoo\\Bz\\": "src/",
+      "Decotatoo\\Bz\\Database\\Factories\\": "database/factories",
+      "Decotatoo\\Bz\\Database\\Seeders\\": "database/seeders/"
+    }
   },
   "autoload-dev": {
-      "psr-4": {
-          "Decotatoo\\WoocommerceIntegration\\Tests\\": "tests"
-      }
+    "psr-4": {
+      "Decotatoo\\Bz\\Tests\\": "tests"
+    }
   },
   "scripts": {
-      "phpstan": "vendor/bin/phpstan analyse",
-      "test": "vendor/bin/pest",
-      "test-coverage": "vendor/bin/pest coverage"
+    "phpstan": "vendor/bin/phpstan analyse",
+    "test": "vendor/bin/pest",
+    "test-coverage": "vendor/bin/pest coverage"
   },
   "authors": [
-      {
-          "name": "decotatoo",
-          "email": "it@deco-tatoo.com"
-      }
+    {
+      "name": "decotatoo",
+      "email": "it@deco-tatoo.com"
+    }
   ],
   "config": {
-      "sort-packages": true
+    "sort-packages": true,
+    "allow-plugins": {
+      "phpstan/extension-installer": true,
+      "pestphp/pest-plugin": true
+    }
   },
   "extra": {
-      "laravel": {
-          "providers": [
-              "Decotatoo\\WoocommerceIntegration\\WoocommerceIntegrationServiceProvider"
-          ],
-          "aliases": {
-              "WoocommerceIntegration": "Decotatoo\\WoocommerceIntegration\\WoocommerceIntegrationFacade"
-          }
+    "laravel": {
+      "providers": [
+        "Decotatoo\\Bz\\BzServiceProvider"
+      ],
+      "aliases": {
+        "Bz": "Decotatoo\\Bz\\BzFacade"
       }
+    }
   },
   "minimum-stability": "dev",
-  "prefer-stable": true
+  "prefer-stable": true,
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/decotatoo/BoxPacker"
+    }
+  ]
 }

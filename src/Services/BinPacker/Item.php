@@ -1,9 +1,10 @@
 <?php
 
-namespace Decotatoo\WoocommerceIntegration\Services\BinPacker;
+namespace Decotatoo\Bz\Services\BinPacker;
 
 use App\Models\ProductInCatalog;
 use DVDoug\BoxPacker\Item as BoxPackerItem;
+use DVDoug\BoxPacker\Rotation;
 
 class Item implements BoxPackerItem
 {
@@ -32,33 +33,30 @@ class Item implements BoxPackerItem
      */
     private $weight = 0;
 
-    private $keep_flat = false;
+    /**
+     * @var Rotation
+     */
+    private $allowedRotation;
 
     public function __construct(ProductInCatalog $product)
     {
         $this->product = $product;
 
-        if ($this->product->boxType) {
-            $boxType = $this->product->boxType;
+        if ($this->product->unitBox()->exists()) {
+            $dimension = $this->product->unitBox;
+            
+            $this->width = $dimension->width;
+            $this->length = $dimension->length;
+            $this->depth = $dimension->height;
+        } elseif ($this->product->boxType()->exists()) {
+            $dimension = $this->product->boxType;
 
-            $this->width = $this->normalizeDimentionalValue($boxType->lebar);
-            $this->length = $this->normalizeDimentionalValue($boxType->panjang);
-            $this->depth = $this->normalizeDimentionalValue($boxType->tinggi);
+            $this->width = intval($dimension->lebar * 10);
+            $this->length = intval($dimension->panjang * 10);
+            $this->depth = intval($dimension->tinggi * 10);
         }
 
-        if ($this->product->packing_weight) {
-            $this->weight = $this->product->packing_weight;
-        }
-
-        $this->keep_flat = $this->product->keep_flat ?? false;
-    }
-
-    /**
-     * Convert the dimentional value from cm to mm
-     */
-    private function normalizeDimentionalValue($value): int
-    {
-        return intval($value * 10);
+        $this->weight = $this->product->packed_weight ?? $this->product->gross_weight;
     }
 
     public function getDescription(): string
@@ -86,20 +84,21 @@ class Item implements BoxPackerItem
         return $this->weight;
     }
 
-    public function getKeepFlat(): bool
+    public function getAllowedRotations(): int
     {
-        return $this->keep_flat;
+        return 6;
+        return $this->allowedRotation;
     }
 
     public function jsonSerialize()
     {
         return [
-            'description' => $this->description,
-            'width' => $this->width,
-            'length' => $this->length,
-            'depth' => $this->depth,
-            'weight' => $this->weight,
-            'keepFlat' => $this->keep_flat,
+            'description' => $this->getDescription(),
+            'width' => $this->getWidth(),
+            'length' => $this->getLength(),
+            'depth' => $this->getDepth(),
+            'weight' => $this->getWeight(),
+            'allowedRotation' => $this->getAllowedRotations(),
         ];
     }
 }

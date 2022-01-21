@@ -1,11 +1,11 @@
 <?php
 
-namespace Decotatoo\WoocommerceIntegration\Jobs\Webhook;
+namespace Decotatoo\Bz\Jobs\Webhook;
 
-use Decotatoo\WoocommerceIntegration\Models\WiCustomer;
-use Decotatoo\WoocommerceIntegration\Models\WiOrder;
-use Decotatoo\WoocommerceIntegration\Models\WiOrderItem;
-use Decotatoo\WoocommerceIntegration\Models\WiProduct;
+use Decotatoo\Bz\Models\BzCustomer;
+use Decotatoo\Bz\Models\BzOrder;
+use Decotatoo\Bz\Models\BzOrderItem;
+use Decotatoo\Bz\Models\BzProduct;
 use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -16,6 +16,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 /**
@@ -30,7 +31,7 @@ class OrderUpdated implements ShouldQueue
     /**
      * The request instance.
      * 
-     * @var Request
+     * @var object
      */
     protected $request;
 
@@ -39,21 +40,9 @@ class OrderUpdated implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(Request $request)
+    public function __construct($request)
     {
         $this->request = $request;
-    }
-
-    /**
-     * Get the middleware the job should pass through.
-     *
-     * @return array
-     */
-    public function middleware()
-    {
-        return [
-            (new WithoutOverlapping($this->request->id))->dontRelease()
-        ];
     }
 
     /**
@@ -64,130 +53,132 @@ class OrderUpdated implements ShouldQueue
     public function handle()
     {
         try {
-            /** @var WiCustomer $wiCustomer */
-            $wiCustomer = WiCustomer::where('wp_customer_id', $this->request->customer_id)->first();
+            $bzOrder = BzOrder::where('wp_order_id', $this->request->id)->first();
 
-            $wiOrder = WiOrder::where('wp_order_id', $this->request->id)->first();
-
-            if (!$wiOrder) {
+            if (!$bzOrder) {
                 throw new Exception("Order with wp_order_id:{$this->request->id} not found");
             }
 
-            if ($wiCustomer) {
-                $wiOrder->wi_customer_id = $wiCustomer->id;
+            if (
+                $bzOrder->status === 'completed'
+                && $bzOrder->released_date
+            ) {
+                throw new Exception("Order with wp_order_id:{$this->request->id} already released");
             }
 
-            $wiOrder->wp_order_id = $this->request->id;
-            $wiOrder->cart_hash = $this->request->cart_hash;
-            $wiOrder->order_key = $this->request->order_key;
+            /** @var BzCustomer $bzCustomer */
+            $bzCustomer = BzCustomer::where('wp_customer_id', $this->request->customer_id)->first();
 
-            $wiOrder->status = $this->request->status;
-            $wiOrder->currency = $this->request->currency;
-            $wiOrder->discount_total = $this->request->discount_total;
-            $wiOrder->discount_tax = $this->request->discount_tax;
-            $wiOrder->shipping_total = $this->request->shipping_total;
-            $wiOrder->shipping_tax = $this->request->shipping_tax;
-            $wiOrder->total = $this->request->total;
-            $wiOrder->total_tax = $this->request->total_tax;
+            if ($bzCustomer) {
+                $bzOrder->bz_customer_id = $bzCustomer->id;
+            }
 
-            $wiOrder->payment_method = $this->request->payment_method;
-            $wiOrder->payment_method_title = $this->request->payment_method_title;
+            $bzOrder->wp_order_id = $this->request->id;
+            $bzOrder->cart_hash = $this->request->cart_hash;
+            $bzOrder->order_key = $this->request->order_key;
+
+            $bzOrder->status = $this->request->status;
+            $bzOrder->currency = $this->request->currency;
+            $bzOrder->discount_total = $this->request->discount_total;
+            $bzOrder->discount_tax = $this->request->discount_tax;
+            $bzOrder->shipping_total = $this->request->shipping_total;
+            $bzOrder->shipping_tax = $this->request->shipping_tax;
+            $bzOrder->total = $this->request->total;
+            $bzOrder->total_tax = $this->request->total_tax;
+
+            $bzOrder->payment_method = $this->request->payment_method;
+            $bzOrder->payment_method_title = $this->request->payment_method_title;
 
             if ($this->request->transaction_id) {
-                $wiOrder->transaction_id = $this->request->transaction_id;
+                $bzOrder->transaction_id = $this->request->transaction_id;
             }
 
             if ($this->request->date_paid) {
-                $wiOrder->date_paid = Carbon::parse($this->request->date_paid);
+                $bzOrder->date_paid = Carbon::parse($this->request->date_paid);
             }
 
             if ($this->request->date_completed) {
-                $wiOrder->date_completed = Carbon::parse($this->request->date_completed);
+                $bzOrder->date_completed = Carbon::parse($this->request->date_completed);
             }
 
-            $wiOrder->date_created = Carbon::parse($this->request->date_created_gmt);
-            $wiOrder->date_modified = Carbon::parse($this->request->date_modified_gmt);
+            $bzOrder->date_created = Carbon::parse($this->request->date_created_gmt);
+            $bzOrder->date_modified = Carbon::parse($this->request->date_modified_gmt);
 
-
-            $wiOrder->billing = $this->request->billing;
-            $wiOrder->shipping = $this->request->shipping;
-            $wiOrder->shipping_lines = $this->request->shipping_lines;
-            $wiOrder->line_items = $this->request->line_items;
-            $wiOrder->tax_lines = $this->request->tax_lines;
-            $wiOrder->fee_lines = $this->request->fee_lines;
-            $wiOrder->coupon_lines = $this->request->coupon_lines;
-            $wiOrder->meta_data = $this->request->meta_data;
+            $bzOrder->billing = $this->request->billing;
+            $bzOrder->shipping = $this->request->shipping;
+            $bzOrder->shipping_lines = $this->request->shipping_lines;
+            $bzOrder->line_items = $this->request->line_items;
+            $bzOrder->tax_lines = $this->request->tax_lines;
+            $bzOrder->fee_lines = $this->request->fee_lines;
+            $bzOrder->coupon_lines = $this->request->coupon_lines;
+            $bzOrder->meta_data = $this->request->meta_data;
 
             // save without triggering events
-            $wiOrder->saveQuietly(['timestamps' => false]);
+            $bzOrder->saveQuietly(['timestamps' => false]);
 
-            $wiOrder->refresh();
+            $bzOrder->refresh();
 
             $line_items = $this->request->line_items;
 
             /**
              * IDEA:
-             * 1. find the existing wiOrderItems that match by the current line_items's id
-             * 2. load all existing wiOrderItems, than trim by the collection from step 1
+             * 1. find the existing bzOrderItems that match by the current line_items's id
+             * 2. load all existing bzOrderItems, than trim by the collection from step 1
              * 3. destroy the result of step 2
-             * 4. loop through the line_items and find or create the wiOrderItem
+             * 4. loop through the line_items and find or create the bzOrderItem
              */
 
             /**
              * IMPLEMENTED:
              * 1. extract the id from the line_items
-             * 2. filter $wiOrder->wiOrderItems by the id that doesn't match with the id from step 1
+             * 2. filter $bzOrder->bzOrderItems by the id that doesn't match with the id from step 1
              * 3. destroy the result of step 2
-             * 4. refresh the wiOrder
-             * 5. loop through the line_items and find or create the wiOrderItem
+             * 4. refresh the bzOrder
+             * 5. loop through the line_items and find or create the bzOrderItem
              */
 
             $ids = array_column($line_items, 'id');
-            $wiOrder->wiOrderItems->filter(function ($item) use ($ids) {
+            $bzOrder->bzOrderItems->filter(function ($item) use ($ids) {
                 return !in_array($item->wp_order_line_item_id, $ids);
             })->each(function ($item) {
                 $item->delete();
             });
 
-            $wiOrder->refresh();
+            $bzOrder->refresh();
 
             $toSaveItems = [];
 
             foreach ($line_items as $line_item) {
-                $wiOrderItem = $wiOrder->wiOrderItems->where('wp_order_line_item_id', $line_item->id)->first();
+                $bzOrderItem = $bzOrder->bzOrderItems->where('wp_order_line_item_id', $line_item['id'])->first();
 
-                if (!$wiOrderItem) {
-                    $wiOrderItem = new WiOrderItem();
+                if (!$bzOrderItem) {
+                    $bzOrderItem = new BzOrderItem();
                 }
 
-                $wiOrderItem->wi_product_id = WiProduct::where('wp_product_id', $line_item->product_id)->first()->id;
+                $bzOrderItem->bz_product_id = BzProduct::where('wp_product_id', $line_item['product_id'])->first()->id;
 
-                $wiOrderItem->sku = $line_item->sku;
-                $wiOrderItem->name = $line_item->name;
-                $wiOrderItem->price = $line_item->price;
-                $wiOrderItem->quantity = $line_item->quantity;
-                $wiOrderItem->subtotal = $line_item->subtotal;
-                $wiOrderItem->subtotal_tax = $line_item->subtotal_tax;
-                $wiOrderItem->total = $line_item->total;
-                $wiOrderItem->total_tax = $line_item->total_tax;
-                $wiOrderItem->taxes = $line_item->taxes;
-                $wiOrderItem->variation_id = $line_item->variation_id;
+                $bzOrderItem->sku = $line_item['sku'];
+                $bzOrderItem->name = $line_item['name'];
+                $bzOrderItem->price = $line_item['price'];
+                $bzOrderItem->quantity = $line_item['quantity'];
+                $bzOrderItem->subtotal = $line_item['subtotal'];
+                $bzOrderItem->subtotal_tax = $line_item['subtotal_tax'];
+                $bzOrderItem->total = $line_item['total'];
+                $bzOrderItem->total_tax = $line_item['total_tax'];
+                $bzOrderItem->taxes = $line_item['taxes'];
+                $bzOrderItem->variation_id = $line_item['variation_id'];
 
-                $wiOrderItem->meta_data = $line_item->meta_data;
+                $bzOrderItem->meta_data = $line_item['meta_data'];
 
-                $toSaveItems[] = $wiOrderItem;
+                $toSaveItems[] = $bzOrderItem;
             }
 
-            $wiOrder->wiOrderItems()->saveMany($toSaveItems);
+            $bzOrder->bzOrderItems()->saveMany($toSaveItems);
 
-            $wiOrder->refresh();
+            $bzOrder->refresh();
 
-            // if ($wiOrder->status !== $this->request->status) {
-            //     if ($this->request->status === 'completed') {
-            //         // TODO: add the order to production and shipment
-            //     }
-            // }
         } catch (\Throwable $th) {
+            Log::error($th->getMessage());
             $this->fail($th->getMessage());
         }
     }

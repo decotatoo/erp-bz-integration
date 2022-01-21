@@ -1,6 +1,6 @@
 <?php
 
-namespace Decotatoo\WoocommerceIntegration\Models;
+namespace Decotatoo\Bz\Models;
 
 use App\Models\ProductInCatalog;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,15 +15,16 @@ class CommerceCategory extends Model
 
     protected $table = 'commerce_categories';
     
-    protected $timestamp = false;
+    public $timestamps = false;
 
-    public function wiCategory()
+    public function bzCategory()
     {
-        return $this->morphOne(WiCategory::class, 'categoryable');  
+        return $this->morphOne(BzCategory::class, 'categoryable');  
     }
 
     public function products()
     {
-        return $this->hasMany(ProductInCatalog::class);
+        return $this->hasMany(ProductInCatalog::class, 'commerce_category_id', 'id');
     }
+
 }

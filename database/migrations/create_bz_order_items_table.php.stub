@@ -1,0 +1,46 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up()
+    {
+        Schema::create('bz_order_items', function (Blueprint $table) {
+            $table->id();
+
+            $table->unsignedBigInteger('wp_order_line_item_id')->nullable(); // WooCommerce Order's line item ID
+
+            $table->unsignedBigInteger('bz_order_id');
+            $table->foreign('bz_order_id')->references('id')->on('bz_orders')->onDelete('cascade');
+
+            $table->unsignedBigInteger('bz_product_id')->nullable();
+            $table->foreign('bz_product_id')->references('id')->on('bz_products')->onDelete('set null');
+
+            $table->integer('variation_id')->nullable();
+
+            $table->string('sku');
+            $table->string('name');
+            $table->integer('quantity')->default(1);
+            $table->float('price');
+            $table->float('subtotal');
+            $table->float('subtotal_tax');
+            $table->float('total');
+            $table->float('total_tax');
+
+            $table->json('taxes')->nullable();
+            $table->json('meta_data')->nullable();
+            $table->timestamps();
+
+            $table->index('wp_order_line_item_id');
+            $table->index('sku');
+        });
+    }
+
+    public function down()
+    {
+        Schema::dropIfExists('bz_order_items');
+    }
+};

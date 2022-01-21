@@ -1,6 +1,6 @@
 <?php
 
-namespace Decotatoo\WoocommerceIntegration\Jobs\Product;
+namespace Decotatoo\Bz\Jobs\Product;
 
 use App\Models\ProductInCatalog;
 use Illuminate\Bus\Queueable;
@@ -16,7 +16,7 @@ class CalculateStock implements ShouldQueue
     /**
      * The product instance.
      *
-     * @var \App\Models\ProductInCatalog
+     * @var ProductInCatalog
      */
     protected $product;
 
@@ -53,33 +53,43 @@ class CalculateStock implements ShouldQueue
      */
     public function handle()
     {
-        if (!$this->product->wiProduct) {
+        if (!$this->product->bzProduct) {
             return;
         }
 
-        $wi_product = $this->product->wiProduct;
+        /** @var \Decotatoo\Bz\Models\BzProduct $bz_product */
+        $bz_product = $this->product->bzProduct;
 
         if ($this->op !== false) {
             switch ($this->op) {
                 case 'in':
-                    $wi_product->stock_in_quantity += $this->value;
+                    $bz_product->stock_in_quantity += $this->value;
                     break;
 
                 case 'out':
-                    $wi_product->stock_out_quantity += $this->value;
+                    $bz_product->stock_out_quantity += $this->value;
                     break;
 
                 default:
                     break;
             }
         } else {
-            $wi_product->stock_in_quantity = $this->product->productStockIn->count('id');
-            $wi_product->stock_out_quantity = $this->product->productStockOut->count('id');
+            $bz_product->stock_in_quantity = (clone $this->product)->productStockIn()->isReleaseable()->count('id');
+            $bz_product->stock_out_quantity = (clone $this->product)->productStockOut()->isReleaseable()->count('id');
         }
 
-        $wi_product->save();
-        $wi_product->refresh();
+        // Find the pending order, and deduct the stock counter
+        $pendingOrderItems = $bz_product->bzOrderItems()->whereHas('bzOrder', function ($query) {
+            $query->where('status', 'processing');
+        })->get();
 
-        UpdateStock::dispatch($wi_product)->onQueue('high');
+        $onhold_quantity = $pendingOrderItems->map(function ($item) {
+            return $item->quantity - $item->productStockOuts()->count();
+        })->sum();
+
+        $bz_product->save();
+        $bz_product->refresh();
+
+        UpdateStock::dispatch($bz_product, $onhold_quantity)->onQueue('high');
     }
 }

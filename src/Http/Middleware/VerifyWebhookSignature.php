@@ -1,9 +1,10 @@
 <?php
 
-namespace Decotatoo\WoocommerceIntegration\Http\Middleware;
+namespace Decotatoo\Bz\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class VerifyWebhookSignature
@@ -17,12 +18,21 @@ class VerifyWebhookSignature
      */
     public function handle(Request $request, Closure $next)
     {
+        Log::debug('VerifyWebhookSignature::handle', [
+            'passed' => !(!$request->hasHeader('x-wc-webhook-source')
+            || !$request->hasHeader('x-wc-webhook-signature')
+            || !$request->hasHeader('x-wc-webhook-topic')
+            || rtrim($request->header('x-wc-webhook-source'), '/') !== config('bz.woocommerce.store_url')
+            || $request->header('x-wc-webhook-signature') !== base64_encode(hash_hmac('sha256', $request->getContent(), config('bz.webhook.secret'), true))),
+            'headers' => $request->header(),
+        ]);
+
         if (
-            ! $request->hasHeader('x-wc-webhook-source') 
-            || ! $request->hasHeader('x-wc-webhook-signature') 
-            || ! $request->hasHeader('x-wc-webhook-topic')
-            || rtrim($request->header('x-wc-webhook-source'), '/') !== config('woocommerce.store_url')
-            || $request->header('x-wc-webhook-signature') !== base64_encode(hash_hmac('sha256', $request->getContent(), config('woocommerce.webhook.secret'), true))
+            !$request->hasHeader('x-wc-webhook-source')
+            || !$request->hasHeader('x-wc-webhook-signature')
+            || !$request->hasHeader('x-wc-webhook-topic')
+            || rtrim($request->header('x-wc-webhook-source'), '/') !== config('bz.woocommerce.store_url')
+            || $request->header('x-wc-webhook-signature') !== base64_encode(hash_hmac('sha256', $request->getContent(), config('bz.webhook.secret'), true))
         ) {
             throw new AccessDeniedHttpException('Invalid webhook signature.');
         }

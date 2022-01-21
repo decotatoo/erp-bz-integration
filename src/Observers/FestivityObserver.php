@@ -1,11 +1,11 @@
 <?php
 
-namespace Decotatoo\WoocommerceIntegration\Observers;
+namespace Decotatoo\Bz\Observers;
 
 use App\Models\Festivity;
-use Decotatoo\WoocommerceIntegration\Jobs\WiCategory\Create;
-use Decotatoo\WoocommerceIntegration\Jobs\WiCategory\Delete;
-use Decotatoo\WoocommerceIntegration\Jobs\WiCategory\Update;
+use Decotatoo\Bz\Jobs\BzCategory\Create;
+use Decotatoo\Bz\Jobs\BzCategory\Delete;
+use Decotatoo\Bz\Jobs\BzCategory\Update;
 
 class FestivityObserver
 {
@@ -24,7 +24,7 @@ class FestivityObserver
      */
     public function created(Festivity $festivity)
     {
-        if (!$festivity->wiCategory) {
+        if (!$festivity->bzCategory) {
             Create::dispatch($festivity)->afterCommit()->onQueue('high');
         }
     }
@@ -37,7 +37,7 @@ class FestivityObserver
      */
     public function updated(Festivity $festivity)
     {
-        if ($festivity->wiCategory) {
+        if ($festivity->bzCategory) {
             Update::dispatch($festivity)->afterCommit()->onQueue('high');
         } else {
             $this->created($festivity);
@@ -52,8 +52,8 @@ class FestivityObserver
      */
     public function deleting(Festivity $festivity)
     {
-        if ($festivity->wiCategory) {
-            Delete::dispatch($festivity->wiCategory)->afterCommit()->onQueue('high');
+        if ($festivity->bzCategory) {
+            Delete::dispatch($festivity->bzCategory)->afterCommit()->onQueue('high');
         }
     }
 }

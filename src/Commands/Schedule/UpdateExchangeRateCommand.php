@@ -1,10 +1,9 @@
 <?php
 
-namespace Decotatoo\WoocommerceIntegration\Commands\Schedule;
+namespace Decotatoo\Bz\Commands\Schedule;
 
 use App\Models\ExchangeRate;
-use Decotatoo\WoocommerceIntegration\Jobs\Misc\UpdateExchangeRate;
-use Decotatoo\WoocommerceIntegration\Services\WordPressRestApi;
+use Decotatoo\Bz\Jobs\Misc\UpdateExchangeRate;
 use Illuminate\Console\Command;
 
 /**
@@ -17,7 +16,7 @@ class UpdateExchangeRateCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'wi:schedule:update-exchange-rate';
+    protected $signature = 'bz:schedule:update-exchange-rate';
 
     /**
      * The console command description.

@@ -1,9 +1,9 @@
 <?php
 
-namespace Decotatoo\WoocommerceIntegration\Observers;
+namespace Decotatoo\Bz\Observers;
 
 use App\Models\ExchangeRate;
-use Decotatoo\WoocommerceIntegration\Jobs\Misc\UpdateExchangeRate;
+use Decotatoo\Bz\Jobs\Misc\UpdateExchangeRate;
 
 class ExchangeRateObserver
 {

@@ -1,18 +1,18 @@
 <?php
 
-namespace Decotatoo\WoocommerceIntegration\Services\BinPacker;
+namespace Decotatoo\Bz\Services\BinPacker;
 
-use Decotatoo\WoocommerceIntegration\Models\WiBin;
+use Decotatoo\Bz\Models\Bin;
 use DVDoug\BoxPacker\Box as BoxPackerBox;
 
 class Box implements BoxPackerBox
 {
     /**
-     * @var WiBin
+     * @var Bin
      */
     public $bin;
 
-    public function __construct(WiBin $bin)
+    public function __construct(Bin $bin)
     {
         $this->bin = $bin;
     }

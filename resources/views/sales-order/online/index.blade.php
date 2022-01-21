@@ -8,7 +8,16 @@
 
 @section('content')
 
+
 <div class="col-12">
+
+    <div class="d-flex flex-row justify-content-between">
+        <h4 class="box-title align-items-start flex-column">
+            Sales Order [ONLINE]
+            <small class="subtitle">A list of sales order online</small>
+        </h4>
+    </div>
+
     <div class="bg-info-light px-20 py-10 rounded mt-10">
         <div class="d-lg-flex justify-content-between align-items-center">
             <div class="col-12">
@@ -37,20 +46,32 @@
                             
                             <input type="date" class="form-control" id="end_date" name="end_date" value="{{ Request::get('end_date') ?? date('Y-m-t') }}" placeholder="Start Date">
                         </div>
+
+                        <div class="form-group" style="margin-right: 5px">
+                            <label for="date_type" class="form-label">Date based on</label>
+                            <select name="date_type" id="date_type" class="form-select">
+                                <option value="date_created">Creation</option>
+                                <option value="date_paid">Payment date</option>
+                                <option value="date_completed">Order Completed</option>
+                                <option value="date_released">Order Released</option>
+                                <option value="date_shipment_shipped">Order Shipped</option>
+                                {{-- <option value="date_shipment_delivered">Order Delivered</option> --}}
+                            </select>
+                        </div>
+
     
                         <div class="form-group" style="margin-right: 5px">
-                            <label for="status" class="form-label">Status</label>
-        
-                            <select name="status" id="status" class="form-select">
-                                <option value="all" {{ (Request::get('status') == "all") ? 'selected' : ''  }}>All</option>
-                                <option value="Release" {{ (Request::get('status') == "Release") ? 'selected' : ''  }}>Release</option>
-                                <option value="NotReleasedYet" {{ (Request::get('NotReleasedYet') == "all") ? 'selected' : ''  }}>Not released yet</option>
+                            <label for="order_status" class="form-label">Status</label>
+                            <select name="order_status" id="order_status" class="form-select">
+                                <option value="">All</option>
+                                <option value="released">Released</option>
+                                <option value="notreleasedyet">Not released yet</option>
                             </select>
                         </div>
                     </div>
     
                     <div class="text-end mt-20">
-                        @if (auth()->user()->can('TODO-PERMISSION-WI'))
+                        @if (auth()->user()->can('journal-create'))
                             <a href="#" class="btn btn-warning btn-rounded" onclick="showFilterdData()"><i class="fa fa-eye"></i> Show</a>
                         @endif
                     </div>
@@ -63,7 +84,7 @@
         </div>  
     </div>   
     
-    <div class="box">
+    <div class="box mt-10">
         <div class="box-body">
             <div class="table-responsive">
                 <form action="" method="POST" id="printForm" target="_blank">
@@ -74,9 +95,8 @@
                             <tr class="text-uppercase bg-lightest">
                                 <th style="min-width: 1px"><span class="text-dark">No</span></th>
                                 <th style="min-width: 25px"><span class="text-dark">SO Number</span></th>
-                                <th style="min-width: 25px"><span class="text-dark">SO Category</span></th>
                                 <th style="min-width: 20px"><span class="text-dark">Customer Name</span></th>
-                                <th style="min-width: 20px"><span class="text-dark">Delivery Date</span></th>
+                                <th style="min-width: 20px"><span class="text-dark">Order Date</span></th>
                                 <th style="min-width: 20px"><span class="text-dark">Product Order</span></th>
                                 <th style="min-width: 80px" class="text-center"><span class="text-dark">Action</span></th>
                             </tr>
@@ -112,7 +132,8 @@
         function showFilterdData() {
             startDate = fixDate($('#start_date').val());
             endDate = fixDate($('#end_date').val());
-            status = $('#status').val();
+            date_type = $('#date_type').val();
+            order_status = $('#order_status').val();
 
             salesOrderTable.clear().draw();
 
@@ -130,7 +151,7 @@
             } else {
                 $.ajax({
                     type: 'POST',
-                    url: "{{ route('sales-order.online.list') }}",
+                    url: "{{ route('sales-order.online.base.list') }}",
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
@@ -138,22 +159,57 @@
                         "_token": "{{ csrf_token() }}",
                         startDate: startDate.formDate,
                         endDate: endDate.formDate,
-                        status,
+                        order_status,
+                        date_type,
                     },
                     success: function (data) {
-                        console.log(data);
                         number = 1;
                         data.data.salesOrders.forEach((value, index) => {
                             let detailProductOrder = `
-                                <a href="#" data-toggle="tooltip" data-placement="top" title="Detail product order" class="btn btn-sm btn-primary btn-rounded" onclick="detailModal('Detail Product Order', ' /sales-order/online/detail-product/${value.id}/online', 'x-large')"><i class="fa fa-eye"></i> Detail</a>
+                                <a href="#" data-toggle="tooltip" data-placement="top" title="Detail product order" class="btn btn-sm btn-primary btn-rounded" onclick="detailModal('Detail Product Order', '${route('sales-order.online.base.detail-product', { bzOrder: value.id } )}', 'x-large')"><i class="fa fa-eye"></i> Detail</a>
                             `;
 
-                            const action = `
-                                <a href="#" data-toggle="tooltip" data-placement="top" title="Delete" class="waves-effect waves-light btn btn-sm btn-danger-light btn-circle" onclick="modalDelete('Sales Order', 'this data', '/sales-order/online/online-delete/${value.id}', '')"><span class="icon-Trash1 fs-18"><span class="path1"></span><span class="path2"></span></span></a>
-                                <a href="/sales-order/online/edit/${value.id}" data-toggle="tooltip" data-placement="top" title="Edit" class="waves-effect waves-light btn btn-sm btn-warning-light btn-circle mx-5"><span class="icon-Write"><span class="path1"></span><span class="path2"></span></span></a>
+                            let _url_edit_release = route('sales-order.online.base.edit-release', { bzOrder: value.id } );
+                            let _url_detail_release = route('sales-order.online.base.detail-release', { bzOrder: value.id } );
+
+                            let action = `
+                                <a href="${_url_edit_release}" data-toggle="tooltip" data-placement="top" title="Release" class="waves-effect waves-light btn btn-sm btn-warning-light btn-circle mx-5">
+                                    <i class="fas fa-qrcode"></i>
+                                </a>
                             `;
 
-                            let tr = $(`<tr class="${(value.qtyReleaseTotal > 0) ? `bg-success` : ``}"><td>${number}</td><td><a href="/sales-order/online/${(value.qtyReleaseTotal > 0) ? `detail-release` : `edit-release`}/${value.id}" class="text-primary text-bold">${value.so_no}</a></td><td>${value.so_category}</td><td>${value.customer_name}</td><td>${value.po_number}</td><td>${value.estimation_delivery_date}</td><td>${detailProductOrder}</td><td>${action}</td></tr>`);
+                            if (value.date_released != null) {
+                                action += `
+                                <a href="${_url_edit_release}" data-toggle="tooltip" data-placement="top" title="Detail" class="waves-effect waves-light btn btn-sm btn-info-light btn-circle mx-5">
+                                    <i class="fas fa-info"></i>
+                                </a>
+                            `;
+                            }
+
+                            let rowBgClass = '';
+
+                            if (value.date_released != null) {
+                                rowBgClass = 'bg-success';
+                            } else if (value.has_some_stockout) {
+                                rowBgClass = 'bg-warning';
+                            }
+
+                            let tr = $(`
+                                <tr class="${rowBgClass}">
+                                    <td>${number}</td>
+                                    <td>
+                                        <a href="${(value.date_released) ? _url_detail_release : _url_edit_release}" class="text-primary text-bold">
+                                            ${value.so_no}
+                                        </a>
+                                    </td>
+                                    <td>${value.customer_name}</td>
+                                    <td>${value.date_order}</td>
+                                    <td>${detailProductOrder}</td>
+                                    <td>
+                                        ${action}
+                                    </td>
+                                </tr>
+                            `);
                             salesOrderTable.row.add(tr[0]).draw();
                             number++;
                         });

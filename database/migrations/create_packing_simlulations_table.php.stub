@@ -1,0 +1,29 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up()
+    {
+        Schema::create('packing_simulations', function (Blueprint $table) {
+            $table->id();
+
+            $table->unsignedBigInteger('bz_order_id')->nullable();
+            $table->foreign('bz_order_id')->references('id')->on('bz_orders')->onDelete('cascade');
+
+            $table->json('items')->nullable();
+            $table->json('bins')->nullable();
+            $table->json('result')->nullable();
+
+            $table->timestamps();
+        });
+    }
+
+    public function down()
+    {
+        Schema::dropIfExists('packing_simulations');
+    }
+};

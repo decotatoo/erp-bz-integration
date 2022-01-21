@@ -1,10 +1,11 @@
 <?php
 
-namespace Decotatoo\WoocommerceIntegration\Observers;
+namespace Decotatoo\Bz\Observers;
 
 use App\Models\ProductInCatalog;
-use Decotatoo\WoocommerceIntegration\Jobs\Product\Create;
-use Decotatoo\WoocommerceIntegration\Jobs\Product\Update;
+use Decotatoo\Bz\Jobs\Product\Create;
+use Decotatoo\Bz\Jobs\Product\Update;
+use Illuminate\Support\Facades\Log;
 
 /**
  * TODO:PLACEHOLDER
@@ -27,16 +28,23 @@ class ProductObserver
     public function created(ProductInCatalog $productInCatalog)
     {
         if (
-            !$productInCatalog->wiProduct
+            !$productInCatalog->bzProduct
             && $productInCatalog->category === 'catalog'
             && $productInCatalog->customer_id === null
             && $productInCatalog->season !== null
             && $productInCatalog->season !== 'None'
             && $productInCatalog->season !== 'Personalize'
             && $productInCatalog->category_prod !== null
-            && ($productInCatalog->festivity && $productInCatalog->festivity->status === 'Yes')
-            && $productInCatalog->catalog === 'Yes'
+            && strpos($productInCatalog->category_prod, 'PERSONALIZE') === false
+            && (
+                (
+                    $productInCatalog->season === 'Four Season'
+                    || ($productInCatalog->commerceCatalog()->exists() && $productInCatalog->commerceCatalog->is_published === true)
+                )
+                && (!$productInCatalog->festivity()->exists() || $productInCatalog->festivity->status === 'Yes') 
+            )
         ) {
+            Log::debug(__CLASS__ . '::' . __FUNCTION__ . '() - ' . $productInCatalog->id);
             Create::dispatch($productInCatalog)->afterCommit()->onQueue('default');
         }
     }
@@ -49,7 +57,7 @@ class ProductObserver
      */
     public function updated(ProductInCatalog $productInCatalog)
     {
-        if ($productInCatalog->wiProduct) {
+        if ($productInCatalog->bzProduct) {
             Update::dispatch($productInCatalog)->afterCommit()->onQueue('default');
         } else {
             $this->created($productInCatalog);

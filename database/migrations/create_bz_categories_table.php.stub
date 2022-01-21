@@ -1,0 +1,22 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up()
+    {
+        Schema::create('bz_categories', function (Blueprint $table) {
+            $table->id();
+            $table->morphs('categoryable');
+            $table->unsignedBigInteger('wp_product_category_id'); // WooCommerce Product Category ID
+        });
+    }
+
+    public function down()
+    {
+        Schema::dropIfExists('bz_categories');
+    }
+};

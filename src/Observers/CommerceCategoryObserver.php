@@ -1,11 +1,11 @@
 <?php
 
-namespace Decotatoo\WoocommerceIntegration\Observers;
+namespace Decotatoo\Bz\Observers;
 
-use Decotatoo\WoocommerceIntegration\Models\CommerceCategory;
-use Decotatoo\WoocommerceIntegration\Jobs\WiCategory\Create;
-use Decotatoo\WoocommerceIntegration\Jobs\WiCategory\Delete;
-use Decotatoo\WoocommerceIntegration\Jobs\WiCategory\Update;
+use Decotatoo\Bz\Models\CommerceCategory;
+use Decotatoo\Bz\Jobs\BzCategory\Create;
+use Decotatoo\Bz\Jobs\BzCategory\Delete;
+use Decotatoo\Bz\Jobs\BzCategory\Update;
 
 class CommerceCategoryObserver
 {
@@ -24,7 +24,7 @@ class CommerceCategoryObserver
      */
     public function created(CommerceCategory $commerceCategory)
     {
-        if (!$commerceCategory->wiCategory) {
+        if (!$commerceCategory->bzCategory) {
             Create::dispatch($commerceCategory)->afterCommit()->onQueue('high');
         }
     }
@@ -37,7 +37,7 @@ class CommerceCategoryObserver
      */
     public function updated(CommerceCategory $commerceCategory)
     {
-        if ($commerceCategory->wiCategory) {
+        if ($commerceCategory->bzCategory) {
             Update::dispatch($commerceCategory)->afterCommit()->onQueue('high');
         } else {
             $this->created($commerceCategory);
@@ -52,8 +52,8 @@ class CommerceCategoryObserver
      */
     public function deleting(CommerceCategory $commerceCategory)
     {
-        if ($commerceCategory->wiCategory) {
-            Delete::dispatch($commerceCategory->wiCategory)->afterCommit()->onQueue('high');
+        if ($commerceCategory->bzCategory) {
+            Delete::dispatch($commerceCategory->bzCategory)->afterCommit()->onQueue('high');
         }
     }
 }

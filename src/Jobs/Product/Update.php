@@ -1,9 +1,10 @@
 <?php
 
-namespace Decotatoo\WoocommerceIntegration\Jobs\Product;
+namespace Decotatoo\Bz\Jobs\Product;
 
 use App\Models\ProductInCatalog;
-use Decotatoo\WoocommerceIntegration\Jobs\WiCategory\Create as WiCategoryCreate;
+use Decotatoo\Bz\Jobs\BzCategory\Create as BzCategoryCreate;
+use Decotatoo\Bz\Services\WooCommerceApi\Models\Product;
 use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -12,10 +13,11 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
-
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Storage;
 
 /**
- * TODO:TEST
+ * TODO:FINAL-TEST
  * 
  * @task add weight attribute to product
  */
@@ -60,7 +62,7 @@ class Update implements ShouldQueue
     public function handle()
     {
         try {
-            if (!$this->product->wiProduct) {
+            if (!$this->product->bzProduct) {
                 throw new Exception("Product not exists in WooCommerce. product_id:{$this->product->id}");
             }
 
@@ -88,18 +90,16 @@ class Update implements ShouldQueue
                 $payload['images'] = $this->getImages();
             }
 
-            $result = \Codexshaper\WooCommerce\Facades\Product::update($this->product->wiProduct->wp_product_id, $payload);
+            $result = (new Product(App::make('bz.woocommerce')))->update($this->product->bzProduct->wp_product_id, $payload);
 
             if (!$result) {
-                throw new Exception("Failed to update Product in WooCommerce. product_id:{$this->product->id} -> wp_product_id:{$this->product->wiProduct->wp_product_id}");
+                throw new Exception("Failed to update Product in WooCommerce. product_id:{$this->product->id} -> wp_product_id:{$this->product->bzProduct->wp_product_id}");
             }
 
-            $wiProduct = $this->product->wiProduct;
-            $wiProduct->wp_post_status = $publish_status;
+            $bzProduct = $this->product->bzProduct;
+            $bzProduct->wp_post_status = $publish_status;
 
-            if (!$wiProduct->save()) {
-                $wiProduct->touch();
-            }
+            $bzProduct->save();
         } catch (\Throwable $th) {
             $this->fail($th->getMessage());
         }
@@ -114,25 +114,29 @@ class Update implements ShouldQueue
     {
         $categories = [];
 
+        if (!$this->product->commerceCategory) {
+            return $categories;
+        }
+
         // Category
-        if (!$this->product->commerceCategory->wiCategory) {
-            WiCategoryCreate::dispatch($this->product->commerceCategory)->afterCommit()->onQueue('high');
+        if (!$this->product->commerceCategory->bzCategory) {
+            BzCategoryCreate::dispatch($this->product->commerceCategory)->afterCommit()->onQueue('high');
             return null;
         }
 
         $categories[] = [
-            'id' => $this->product->commerceCategory->wiCategory->wp_product_category_id
+            'id' => $this->product->commerceCategory->bzCategory->wp_product_category_id
         ];
 
         // Festivity
         if ($this->product->festivity) {
-            if (!$this->product->festivity->wiCategory) {
-                WiCategoryCreate::dispatch($this->product->festivity)->afterCommit()->onQueue('high');
+            if (!$this->product->festivity->bzCategory) {
+                BzCategoryCreate::dispatch($this->product->festivity)->afterCommit()->onQueue('high');
                 return null;
             }
 
             $categories[] = [
-                'id' => $this->product->festivity->wiCategory->wp_product_category_id
+                'id' => $this->product->festivity->bzCategory->wp_product_category_id
             ];
         }
 
@@ -146,13 +150,13 @@ class Update implements ShouldQueue
     {
         $images = [];
 
-        $_online_product = \Codexshaper\WooCommerce\Facades\Product::find($this->product->wiProduct->wp_product_id);
+        $_online_product = (new Product(App::make('bz.woocommerce')))->find($this->product->bzProduct->wp_product_id);
 
         if ($_online_product) {
             $images = $_online_product->images;
         }
 
-        if ($this->product->wasChanged('pic') && $this->product->pic) {
+        if ($this->product->wasChanged('pic') && $this->product->pic && Storage::disk('public')->exists('images/product/' . $this->product->pic)) {
             $images[0] = [
                 'src' => asset('images/product/' . $this->product->pic) // absolute url of image
             ];
@@ -164,20 +168,68 @@ class Update implements ShouldQueue
     /**
      * Get the meta data for the product.
      * 
+     * @TODO: add more metadata to expose to ecommerce
+     * 
      * @return array 
      */
     private function getMetadata()
     {
         $metadata = [];
 
-        // $metadata[] = [
-        //     'key' => '_wi_product_size',
-        //     'value' => '30cm x 30cm',
-        // ];
+        $metadata[] = [
+            'key' => '_erp_size',
+            'value' => $this->product->size,
+        ];
+
+        if (substr($this->product->prod_id, 0, 2) == 'FP') {
+            $metadata[] = [
+                'key' => '_erp_chocolate_size',
+                'value' => $this->product->cho_size,
+            ];
+
+            $metadata[] = [
+                'key' => '_erp_chocolate_type',
+                'value' => $this->product->fp_cklt,
+            ];
+        }
 
         $metadata[] = [
-            'key' => '_wi_erp_season',
+            'key' => '_erp_net_weight',
+            'value' => $this->product->net_weight * (substr($this->product->prod_id, 0, 2) == 'FP' ? intval($this->product->total_box) : 1),
+        ];
+
+        $metadata[] = [
+            'key' => '_erp_gross_weight',
+            'value' => $this->product->gross_weight,
+        ];
+
+        if ($this->product->commerceCategory) {
+            $metadata[] = [
+                'key' => '_erp_industrial_use_only',
+                'value' => strpos($this->product->commerceCategory->name, 'B2B') !== false,
+            ];
+        }
+
+        $metadata[] = [
+            'key' => '_erp_season',
             'value' => $this->product->season,
+        ];
+
+        // Quantity per box
+        if (substr($this->product->prod_id, 0, 2) == 'FP' && strpos($this->product->qty_box, 'sheet') !== false) {
+            $_qty_per_box = strtoupper($this->product->total_box);
+        } elseif (substr($this->product->prod_id, 0, 2) == 'TR' && (strpos($this->product->prod_name, 'cd') !== false || strpos($this->product->prod_name, 'tablet') !== false)) {
+            $_qty_per_box = strtoupper($this->product->total_box);
+        } else {
+            if ($this->product->total_box && trim($this->product->total_box) != '') {
+                $_qty_per_box = strtoupper($this->product->qty_box) . " ({$this->product->total_box})";
+            } else {
+                $_qty_per_box = strtoupper($this->product->qty_box);
+            }
+        }
+        $metadata[] = [
+            'key' => '_erp_quantity_per_box',
+            'value' => $_qty_per_box,
         ];
 
         return $metadata;
@@ -197,8 +249,14 @@ class Update implements ShouldQueue
             && $this->product->season !== 'None'
             && $this->product->season !== 'Personalize'
             && $this->product->category_prod !== null
-            && ($this->product->festivity && $this->product->festivity->status === 'Yes')
-            && $this->product->catalog === 'Yes'
+            && strpos($this->product->category_prod, 'PERSONALIZE') === false
+            && (
+                (
+                    $this->product->season === 'Four Season'
+                    || ($this->product->commerceCatalog()->exists() && $this->product->commerceCatalog->is_published === true)
+                )
+                && (!$this->product->festivity()->exists() || $this->product->festivity->status === 'Yes') 
+            )
         ) {
             return 'publish';
         } else {

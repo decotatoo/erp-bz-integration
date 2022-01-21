@@ -1,13 +1,14 @@
 <?php
 
-namespace Decotatoo\WoocommerceIntegration\Http\Controllers;
+namespace Decotatoo\Bz\Http\Controllers;
 
-use Decotatoo\WoocommerceIntegration\Http\Middleware\VerifyDwiSignature;
-use Decotatoo\WoocommerceIntegration\Models\WiBin;
-use Decotatoo\WoocommerceIntegration\Models\WiPackingSimulation;
-use Decotatoo\WoocommerceIntegration\Models\WiProduct;
-use Decotatoo\WoocommerceIntegration\Services\BinPacker\Packer;
+use Decotatoo\Bz\Http\Middleware\VerifyDwiSignature;
+use Decotatoo\Bz\Models\Bin;
+use Decotatoo\Bz\Models\PackingSimulation;
+use Decotatoo\Bz\Models\BzProduct;
+use Decotatoo\Bz\Services\BinPacker\Packer;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 /**
  * TODO:PLACEHOLDER
@@ -15,13 +16,20 @@ use Illuminate\Http\Request;
 class BinPackerController extends Controller
 {
     public function __construct() {
-        $this->middleware(VerifyDwiSignature::class);
+        $this->middleware('permission:bin-packer-visualiser', ['only' => ['visualiser']]);
+        $this->middleware(VerifyDwiSignature::class, ['only' => ['simulate']]);
+    }
+
+    public function visualiser(Request $request, PackingSimulation $packingSimulation) {
+        $data['page_title'] = 'Packing Simulation #'. $packingSimulation->id;
+        $data['packing_simulation'] = $packingSimulation;
+        
+        return view('bz::packing-management.packing-simulation.visualiser', $data);
     }
 
     public function simulate(Request $request)
     {
         $request->validate([
-            'order_id' => 'required|integer',
             'items' => 'required|array',
             'items.*.id' => 'required|integer',
             'items.*.quantity' => 'required|integer',
@@ -30,28 +38,35 @@ class BinPackerController extends Controller
         $items = [];
 
         foreach ($request->items as $item) {
-            $wiProduct = WiProduct::where('wp_product_id', $item['id'])->first();
-            if ($wiProduct) {
+            $bzProduct = BzProduct::where('wp_product_id', $item['id'])->first();
+            if ($bzProduct) {
                 $items[] = [
-                    'product' => $wiProduct,
+                    'product' => $bzProduct->product,
                     'quantity' => $item['quantity'],
                 ];
             }
         }
 
-        $bins = WiBin::all();
+        $bins = Bin::all();
 
-        $result = Packer::pack($bins, $items);
-
-        $wiPackingSimulation = new WiPackingSimulation();
-        $wiPackingSimulation->items = $items;
-        $wiPackingSimulation->bins = $bins;
-        $wiPackingSimulation->result = $result;
-        $wiPackingSimulation->save();
-
-        return response()->json([
-            'simulation_id' => $wiPackingSimulation->id,
-            'result' => $result,
-        ]);
+        try {
+            $result = Packer::pack($bins, $items);
+            $packingSimulation = new PackingSimulation();
+            $packingSimulation->items = collect($items);
+            $packingSimulation->bins = collect($bins);
+            $packingSimulation->result = collect($result);
+            $packingSimulation->save();
+    
+            return response()->json([
+                'simulation_id' => $packingSimulation->id,
+                'result' => $result,
+                'visualiser_url' => route('packing-management.packing-simulation.visualiser', ['packingSimulation' => $packingSimulation->id]),
+            ]);
+    
+        } catch (\Throwable $th) {
+            return response()->json([
+                'error' => $th->getMessage(),
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 }

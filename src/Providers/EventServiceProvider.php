@@ -1,19 +1,21 @@
 <?php
 
-namespace Decotatoo\WoocommerceIntegration\Providers;
+namespace Decotatoo\Bz\Providers;
 
 use App\Models\ExchangeRate;
 use App\Models\Festivity;
 use App\Models\ProductInCatalog as Product;
-use Decotatoo\WoocommerceIntegration\Models\CommerceCategory;
-use Decotatoo\WoocommerceIntegration\Models\WiCustomer;
-use Decotatoo\WoocommerceIntegration\Models\WiOrder;
-use Decotatoo\WoocommerceIntegration\Observers\CommerceCategoryObserver;
-use Decotatoo\WoocommerceIntegration\Observers\ExchangeRateObserver;
-use Decotatoo\WoocommerceIntegration\Observers\FestivityObserver;
-use Decotatoo\WoocommerceIntegration\Observers\ProductObserver;
-use Decotatoo\WoocommerceIntegration\Observers\WiCustomerObserver;
-use Decotatoo\WoocommerceIntegration\Observers\WiOrderObserver;
+use Decotatoo\Bz\Models\CommerceCategory;
+use Decotatoo\Bz\Models\BzCustomer;
+use Decotatoo\Bz\Models\BzOrder;
+use Decotatoo\Bz\Models\BzProduct;
+use Decotatoo\Bz\Observers\CommerceCategoryObserver;
+use Decotatoo\Bz\Observers\ExchangeRateObserver;
+use Decotatoo\Bz\Observers\FestivityObserver;
+use Decotatoo\Bz\Observers\ProductObserver;
+use Decotatoo\Bz\Observers\BzCustomerObserver;
+use Decotatoo\Bz\Observers\BzOrderObserver;
+use Decotatoo\Bz\Observers\BzProductObserver;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
 class EventServiceProvider extends ServiceProvider
@@ -34,8 +36,8 @@ class EventServiceProvider extends ServiceProvider
         ExchangeRate::observe(ExchangeRateObserver::class);
         Festivity::observe(FestivityObserver::class);
         Product::observe(ProductObserver::class);
-
-        WiCustomer::observe(WiCustomerObserver::class);
-        WiOrder::observe(WiOrderObserver::class);
+        BzProduct::observe(BzProductObserver::class);
+        BzCustomer::observe(BzCustomerObserver::class);
+        BzOrder::observe(BzOrderObserver::class);
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Decotatoo\WoocommerceIntegration\Services;
+namespace Decotatoo\Bz\Services;
 
 use Illuminate\Support\Facades\Http;
 

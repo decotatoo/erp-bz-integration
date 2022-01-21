@@ -1,16 +1,18 @@
 <?php
 
-namespace Decotatoo\WoocommerceIntegration\Http\Controllers;
+namespace Decotatoo\Bz\Http\Controllers;
 
-use Decotatoo\WoocommerceIntegration\Http\Middleware\VerifyWebhookSignature;
-use Decotatoo\WoocommerceIntegration\Jobs\Webhook\CustomerCreated;
-use Decotatoo\WoocommerceIntegration\Jobs\Webhook\OrderCreated;
-use Decotatoo\WoocommerceIntegration\Models\WiCustomer;
-use Decotatoo\WoocommerceIntegration\Models\WiOrder;
-use Decotatoo\WoocommerceIntegration\Models\WiProduct;
+use Decotatoo\Bz\Http\Middleware\VerifyWebhookSignature;
+use Decotatoo\Bz\Jobs\Webhook\CustomerCreated;
+use Decotatoo\Bz\Jobs\Webhook\OrderCreated;
+use Decotatoo\Bz\Jobs\Webhook\OrderUpdated;
+use Decotatoo\Bz\Models\BzCustomer;
+use Decotatoo\Bz\Models\BzOrder;
+use Decotatoo\Bz\Models\BzProduct;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -48,11 +50,11 @@ class WebhookController extends Controller
      */
     protected function missingMethod($parameters = [])
     {
-        return new Response;
+        return new Response('Webhook Not Handled', 400);
     }
 
     /**
-     * Handle the incoming request.
+     * Proxy the incoming request to the appropriate handler.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
@@ -105,20 +107,16 @@ class WebhookController extends Controller
             'date_modified_gmt' => 'nullable|date',
         ]);
 
-        /** @var WiCustomer $wiCustomer */
-        $wiCustomer = WiCustomer::where('wp_customer_id', $request->id)->first();
+        /** @var BzCustomer $bzCustomer */
+        $bzCustomer = BzCustomer::where('wp_customer_id', $request->id)->first();
 
-        if (!$wiCustomer) {
-            $wiCustomer = new WiCustomer();
-            $wiCustomer->wp_customer_id = $request->id;
-        } else {
+        if ($bzCustomer) {
             $this->validate($request, [
-                'email' => ['required', 'email', 'unique:' . WiCustomer::class . ',email,' . $wiCustomer->id],
+                'email' => ['required', 'email', 'unique:' . BzCustomer::class . ',email,' . $bzCustomer->id],
             ]);
         }
 
-        // Passing the request object or the request's  input?
-        CustomerCreated::dispatch($wiCustomer, $request)->afterCommit()->onQueue('webhook');
+        CustomerCreated::dispatch((object) $request->all())->afterCommit()->onQueue('webhook');
 
         return $this->successMethod();
     }
@@ -126,52 +124,17 @@ class WebhookController extends Controller
     protected function handleProductDeleted(Request $request)
     {
         $request->validate([
-            'id' => ['required', 'integer', 'exists:' . WiProduct::class . ',wp_product_id'],
+            'id' => ['required', 'integer', 'exists:' . BzProduct::class . ',wp_product_id'],
         ]);
 
-        $wiProduct = WiProduct::where('wp_product_id', $request->input('id'))->first();
+        $bzProduct = BzProduct::where('wp_product_id', $request->input('id'))->first();
 
-        $wiProduct->delete();
+        if ($bzProduct) {
+            $bzProduct->delete();
+        }
 
         return $this->successMethod();
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     protected function handleOrderCreated(Request $request)
     {
@@ -182,15 +145,34 @@ class WebhookController extends Controller
             'status' => 'required',
         ]);
 
-        // Passing the request object or the request's  input?
-        OrderCreated::dispatch($request)->afterCommit()->onQueue('webhook');
+        if (
+            $request->status === 'processing'
+            || $request->status === 'completed'
+        ) {
+            OrderCreated::dispatch((object) $request->all())->afterCommit()->onQueue('webhook');
+        }
 
         return $this->successMethod();
     }
 
     protected function handleOrderUpdated(Request $request)
     {
-        // $wiOrder->saveSilently();
-        // return $this->successMethod();
+        $request->validate([
+            'id' => 'required|integer',
+            'cart_hash' => 'required|string',
+            'order_key' => 'required|string',
+            'status' => 'required',
+        ]);
+
+        /** @var BzOrder $bzOrder */
+        $bzOrder = BzOrder::where('wp_order_id', $request->id)->first();
+
+        if (!$bzOrder) {
+            return $this->handleOrderCreated($request);
+        } else {
+            OrderUpdated::dispatch((object) $request->all())->afterCommit()->onQueue('webhook');
+
+            return $this->successMethod();
+        }
     }
 }

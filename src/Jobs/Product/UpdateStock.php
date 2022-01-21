@@ -1,8 +1,9 @@
 <?php
 
-namespace Decotatoo\WoocommerceIntegration\Jobs\Product;
+namespace Decotatoo\Bz\Jobs\Product;
 
-use Decotatoo\WoocommerceIntegration\Models\WiProduct;
+use Decotatoo\Bz\Models\BzProduct;
+use Decotatoo\Bz\Services\WooCommerceApi\Models\Product;
 use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -12,6 +13,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\App;
 
 class UpdateStock implements ShouldQueue, ShouldBeUnique
 {
@@ -20,9 +22,16 @@ class UpdateStock implements ShouldQueue, ShouldBeUnique
     /**
      * The product instance.
      *
-     * @var \App\Models\WooCommerce\WiProduct
+     * @var \App\Models\WooCommerce\BzProduct
      */
-    protected $wi_product;
+    protected $bz_product;
+
+    /**
+     * Onhold stock of bzOrder with `pending` status.
+     * 
+     * @var int
+     */
+    protected $onhold_quantity;
 
     /**
      * The unique ID of the job.
@@ -31,7 +40,7 @@ class UpdateStock implements ShouldQueue, ShouldBeUnique
      */
     public function uniqueId()
     {
-        return $this->wi_product->id;
+        return $this->bz_product->id;
     }
 
     /**
@@ -39,9 +48,10 @@ class UpdateStock implements ShouldQueue, ShouldBeUnique
      *
      * @return void
      */
-    public function __construct(WiProduct $wi_product)
+    public function __construct(BzProduct $bz_product, $onhold_quantity = 0)
     {
-        $this->wi_product = $wi_product;
+        $this->bz_product = $bz_product;
+        $this->onhold_quantity = $onhold_quantity;
     }
 
     /**
@@ -52,7 +62,7 @@ class UpdateStock implements ShouldQueue, ShouldBeUnique
     public function middleware()
     {
         return [
-            new WithoutOverlapping($this->wi_product->id)
+            new WithoutOverlapping($this->bz_product->id)
         ];
     }
 
@@ -63,12 +73,7 @@ class UpdateStock implements ShouldQueue, ShouldBeUnique
      */
     public function handle()
     {
-        // if product doesn't meet condition for public visibility, skip
-        // if ($this->wi_product->wp_post_status !== 'publish') {
-        //     return;
-        // }
-
-        $stockQuantity = $this->wi_product->stock_in_quantity - $this->wi_product->stock_out_quantity;
+        $stockQuantity = $this->bz_product->stock_in_quantity - $this->bz_product->stock_out_quantity - $this->onhold_quantity;
 
         try {
             $payload = [
@@ -76,14 +81,13 @@ class UpdateStock implements ShouldQueue, ShouldBeUnique
                 'stock_status' => $stockQuantity > 0 ? 'instock' : 'outofstock',
             ];
 
-            $result = \Codexshaper\WooCommerce\Facades\Product::update($this->wi_product->wp_product_id, $payload);
+            $result = (new Product(App::make('bz.woocommerce')))->update($this->bz_product->wp_product_id, $payload);
 
             if (!$result) {
-                throw new Exception("Failed to update Product wp_product_id:{$this->wi_product->wp_product_id} in WooCommerce.");
+                throw new Exception("Failed to update Product wp_product_id:{$this->bz_product->wp_product_id} in WooCommerce.");
             }
 
-            $this->wi_product->stock_updated_at = Carbon::now();
-            $this->wi_product->save();
+            $this->bz_product->save();
         } catch (\Throwable $th) {
             $this->fail($th->getMessage());
         }

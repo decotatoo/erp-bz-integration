@@ -12,9 +12,18 @@ return new class extends Migration
         DB::statement('ALTER TABLE box_types ALTER COLUMN panjang TYPE FLOAT USING (panjang)::float');
         DB::statement('ALTER TABLE box_types ALTER COLUMN lebar TYPE FLOAT USING (lebar)::float');
         DB::statement('ALTER TABLE box_types ALTER COLUMN tinggi TYPE FLOAT USING (tinggi)::float');
-        
+
         Schema::table('products', function (Blueprint $table) {
-            $table->unsignedFloat('packing_weight')->nullable();
+            $table->unsignedInteger('packed_weight')->nullable();
+
+            $table->unsignedBigInteger('unit_box_id')->nullable();
+            $table->foreign('unit_box_id')->references('id')->on('unit_boxes')->onDelete('set null');
+
+            $table->unsignedBigInteger('commerce_catalog_id')->nullable();
+            $table->foreign('commerce_catalog_id')->references('id')->on('commerce_catalogs')->onDelete('set null');
+
+            $table->unsignedBigInteger('commerce_category_id')->nullable();
+            $table->foreign('commerce_category_id')->references('id')->on('commerce_categories')->onDelete('set null');
         });
 
         Schema::table('festivities', function (Blueprint $table) {
@@ -22,7 +31,7 @@ return new class extends Migration
         });
 
         Schema::table('product_stock_outs', function (Blueprint $table) {
-            $table->nullableMorphs('ownable');
+            $table->nullableMorphs('stockable');
         });
     }
 
@@ -33,17 +42,26 @@ return new class extends Migration
             $table->string('lebar')->change();
             $table->string('tinggi')->change();
         });
-        
+
         Schema::table('products', function (Blueprint $table) {
-            $table->dropColumn('packing_weight');        
+            $table->dropColumn('packed_weight');
+
+            $table->dropColumn('unit_box_id');
+            // $table->dropIndex('products_unit_box_id_foreign');
+
+            $table->dropColumn('commerce_catalog_id');
+            // $table->dropIndex('products_commerce_catalog_id_foreign');
+
+            $table->dropColumn('commerce_category_id');
+            // $table->dropIndex('products_commerce_category_id_foreign');
         });
-        
+
         Schema::table('festivities', function (Blueprint $table) {
             $table->dropColumn('slug');
         });
-        
+
         Schema::table('festivities', function (Blueprint $table) {
-            $table->dropMorphs('ownable');
+            $table->dropMorphs('stockable');
         });
     }
 };
