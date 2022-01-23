@@ -1,0 +1,10 @@
+{
+    "dependencies": {
+        "esbuild": "^0.14.12",
+        "string-to-color": "^2.2.2",
+        "three": "^0.136.0"
+    },
+    "scripts": {
+        "build:visualiser": "esbuild resources/js/visualiser.js --outfile=assets/dist/visualiser.js --bundle --minify --define:process.env.NODE_ENV=\\\"production\\\""
+    }
+}

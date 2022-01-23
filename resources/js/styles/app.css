@@ -1,0 +1,28 @@
+#visualization-wrapper {
+    position: relative;
+}
+
+#visualization-info-panel {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: auto;
+    height: auto;
+    padding: 15px;
+    background-color: rgba(255, 255, 255, 1);
+    display: none;
+}
+
+.info-panel-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: left;
+}
+
+.info-panel-item-title {
+    font-weight: 600;
+}
+
+.info-panel-item-content {
+    padding-left: 1rem;
+}

@@ -63,7 +63,7 @@ class Delete implements ShouldQueue
             $this->bzCategory->categoryable()->disassociate();
             $this->bzCategory->delete();
         } catch (\Throwable $th) {
-            $this->fail($th->getMessage());
+            $this->fail($th);
         }
     }
 }

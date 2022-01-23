@@ -71,7 +71,7 @@ class Update implements ShouldQueue
                 throw new Exception("Failed to update Order in WooCommerce. wp_order_id:{$this->bzOrder->wp_order_id}");
             }
         } catch (\Throwable $th) {
-            $this->fail($th->getMessage());
+            $this->fail($th);
         }
     }
 

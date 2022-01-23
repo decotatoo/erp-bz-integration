@@ -71,7 +71,7 @@ class Create implements ShouldQueue
             $bzCategory->wp_product_category_id = $result['id'];
             $bzCategory->save();
         } catch (\Throwable $th) {
-            $this->fail($th->getMessage());
+            $this->fail($th);
         }
     }
 }

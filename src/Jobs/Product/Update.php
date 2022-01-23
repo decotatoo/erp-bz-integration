@@ -101,7 +101,7 @@ class Update implements ShouldQueue
 
             $bzProduct->save();
         } catch (\Throwable $th) {
-            $this->fail($th->getMessage());
+            $this->fail($th);
         }
     }
 

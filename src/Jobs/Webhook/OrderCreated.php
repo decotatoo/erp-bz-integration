@@ -6,6 +6,7 @@ use Decotatoo\Bz\Models\BzCustomer;
 use Decotatoo\Bz\Models\BzOrder;
 use Decotatoo\Bz\Models\BzOrderItem;
 use Decotatoo\Bz\Models\BzProduct;
+use Decotatoo\Bz\Models\PackingSimulation;
 use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -16,6 +17,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
@@ -47,6 +49,7 @@ class OrderCreated implements ShouldQueue
      */
     public function handle()
     {
+        DB::beginTransaction();
         try {
             $bzOrder = BzOrder::where('wp_order_id', $this->request->id)->first();
 
@@ -65,7 +68,9 @@ class OrderCreated implements ShouldQueue
 
             /** @var BzCustomer $bzCustomer */
             $bzCustomer = BzCustomer::where('wp_customer_id', $this->request->customer_id)->first();
-
+            
+            
+            /** @var BzOrder $bzOrder */
             if ($bzCustomer) {
                 $bzOrder->bz_customer_id = $bzCustomer->id;
             }
@@ -109,6 +114,17 @@ class OrderCreated implements ShouldQueue
             $bzOrder->coupon_lines = $this->request->coupon_lines;
             $bzOrder->meta_data = $this->request->meta_data;
 
+            // link the packing simulation to the order
+            $packing_simulation_key = array_search('_dwi_simulation_id', array_column($this->request->meta_data, 'key'));
+            if (false !== $packing_simulation_key) {
+                $simulation = PackingSimulation::find($this->request->meta_data[$packing_simulation_key]['value']);
+                /** @var PackingSimulation $simulation */
+                if ($simulation) {
+                    $simulation->bzOrder()->associate($bzOrder);
+                    $simulation->save();
+                }
+            }
+
             // save without triggering events
             $bzOrder->saveQuietly();
 
@@ -140,13 +156,11 @@ class OrderCreated implements ShouldQueue
             }
 
             $bzOrder->bzOrderItems()->saveMany($items);
-
-            // add the order release
             
+            DB::commit();
         } catch (\Throwable $th) {
-            throw $th;
-            // Log::error($th->getMessage(), [$th]);
-            $this->fail($th->getMessage());
+            DB::rollBack();
+            $this->fail($th);
         }
     }
 }

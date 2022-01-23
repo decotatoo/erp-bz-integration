@@ -7,12 +7,10 @@ use Decotatoo\Bz\Models\Bin;
 use Decotatoo\Bz\Models\PackingSimulation;
 use Decotatoo\Bz\Models\BzProduct;
 use Decotatoo\Bz\Services\BinPacker\Packer;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-/**
- * TODO:PLACEHOLDER
- */
 class BinPackerController extends Controller
 {
     public function __construct() {
@@ -56,10 +54,15 @@ class BinPackerController extends Controller
             $packingSimulation->bins = collect($bins);
             $packingSimulation->result = collect($result);
             $packingSimulation->save();
-    
+
+
+            if (count($result['unpacked'])) {
+                throw new Exception("Error: Not all items could be packed");
+            }
+
             return response()->json([
                 'simulation_id' => $packingSimulation->id,
-                'result' => $result,
+                'result' => $result['packed'],
                 'visualiser_url' => route('packing-management.packing-simulation.visualiser', ['packingSimulation' => $packingSimulation->id]),
             ]);
     

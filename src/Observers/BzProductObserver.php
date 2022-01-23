@@ -25,7 +25,7 @@ class BzProductObserver
     {
         // Get all dangling order items and link to the new bzProduct record
         $_dangling_order_items = BzOrderItem::query()
-            ->whereDoesntHave(BzProduct::class)
+            ->where('bz_product_id', null)
             ->where('sku', $bzProduct->product->prod_id)
             ->get();
 

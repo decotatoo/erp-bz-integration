@@ -71,7 +71,7 @@
                     </div>
     
                     <div class="text-end mt-20">
-                        @if (auth()->user()->can('journal-create'))
+                        @if (auth()->user()->can('sales-order-online-list'))
                             <a href="#" class="btn btn-warning btn-rounded" onclick="showFilterdData()"><i class="fa fa-eye"></i> Show</a>
                         @endif
                     </div>
@@ -180,7 +180,7 @@
 
                             if (value.date_released != null) {
                                 action += `
-                                <a href="${_url_edit_release}" data-toggle="tooltip" data-placement="top" title="Detail" class="waves-effect waves-light btn btn-sm btn-info-light btn-circle mx-5">
+                                <a href="${_url_detail_release}" data-toggle="tooltip" data-placement="top" title="Detail" class="waves-effect waves-light btn btn-sm btn-info-light btn-circle mx-5">
                                     <i class="fas fa-info"></i>
                                 </a>
                             `;

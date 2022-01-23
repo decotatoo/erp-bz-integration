@@ -89,7 +89,7 @@ class UpdateStock implements ShouldQueue, ShouldBeUnique
 
             $this->bz_product->save();
         } catch (\Throwable $th) {
-            $this->fail($th->getMessage());
+            $this->fail($th);
         }
     }
 }

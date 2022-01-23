@@ -96,7 +96,7 @@ class CustomerCreated implements ShouldQueue
 
         } catch (\Throwable $th) {
             Log::error($th->getMessage());
-            $this->fail($th->getMessage());
+            $this->fail($th);
         }
     }
 }

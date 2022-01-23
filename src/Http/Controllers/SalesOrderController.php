@@ -21,16 +21,68 @@ use Yajra\DataTables\DataTables;
 
 class SalesOrderController extends Controller
 {
+    private $shipment_providers = [
+        [
+            'id' => null,
+            'name' => 'Provider: Other',
+        ],
+        [
+            'id' => 'jnt',
+            'name' => 'J&T',
+        ],
+        [
+            'id' => 'lion',
+            'name' => 'Lion Parcel',
+        ],
+    ];
+
     public function __construct()
     {
-        $this->middleware('permission:sales-order-online-list', ['only' => ['index']]);
-        // $this->middleware('permission:sales-order-online-edit', ['only' => ['editRelease']]);
+        // @TODO:
+        // $this->middleware('permission:sales-order-online-list', ['only' => ['index']]);
+        // $this->middleware('permission:sales-order-online-release', ['only' => []]);
+        // $this->middleware('permission:sales-order-online-detail', ['only' => ['detailRelease']]);
+        // $this->middleware('permission:sales-order-online-report', ['only' => []]);
+        // $this->middleware('permission:sales-order-online-invoice', ['only' => []]);
+        // $this->middleware('permission:sales-order-online-invoice-pt-to-ltd', ['only' => []]);
+
+
+
+        // $this->middleware('permission:sales-order-list', ['only' => 'index']);
+        // $this->middleware('permission:sales-order-create', ['only' => 'createSalesOrderReguler']);
+        // $this->middleware('permission:sales-order-report', ['only' => 'report']);
+        // $this->middleware('permission:sales-order-regulerInvoice', ['only' => 'regulerInvoice']);
+        // $this->middleware('permission:sales-order-regulerInvoiceToDecotatoo', ['only' => 'regulerInvoiceDecoToDecotatoo']);
+        // $this->middleware('permission:sales-order-release', ['only' => 'editRelease, releaseProduct, deleteLastProduct']);
     }
 
     public function index()
     {
         $data['page_title'] = 'Sales Order [ONLINE]';
         return view('bz::sales-order.online.index', $data);
+    }
+
+    // @wip:
+    public function detailRelease(BzOrder $bzOrder)
+    {
+        $data['page_title'] = "Detail Release Sales Order [ONLINE]";
+        $data['sales_order'] = $bzOrder;
+        $data['customer'] = $bzOrder->customer;
+        $data['shipments'] = $this->shipment_providers;
+
+
+        return view('bz::sales-order.online.release-detail', $data);
+    }
+
+    public function editRelease(BzOrder $bzOrder)
+    {
+        $data['page_title'] = "Update Release Sales Order [ONLINE]";
+        $data['sales_order'] = $bzOrder;
+        $data['customer'] = $bzOrder->bzCustomer;
+
+        $data['shipments'] = $this->shipment_providers;
+
+        return view('bz::sales-order.online.release-edit', $data);
     }
 
     public function report()
@@ -90,8 +142,6 @@ class SalesOrderController extends Controller
                 } else {
                     $data['currency'] = $item->currency;
                 }
-
-                $data['_'] = $item->bzOrderItems;
 
                 $data['has_some_stockout'] = count($item->bzOrderItems) > 0;
 
@@ -156,33 +206,9 @@ class SalesOrderController extends Controller
         return view('bz::sales-order.online.show-product-detail', $data);
     }
 
-    public function editRelease(BzOrder $bzOrder)
-    {
-        $data['page_title'] = "Update Release Sales Order [ONLINE]";
-        $data['sales_order'] = $bzOrder;
-        $data['customer'] = $data['sales_order']->bzCustomer;
-
-        $data['shipments'] = [
-            [
-                'id' => null,
-                'name' => 'Provider: Other',
-            ],
-            [
-                'id' => 'jnt',
-                'name' => 'J&T',
-            ],
-            [
-                'id' => 'lion',
-                'name' => 'Lion Parcel',
-            ],
-        ];
-
-        return view('bz::sales-order.online.release-edit', $data);
-    }
-
     public function listProductWithStock(BzOrder $bzOrder)
     {
-        return DataTables::of($bzOrder->bzOrderItems)
+        $dataTables = DataTables::of($bzOrder->bzOrderItems)
             ->addColumn('product_id', function (BzOrderItem $item) {
                 return $item->bzProduct->product->prod_id;
             })
@@ -210,7 +236,7 @@ class SalesOrderController extends Controller
 
                 // total stock available
                 $stockAvailable = $stockIn - $stockOut;
-                return $stockAvailable . ' ' . Str::of('item')->plural($stockAvailable);
+                return $stockAvailable;
             })
             ->addColumn('stock_detail', function (BzOrderItem $item) {
                 $detailProduction = [];
@@ -238,8 +264,19 @@ class SalesOrderController extends Controller
                             <a href="#"><button type="button" class="waves-effect waves-light btn btn-danger btn-sm" data-toggle="tooltip" title="Delete 1 item" onClick="deleteLastItem(' . $item->id . ')"><i class="fa fa-trash"></i></button></a>
                         </div>';
             })
-            ->rawColumns(['qty_in_stock', 'btnAction'])
-            ->make(true);
+            ->rawColumns(['qty_in_stock', 'btnAction']);
+
+            if (auth()->user()->can('sales-order-online-detail')) {
+                $dataTables->addColumn('price', function (BzOrderItem $item) {
+                    return number_format($item->price, 2, '.', ',');
+                });
+                $dataTables->addColumn('price_subtotal', function (BzOrderItem $item) {
+                    return number_format($item->subtotal, 2, '.', ',');
+                });
+            }
+
+
+            return $dataTables->make(true);
     }
 
     /**

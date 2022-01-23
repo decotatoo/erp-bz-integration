@@ -46,7 +46,7 @@ class BzOrder extends Model
 
     public function packingSimulation()
     {
-        return $this->hasMany(PackingSimulation::class);
+        return $this->hasOne(PackingSimulation::class);
     }
 
     public function getMetaData($key)

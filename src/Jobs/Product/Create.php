@@ -114,7 +114,7 @@ class Create implements ShouldQueue
             DB::commit();
         } catch (\Throwable $th) {
             DB::rollBack();
-            $this->fail($th->getMessage());
+            $this->fail($th);
         }
     }
 

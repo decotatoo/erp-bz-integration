@@ -132,16 +132,6 @@ class PermissionSeeder extends Seeder
 
 
 
-
-
-
-
-
-
-
-
-
-
             [
                 'name' => 'sales-order-online-list',
                 'modul_name' => 'Sales Order',
@@ -149,10 +139,34 @@ class PermissionSeeder extends Seeder
                 'menu_description' => 'View the Sales Order [ONLINE] list',
             ],
             [
-                'name' => 'sales-order-online-edit',
+                'name' => 'sales-order-online-release',
                 'modul_name' => 'Sales Order',
                 'submodul_name' => 'Sales Order [ONLINE]',
-                'menu_description' => 'Edit a Sales Order [ONLINE]',
+                'menu_description' => "Release a Sales Order's item[ONLINE]",
+            ],
+            [
+                'name' => 'sales-order-online-detail',
+                'modul_name' => 'Sales Order',
+                'submodul_name' => 'Sales Order [ONLINE]',
+                'menu_description' => 'See the Detail of a Sales Order [ONLINE]',
+            ],
+            [
+                'name' => 'sales-order-online-report',
+                'modul_name' => 'Sales Order',
+                'submodul_name' => 'Sales Order [ONLINE]',
+                'menu_description' => 'See the report of a Sales Order [ONLINE]',
+            ],
+            [
+                'name' => 'sales-order-online-invoice',
+                'modul_name' => 'Sales Order',
+                'submodul_name' => 'Sales Order [ONLINE]',
+                'menu_description' => 'Print the invoice and delivery order of a Sales Order [ONLINE]',
+            ],
+            [
+                'name' => 'sales-order-online-invoice-pt-to-ltd',
+                'modul_name' => 'Sales Order',
+                'submodul_name' => 'Sales Order [ONLINE]',
+                'menu_description' => 'Print the invoice of a Sales Order [ONLINE] from PT to LTD',
             ],
 
         ];

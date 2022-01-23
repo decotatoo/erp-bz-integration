@@ -17,7 +17,7 @@
                                 Commerce Catalog
                                 <small class="subtitle">A list of Commerce Catalog</small>
                             </h4>
-                            @if (true === false && auth()->user()->can('commerce-catalog-create'))
+                            @if (auth()->user()->can('commerce-catalog-create'))
                             <div class="text-end">
                                 <a href="{{ route('website-management.commerce-catalog.create') }}"
                                     class="btn btn-primary btn-rounded"><i class="fa fa-plus"></i> Add New Catalog</a>
@@ -57,7 +57,7 @@
                                                     </span>
                                                 </a>
                                             @endif
-                                            @if (true === false && auth()->user()->can('commerce-catalog-delete'))
+                                            @if (auth()->user()->can('commerce-catalog-delete'))
                                                 <a href="#" class="waves-effect waves-light btn btn-danger-light btn-circle" onclick="modalDelete('Commerce Catalog', 'this catalog', '/website-management/commerce-catalog/' + {{ $catalog->id }}, '/website-management/commerce-catalog/')"><span class="icon-Trash1 fs-18"><span class="path1"></span><span class="path2"></span></span></a>
                                             @endif
                                         </td>

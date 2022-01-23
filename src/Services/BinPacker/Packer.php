@@ -3,8 +3,7 @@
 namespace Decotatoo\Bz\Services\BinPacker;
 
 use Decotatoo\Bz\Models\Bin;
-use DVDoug\BoxPacker\PackedBox;
-use DVDoug\BoxPacker\Packer as BoxPackerPacker;
+use DVDoug\BoxPacker\InfalliblePacker;
 use Exception;
 
 class Packer
@@ -19,7 +18,8 @@ class Packer
             throw new Exception("Error No Items provided or Bins available", 1);
         }
 
-        $packer = new BoxPackerPacker();
+        $packer = new InfalliblePacker();
+        // $packer->setMaxBoxesToBalanceWeight(3);
 
         foreach ($bins as $bin) {
             $packer->addBox(new Box($bin));
@@ -29,24 +29,38 @@ class Packer
             $packer->addItem(new Item($item['product']), $item['quantity']);
         }
 
-        return array_map(function ($packedBox) {
-            $_packedBox = $packedBox->jsonSerialize();
+        $packed = array_map(function ($pb) {
+            $_pb = $pb->jsonSerialize();
+            $_pb['box'] = $pb->getBox()->jsonSerialize();
 
-            $_packedBox['weight'] = $packedBox->getWeight();
-            $_packedBox['volume'] = $packedBox->getBox()->getOuterDepth() * $packedBox->getBox()->getOuterWidth() * $packedBox->getBox()->getOuterLength();
-            $_packedBox['items'] = [];
+            $_pb['weight'] = $pb->getWeight();
+            $_pb['volume'] = $pb->getBox()->getOuterDepth() * $pb->getBox()->getOuterWidth() * $pb->getBox()->getOuterLength();
+            $_pb['items'] = [];
 
-            foreach (iterator_to_array($packedBox->getItems()) as $item) {
+            foreach (iterator_to_array($pb->getItems()) as $item) {
                 $_item = $item->jsonSerialize();
-
+                $_item['id'] = $item->getItem()->product->prod_id;
                 $_item['item']['id'] = $item->getItem()->product->id;
                 $_item['item']['name'] = $item->getItem()->product->prod_name;
-                // $_item['item']['unit_box'] = $item->getItem()->product->unitBox;
 
-                $_packedBox['items'][] = $_item;
+                $_pb['items'][] = $_item;
             }
 
-            return $_packedBox;
+            return $_pb;
         }, $packer->pack()->jsonSerialize());
+
+        $unpackedItems = array_map(function ($item) {
+            $_item = $item->jsonSerialize();
+            $_item['id'] = $item->product->prod_id;
+            $_item['item']['id'] = $item->product->id;
+            $_item['item']['name'] = $item->product->prod_name;
+
+            return $_item;
+        }, iterator_to_array($packer->getUnpackedItems()));
+
+        return [
+            'packed' => $packed,
+            'unpacked' => $unpackedItems,
+        ];
     }
 }
