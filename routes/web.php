@@ -58,12 +58,13 @@ Route::middleware(['web', 'auth'])->group(function () {
 
             Route::prefix('invoice')->name('invoice.')->group(function () {
                 Route::prefix('consumer')->name('consumer.')->group(function () {
-                    Route::get('/', [SalesOrderController::class, 'listInvoice'])->name('index');
+                    Route::get('/', [SalesOrderController::class, 'indexInvoiceConsumer'])->name('index');
+                    Route::get('/list', [SalesOrderController::class, 'indexInvoiceConsumer'])->name('list');
                     Route::get('print/{bzOrder}', [SalesOrderController::class, 'printInvoice'])->name('print');
                 });
 
                 Route::prefix('pt-to-ltd')->name('pt-to-ltd.')->group(function () {
-                    Route::get('/', [SalesOrderController::class, 'listInvoicePtToLtd'])->name('index');
+                    Route::get('/', [SalesOrderController::class, 'indexInvoicePtToLtd'])->name('index');
                     Route::get('print-pt-to-ltd/{bzOrder}', [SalesOrderController::class, 'printInvoicePtToLtd'])->name('print-pt-to-ltd');
                 });
             });

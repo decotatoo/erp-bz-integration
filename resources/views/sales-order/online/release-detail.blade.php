@@ -125,7 +125,7 @@
                                             </div>
 
                                             <div class="form-group row">
-                                                <label class="col-sm-4 col-form-label">Shipping</label>
+                                                <label class="col-sm-4 col-form-label">Transportation (Order)</label>
                                                 <div class="col-sm-8">
                                                     <input type="text" class="form-control" placeholder="" value="{{ $sales_order->shipping_lines[0]['method_title'] }}" readonly>
                                                 </div>
@@ -133,7 +133,7 @@
 
                                             @if ($sales_order->date_released)
                                                 <div class="form-group row">
-                                                    <label class="col-sm-4 col-form-label">Delivery</label>
+                                                    <label class="col-sm-4 col-form-label">Transportation (Actual)</label>
                                                     <div class="col-sm-8">
                                                         <div style="display: inline-flex;width: 100%;">
                                                             <select readonly disabled class="form-select" name="shipment_provider" id="shipment_provider" title="Provider" style="width: 50%;">
@@ -153,11 +153,11 @@
                                                     </div>
                                                 </div>
                                                 
-                                                @if (auth()->user()->can('sales-order-online-invoice'))
+                                                @if (auth()->user()->can('sales-order-online-invoice') && $sales_order->date_released)
                                                 <div class="form-group row">
                                                     <label class="col-sm-4 col-form-label">Invoice & Delivery Order</label>
                                                     <div class="col-sm-8" style="align-self: center;">
-                                                        <a href="{{ route('sales-order.online.invoice.consumer.print', ['bzOrder' => $sales_order->id]) }}" target="_blank">
+                                                        <a href="#print-invoice">
                                                             <i class="fas fa-file-invoice"></i>
                                                             Print Invoice and Delivery Order
                                                         </a>
@@ -244,13 +244,6 @@
                                 </div>
 
                                 <div class="form-group row">
-                                    <label class="col-sm-4 col-form-label">Is VAT Exempt</label>
-                                    <div class="col-sm-8">
-                                        <input type="text" class="form-control" placeholder="" value="{{ $sales_order->getMetaData('is_vat_exempt') }}" readonly>
-                                    </div>
-                                </div>
-                                
-                                <div class="form-group row">
                                     <label class="col-sm-4 col-form-label">Shipping Service</label>
                                     <div class="col-sm-8">
                                         <input type="text" class="form-control" placeholder="" value="{{ $sales_order->shipping_lines[0]['method_title'] }}" readonly>
@@ -276,6 +269,12 @@
                                     </div>
                                 </div>
 
+                                <div class="form-group row">
+                                    <label class="col-sm-4 col-form-label">Is Tax (10%)</label>
+                                    <div class="col-sm-8">
+                                        <input type="text" class="form-control" placeholder="" value="{{ $sales_order->getMetaData('is_vat_exempt') == 'no' ? 'yes' : 'no'  }} " readonly>
+                                    </div>
+                                </div>
 
                                 @if ('no' == $sales_order->getMetaData('is_vat_exempt'))
                                     <div class="form-group row">
@@ -302,6 +301,16 @@
                                         id="quotation_total_price">{{ number_format($sales_order->total, 2, '.', ',') }}</span>
                                 </div>
                             </div>
+
+
+
+                            @if (auth()->user()->can('sales-order-online-invoice') && $sales_order->date_released)
+                            <a id="print-invoice" href="{{ route('sales-order.online.invoice.consumer.print', ['bzOrder' => $sales_order->id]) }}" target="blank" class="btn wd-100 btn-success" style="width: 100%"> 
+                                Create Invoice & Delivery Order
+                            </a>
+                            @endif
+
+
                         </div>
                     </div>
 

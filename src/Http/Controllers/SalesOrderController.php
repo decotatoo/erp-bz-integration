@@ -82,6 +82,12 @@ class SalesOrderController extends Controller
         return view('bz::sales-order.online.report', $data);
     }
 
+    public function indexInvoiceConsumer()
+    {
+        $data['page_title'] = 'Sales Order [ONLINE] - Invoice';
+        return view('bz::sales-order.online.consumer.invoice-index', $data);
+    }
+
     public function list(Request $request)
     {
         try {
@@ -114,6 +120,17 @@ class SalesOrderController extends Controller
                 }
             }
 
+            
+            if ($request->index_type) {
+                $bzOrders->where('date_released', '!=', null);
+                if ($request->index_type === 'invoice-consumer') {
+                    $bzOrders->where('date_invoice_print', '=', null);
+                } elseif ($request->index_type === 'invoice-pt-to-ltd') {
+                    $bzOrders->whereJsonContains('billing->country', '!=', 'ID');
+                }
+            }
+
+
             // check if the order have some stocks released
             $bzOrders->with('bzOrderItems', function ($query) {
                 $query->whereHas('productStockOuts');
@@ -139,6 +156,8 @@ class SalesOrderController extends Controller
                 $data['date_order'] = Carbon::parse($item->date_created)->format('Y-m-d');
                 $data['date_released'] = $item->date_released ? Carbon::parse($item->date_released)->format('Y-m-d') : null;
                 $data['date_shipped'] = $item->date_shipment_shipped ? Carbon::parse($item->date_shipment_shipped)->format('Y-m-d') : null;
+
+                $data['transportation_order'] = $item->shipping_lines[0]['method_title']; 
 
                 $data['total_order_value'] = number_format($item->total - $item->total_tax - $item->shipping_total, 2, ',', '.');
                 $data['total_tax'] = number_format($item->total_tax, 2, ',', '.');

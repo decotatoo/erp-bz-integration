@@ -115,7 +115,7 @@
                                             </div>
 
                                             <div class="form-group row">
-                                                <label class="col-sm-4 col-form-label">Shipping</label>
+                                                <label class="col-sm-4 col-form-label">Transportation (Order)</label>
                                                 <div class="col-sm-8">
                                                     <input type="text" class="form-control" placeholder="" value="{{ $sales_order->shipping_lines[0]['method_title'] }}" readonly>
                                                 </div>
@@ -125,7 +125,7 @@
 
                                             @if ($sales_order->date_released)
                                                 <div class="form-group @error('shipment') error @enderror row">
-                                                    <label class="col-sm-4 col-form-label">Delivery</label>
+                                                    <label class="col-sm-4 col-form-label">Transportation (Actual)</label>
                                                     <div class="col-sm-8">
                                                         <div style="display: inline-flex;width: 100%;">
                                                             <select class="form-select" name="shipment_provider" id="shipment_provider" title="Provider" style="width: 50%;">
@@ -155,7 +155,7 @@
                                                 <div class="form-group row">
                                                     <label class="col-sm-4 col-form-label">Invoice & Delivery Order</label>
                                                     <div class="col-sm-8" style="align-self: center;">
-                                                        <a href="{{ route('sales-order.online.invoice.consumer.print', ['bzOrder' => $sales_order->id]) }}" target="_blank">
+                                                        <a href="{{ route('sales-order.online.base.detail-release', ['bzOrder' => $sales_order->id]) }}#print-invoice" target="_blank">
                                                             <i class="fas fa-file-invoice"></i>
                                                             Print Invoice and Delivery Order
                                                         </a>
