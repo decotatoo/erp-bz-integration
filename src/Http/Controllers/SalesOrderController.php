@@ -47,13 +47,6 @@ class SalesOrderController extends Controller
         // $this->middleware('permission:sales-order-online-invoice-pt-to-ltd', ['only' => []]);
 
 
-
-        // $this->middleware('permission:sales-order-list', ['only' => 'index']);
-        // $this->middleware('permission:sales-order-create', ['only' => 'createSalesOrderReguler']);
-        // $this->middleware('permission:sales-order-report', ['only' => 'report']);
-        // $this->middleware('permission:sales-order-regulerInvoice', ['only' => 'regulerInvoice']);
-        // $this->middleware('permission:sales-order-regulerInvoiceToDecotatoo', ['only' => 'regulerInvoiceDecoToDecotatoo']);
-        // $this->middleware('permission:sales-order-release', ['only' => 'editRelease, releaseProduct, deleteLastProduct']);
     }
 
     public function index()
@@ -62,14 +55,12 @@ class SalesOrderController extends Controller
         return view('bz::sales-order.online.index', $data);
     }
 
-    // @wip:
     public function detailRelease(BzOrder $bzOrder)
     {
         $data['page_title'] = "Detail Release Sales Order [ONLINE]";
         $data['sales_order'] = $bzOrder;
         $data['customer'] = $bzOrder->customer;
         $data['shipments'] = $this->shipment_providers;
-
 
         return view('bz::sales-order.online.release-detail', $data);
     }
@@ -563,6 +554,76 @@ class SalesOrderController extends Controller
         ];
         return json_encode($response);
     }
+
+    /**
+     * @TODO:
+     */
+    public function printReport(BzOrder $bzOrder)
+    {
+        // Choose company based on order's billing?
+        $companyIssueInvoice = $bzOrder->billing['country'] === 'ID' ? 1 : 2;
+        $company = Company::find($companyIssueInvoice);
+
+        $data['company'] = $company;
+        $data['sales_order'] = $bzOrder;
+
+        $data['products'] = $bzOrder->bzOrderItems->map(function ($item) {
+            return (object) [
+                'code' => $item->bzProduct->product->prod_id,
+                'name' => $item->bzProduct->product->prod_name,
+                'size' => $item->bzProduct->product->size,
+                'qty_box' => $item->bzProduct->product->qty_box,
+                'qty_order' => $item->quantity,
+                'qty_release' => $item->productStockOuts->count(),
+                'sub_total' => $item->bzOrder->currency . ' ' . number_format($item->subtotal, 2, ',', '.'),
+                'price' => $item->bzOrder->currency . ' ' . number_format($item->price, 2, ',', '.'),
+            ];
+        });
+
+        $pdf = PDF::loadView('bz::sales-order.online.report-pdf', $data);
+
+        return $pdf->stream("report-{$bzOrder->uid}.pdf");
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     /**

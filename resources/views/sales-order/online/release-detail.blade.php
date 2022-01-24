@@ -133,7 +133,7 @@
 
                                             @if ($sales_order->date_released)
                                                 <div class="form-group row">
-                                                    <label class="col-sm-4 col-form-label">Shipment</label>
+                                                    <label class="col-sm-4 col-form-label">Delivery</label>
                                                     <div class="col-sm-8">
                                                         <div style="display: inline-flex;width: 100%;">
                                                             <select readonly disabled class="form-select" name="shipment_provider" id="shipment_provider" title="Provider" style="width: 50%;">
@@ -292,7 +292,7 @@
                         <div class="col-lg-6">
                             <div class="box-body">
                                 {{-- currency --}}
-                                <h3>TOTAL PRICE ({{$sales_order->currency}}) :</h3>
+                                <h3>GRAND SUB TOTAL ({{$sales_order->currency}}) :</h3>
                                 <div style="background:#E9ECEF;padding:30px;border-radius:19px;">
                                     <span style="font-size: 30px;font-family: monospace;font-weight: 100;text-decoration: line-through;"
                                         id="before_discount"></span>

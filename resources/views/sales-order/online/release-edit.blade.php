@@ -125,7 +125,7 @@
 
                                             @if ($sales_order->date_released)
                                                 <div class="form-group @error('shipment') error @enderror row">
-                                                    <label class="col-sm-4 col-form-label">Shipment</label>
+                                                    <label class="col-sm-4 col-form-label">Delivery</label>
                                                     <div class="col-sm-8">
                                                         <div style="display: inline-flex;width: 100%;">
                                                             <select class="form-select" name="shipment_provider" id="shipment_provider" title="Provider" style="width: 50%;">

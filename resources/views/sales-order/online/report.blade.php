@@ -90,7 +90,6 @@
                                 <th style="min-width: 20px"><span class="text-dark">Product Value</span></th>
                                 <th style="min-width: 20px"><span class="text-dark">Tax</span></th>
                                 <th style="min-width: 20px"><span class="text-dark">Shipping Cost</span></th>
-                                <th style="min-width: 20px"><span class="text-dark">Notes</span></th>
                                 <th style="min-width: 80px" class="text-center"><span class="text-dark">Action</span></th>
                             </tr>
                         </thead>
@@ -101,15 +100,6 @@
             </div>
         </div>
     </div>
-
-
-
-
-
-
-
-
-
 
     <div class="bg-info p-20 rounded mt-30" style="background-color: #17586f !important">
         <div class="d-lg-flex justify-content-between align-items-center">
@@ -133,52 +123,6 @@
             </div>
         </div>
     </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 </div>
 @endsection
@@ -243,13 +187,29 @@
 
 
                             let action = `
-                                <a href="${route('sales-order.online.base.detail-release', { bzOrder: value.id})}" class="btn btn-sm btn-info btn-rounded" target="blank"><i class="fa fa-print"></i> Print</a>
+                                <a href="${route('sales-order.online.report.print', { bzOrder: value.id})}" class="btn btn-sm btn-info btn-rounded" target="blank"><i class="fa fa-print"></i> Print</a>
                             `;
+
+
+                            let td_so = ``;
+                            @if (auth()->user()->can('sales-order-online-detail'))
+                                td_so += `
+                                    <a href="${route('sales-order.online.base.detail-release', { bzOrder: value.id } )}" class="text-primary text-bold" target="_blank">
+                                        ${value.so_no}
+                                    </a>
+                                `;
+                            @else
+                                td_so = `
+                                    ${value.so_no}
+                                `;
+                            @endif
 
                             let tr = $(`
                                 <tr>
                                     <td>${number}</td>
-                                    <td>${value.so_no}</td>
+                                    <td>
+                                        ${td_so}
+                                    </td>
                                     <td>${value.customer_name}</td>
                                     <td>${value.date_order}</td>
                                     <td>${value.date_shipped ?? ''}</td>
@@ -257,8 +217,7 @@
                                     <td>${value.currency + ' ' + value.total_order_value}</td>
                                     <td>${value.total_tax ? value.currency + ' ' + value.total_tax : ''}</td>
                                     <td>${value.shipping_total ? value.currency + ' ' + value.shipping_total : ''}</td>
-                                    <td>${value.customer_note ?? ''}</td>
-                                    <td>
+                                    <td style="display:flex;">
                                         ${action}
                                     </td>
                                 </tr>

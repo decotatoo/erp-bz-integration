@@ -178,27 +178,29 @@
                                 </a>
                             `;
 
-                            if (value.date_released != null) {
+                            
+
+                            @if (auth()->user()->can('sales-order-online-detail'))
                                 action += `
-                                <a href="${_url_detail_release}" data-toggle="tooltip" data-placement="top" title="Detail" class="waves-effect waves-light btn btn-sm btn-info-light btn-circle mx-5">
-                                    <i class="fas fa-info"></i>
-                                </a>
-                            `;
-                            }
+                                    <a href="${_url_detail_release}" data-toggle="tooltip" data-placement="top" title="Detail" class="waves-effect waves-light btn btn-sm btn-info-light btn-circle mx-5">
+                                        <i class="fas fa-info"></i>
+                                    </a>
+                                `;
+                            @endif
 
-                            let rowBgClass = '';
+                            let trBgClass = '';
 
                             if (value.date_released != null) {
-                                rowBgClass = 'bg-success';
+                                trBgClass = 'bg-success';
                             } else if (value.has_some_stockout) {
-                                rowBgClass = 'bg-warning';
+                                trBgClass = 'bg-warning';
                             }
 
                             let tr = $(`
-                                <tr class="${rowBgClass}">
+                                <tr class="${trBgClass}">
                                     <td>${number}</td>
                                     <td>
-                                        <a href="${(value.date_released) ? _url_detail_release : _url_edit_release}" class="text-primary text-bold">
+                                        <a href="${(value.date_released) ? _url_detail_release : _url_edit_release}" class="text-primary text-bold" target="_blank">
                                             ${value.so_no}
                                         </a>
                                     </td>
