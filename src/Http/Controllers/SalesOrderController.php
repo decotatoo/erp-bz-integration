@@ -574,9 +574,6 @@ class SalesOrderController extends Controller
         return json_encode($response);
     }
 
-    /**
-     * @TODO:
-     */
     public function printReport(BzOrder $bzOrder)
     {
         // Choose company based on order's billing?
@@ -650,17 +647,77 @@ class SalesOrderController extends Controller
      */
     public function printInvoice(BzOrder $bzOrder)
     {
-        // Choose company based on order's billing or shipping?
+        if (!$bzOrder->date_invoice_print) {
+            $bzOrder->date_invoice_print = Carbon::now();
+            $bzOrder->save();
+
+            $bzOrder->refresh();
+        }
+
+        // Choose company based on order's billing?
         $companyIssueInvoice = $bzOrder->billing['country'] === 'ID' ? 1 : 2;
         $company = Company::find($companyIssueInvoice);
 
         $data['company'] = $company;
         $data['sales_order'] = $bzOrder;
 
-        $pdf = PDF::loadView('bz::sales-order.online.invoice-pdf', $data);
+        $data['products'] = $bzOrder->bzOrderItems->map(function ($item) {
+            $products = [
+                'code' => $item->sku,
+                'name' => $item->name,
+                'qty_order' => $item->quantity,
+                'size' => $item->bzProduct->product->size,
+                'sub_total' => $item->bzOrder->currency . ' ' . number_format($item->subtotal, 2, ',', '.'),
+                'price' => $item->bzOrder->currency . ' ' . number_format($item->price, 2, ',', '.'),
+            ];
+
+            $pos = strpos(strtolower($item->bzProduct->product->qty_box), 'sheet');
+            $cd = strpos(strtolower($item->bzProduct->product->prod_name), 'cd');
+            $tb = strpos(strtolower($item->bzProduct->product->prod_name), 'tablet');
+
+            if (substr($item->bzProduct->product->prod_id, 0, 2) == 'FP' && $pos !== false) {
+                $products['qty'] = $item->bzProduct->product->total_box;
+            } else if (substr($item->bzProduct->product->prod_id, 0, 2) == 'TR' && ($cd !== false || $tb !== false)) {
+                $products['qty'] = $item->bzProduct->product->total_box;
+            } else {
+                if ($item->bzProduct->product->total_box == '' || $item->bzProduct->product->total_box == ' ' || $item->bzProduct->product->total_box == '0') {
+                    $products['qty'] = $item->bzProduct->product->qty_box;
+                } else {
+                    $products['qty'] = $item->bzProduct->product->qty_box . " (" . $item->bzProduct->product->total_box . ")";
+                }
+            }
+
+            return (object) $products;
+        });
+
+        $pdf = PDF::loadView('bz::sales-order.online.consumer.invoice-pdf', $data);
 
         return $pdf->stream("invoice-do-{$bzOrder->uid}.pdf");
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

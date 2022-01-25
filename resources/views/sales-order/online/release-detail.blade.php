@@ -300,15 +300,24 @@
                                     <span style="display:block;font-size: 56px;font-family: monospace;font-weight: 700;"
                                         id="quotation_total_price">{{ number_format($sales_order->total, 2, '.', ',') }}</span>
                                 </div>
+
+                                    
+                                @if (auth()->user()->can('sales-order-online-invoice') && $sales_order->date_released)
+                                    <a id="print-invoice" href="{{ route('sales-order.online.invoice.consumer.print', ['bzOrder' => $sales_order->id]) }}" target="blank" class="btn wd-100 btn-success" style="width: 100%;margin-top:25px;"> 
+                                        Create Invoice & Delivery Order
+                                    </a>
+
+
+                                    @if ($sales_order->billing['country'] != 'ID' && auth()->user()->can('sales-order-online-invoice-pt-to-ltd'))
+                                        <a id="print-invoice" href="{{ route('sales-order.online.invoice.print', ['bzOrder' => $sales_order->id]) }}" target="blank" class="btn wd-100 btn-success" style="width: 100%;margin-top:25px;"> 
+                                            Create Invoice PT. Deco Kreasindo to Decatatoo Co., Ltd.
+                                        </a>
+                                    @endif
+                                @endif
+
                             </div>
 
 
-
-                            @if (auth()->user()->can('sales-order-online-invoice') && $sales_order->date_released)
-                            <a id="print-invoice" href="{{ route('sales-order.online.invoice.consumer.print', ['bzOrder' => $sales_order->id]) }}" target="blank" class="btn wd-100 btn-success" style="width: 100%"> 
-                                Create Invoice & Delivery Order
-                            </a>
-                            @endif
 
 
                         </div>
