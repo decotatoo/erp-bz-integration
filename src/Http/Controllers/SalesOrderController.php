@@ -3,10 +3,10 @@
 namespace Decotatoo\Bz\Http\Controllers;
 
 use App\Models\Company;
+use App\Models\ExchangeRate;
 use App\Models\ProductStockIn;
 use App\Models\ProductStockOut;
 use Carbon\CarbonImmutable;
-use Decotatoo\Bz\Jobs\BzOrder\Update;
 use Decotatoo\Bz\Models\BzOrder;
 use Decotatoo\Bz\Models\BzOrderItem;
 use Exception;
@@ -15,7 +15,6 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Str;
 use PDF;
 use Yajra\DataTables\DataTables;
 
@@ -88,6 +87,12 @@ class SalesOrderController extends Controller
         return view('bz::sales-order.online.consumer.invoice-index', $data);
     }
 
+    public function indexInvoicePtToLtd()
+    {
+        $data['page_title'] = 'Sales Order [ONLINE] - PT Deco Kreasindo to Decotatoo Co., Ltd.';
+        return view('bz::sales-order.online.pt-to-ltd.invoice-index', $data);
+    }
+
     public function list(Request $request)
     {
         try {
@@ -126,7 +131,8 @@ class SalesOrderController extends Controller
                 if ($request->index_type === 'invoice-consumer') {
                     $bzOrders->where('date_invoice_print', '=', null);
                 } elseif ($request->index_type === 'invoice-pt-to-ltd') {
-                    $bzOrders->whereJsonContains('billing->country', '!=', 'ID');
+                    // $bzOrders->whereJsonContains('billing->country', '!=', 'ID');
+                    $bzOrders->where('billing', 'NOT LIKE', '%"country":"ID"%');
                 }
             }
 
@@ -728,10 +734,60 @@ class SalesOrderController extends Controller
      */
     public function printInvoicePtToLtd(BzOrder $bzOrder)
     {
-        if ($bzOrder->shipping['country'] === 'ID') {
-            return;
+        if ($bzOrder->billing['country'] === 'ID') {
+            abort(404, 'Page not found');
         }
-        $company = Company::find(2);
+
+        if (!$bzOrder->date_invoice_print) {
+            $bzOrder->date_invoice_print = Carbon::now();
+            $bzOrder->save();
+
+            $bzOrder->refresh();
+        }
+
+        $companyPT = Company::find(1);
+        $companyLTD = Company::find(2);
+
+        $data['company_pt'] = $companyPT;
+        $data['company_ltd'] = $companyLTD;
+        $data['sales_order'] = $bzOrder;
+        
+        //get rate usd idr
+        $exchange_rate = ExchangeRate::where('from_currency', 'USD')->where('to_currency', $bzOrder->currency)->first();
+        $data['exchange_rate'] = $exchange_rate;
+
+        $data['products'] = $bzOrder->bzOrderItems->map(function ($item) use ($exchange_rate) {
+            $products = [
+                'code' => $item->sku,
+                'name' => $item->name,
+                'qty_order' => $item->quantity,
+                'size' => $item->bzProduct->product->size,
+                'sub_total' => $exchange_rate->from_currency . ' ' . number_format(($item->subtotal * 0.35) / $exchange_rate->rate, 2, ',', '.'),
+                'price' => $exchange_rate->from_currency . ' ' . number_format(($item->price * 0.35) / $exchange_rate->rate, 2, ',', '.'),
+            ];
+
+            $pos = strpos(strtolower($item->bzProduct->product->qty_box), 'sheet');
+            $cd = strpos(strtolower($item->bzProduct->product->prod_name), 'cd');
+            $tb = strpos(strtolower($item->bzProduct->product->prod_name), 'tablet');
+
+            if (substr($item->bzProduct->product->prod_id, 0, 2) == 'FP' && $pos !== false) {
+                $products['qty'] = $item->bzProduct->product->total_box;
+            } else if (substr($item->bzProduct->product->prod_id, 0, 2) == 'TR' && ($cd !== false || $tb !== false)) {
+                $products['qty'] = $item->bzProduct->product->total_box;
+            } else {
+                if ($item->bzProduct->product->total_box == '' || $item->bzProduct->product->total_box == ' ' || $item->bzProduct->product->total_box == '0') {
+                    $products['qty'] = $item->bzProduct->product->qty_box;
+                } else {
+                    $products['qty'] = $item->bzProduct->product->qty_box . " (" . $item->bzProduct->product->total_box . ")";
+                }
+            }
+
+            return (object) $products;
+        });
+
+        $pdf = PDF::loadView('bz::sales-order.online.pt-to-ltd.invoice-pdf', $data);
+
+        return $pdf->stream("invoice-do-{$bzOrder->uid}.pdf");
     }
 
 

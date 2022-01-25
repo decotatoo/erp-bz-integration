@@ -28,7 +28,7 @@
 
     <div class="d-flex flex-row justify-content-between">
         <h4 class="box-title align-items-start flex-column">
-            Sales Order [ONLINE] - <span style="text-decoration-line: underline;"> Invoice </span>
+            Sales Order [ONLINE] - <span style="text-decoration-line: underline;"> Invoice PT Deco Kreasindo to Decotatoo Co., Ltd. </span>
             <small class="subtitle">Invoice of sales order online</small>
         </h4>
     </div>
@@ -160,7 +160,7 @@
                         startDate: startDate.formDate,
                         endDate: endDate.formDate,
                         date_type,
-                        index_type: 'invoice-consumer'
+                        index_type: 'invoice-pt-to-ltd'
                     },
                     success: function (data) {
                         console.log(data);
@@ -170,14 +170,14 @@
                             if (value != null) {
                                 number++;
                                 let detailProductOrder = `
-                                    <a href="#" data-toggle="tooltip" data-placement="top" title="Detail product order" class="btn btn-sm btn-primary btn-rounded" onclick="detailModal('Detail Product Order', '${route('sales-order.online.base.detail-product', { bzOrder: value.id, view_type: 'invoice' } )}', 'x-large')"><i class="fa fa-eye"></i> Detail</a>
+                                    <a href="#" data-toggle="tooltip" data-placement="top" title="Detail product order" class="btn btn-sm btn-primary btn-rounded" onclick="detailModal('Detail Product Order', '${route('sales-order.online.base.detail-product', { bzOrder: value.id, view_type: 'invoice-pt-to-ltd' } )}', 'x-large')"><i class="fa fa-eye"></i> Detail</a>
                                 `;
 
                                     
                                 let td_so = ``;
-                                @if (auth()->user()->can('sales-order-online-detail'))
+                                @if (auth()->user()->can('sales-order-online-invoice-pt-to-ltd'))
                                     td_so += `
-                                        <a href="${route('sales-order.online.base.detail-release', { bzOrder: value.id } )}" class="text-primary text-bold" target="_blank">
+                                        <a href="${route('sales-order.online.invoice.pt-to-ltd.print', { bzOrder: value.id } )}" class="text-primary text-bold" target="_blank">
                                             ${value.so_no}
                                         </a>
                                     `;

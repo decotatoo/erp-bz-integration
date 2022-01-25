@@ -309,7 +309,7 @@
 
 
                                     @if ($sales_order->billing['country'] != 'ID' && auth()->user()->can('sales-order-online-invoice-pt-to-ltd'))
-                                        <a id="print-invoice" href="{{ route('sales-order.online.invoice.print', ['bzOrder' => $sales_order->id]) }}" target="blank" class="btn wd-100 btn-success" style="width: 100%;margin-top:25px;"> 
+                                        <a id="print-invoice" href="{{ route('sales-order.online.invoice.pt-to-ltd.print', ['bzOrder' => $sales_order->id]) }}" target="blank" class="btn wd-100 btn-success" style="width: 100%;margin-top:25px;"> 
                                             Create Invoice PT. Deco Kreasindo to Decatatoo Co., Ltd.
                                         </a>
                                     @endif
